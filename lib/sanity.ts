@@ -24,11 +24,11 @@ const BASE_FIELDS = `
   title,
   slug,
   posterImage {
-    asset->,
+    asset,
     alt
   },
   bannerImage {
-    asset->,
+    asset,
     alt
   },
   rating,
@@ -63,7 +63,7 @@ const TVSHOW_FIELDS = `
       episodeNumber,
       title,
       thumbnail {
-        asset->
+        asset
       },
       videoUrl,
       duration
