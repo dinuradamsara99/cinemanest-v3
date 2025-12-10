@@ -1,0 +1,25 @@
+.page {
+  min-height: 100vh;
+}
+
+.main {
+  padding-top: var(--navbar-height);
+}
+
+.sections {
+  padding: var(--spacing-3xl) 0;
+}
+
+.error {
+  color: #ff6b6b;
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main {
+    margin-left: 0;
+  }
+}

@@ -1,0 +1,78 @@
+// Language type from Sanity
+export interface Language {
+    _id: string
+    title: string
+    slug: {
+        current: string
+    }
+}
+
+// Episode type for TV Shows
+export interface Episode {
+    _key: string
+    episodeNumber: number
+    title: string
+    thumbnail?: {
+        asset: {
+            _ref: string
+            _type: string
+        }
+    }
+    videoUrl: string
+    duration?: number
+}
+
+// Season type for TV Shows
+export interface Season {
+    _key: string
+    seasonNumber: number
+    title?: string
+    episodes: Episode[]
+}
+
+// Movie type from Sanity (also used for TV Shows)
+export interface Movie {
+    _id: string
+    _type?: 'movie' | 'tvshow'
+    title: string
+    contentType?: 'movie' | 'tvshow'
+    slug: {
+        current: string
+    }
+    posterImage: {
+        asset: {
+            _ref: string
+            _type: string
+        }
+        alt?: string
+    }
+    bannerImage: {
+        asset: {
+            _ref: string
+            _type: string
+        }
+        alt?: string
+    }
+    rating: number
+    isFeatured?: boolean
+    isTrending?: boolean
+    description?: string
+    releaseYear: number
+    duration?: number
+    genre?: string[]
+    videoUrl?: string
+    seasons?: Season[]
+    language?: Language
+}
+
+// Category type from Sanity
+export interface Category {
+    _id: string
+    title: string
+    slug: {
+        current: string
+    }
+    description?: string
+    movies?: Movie[]
+    movieCount?: number
+}

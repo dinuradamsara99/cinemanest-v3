@@ -1,0 +1,298 @@
+/* ========== BASE SKELETON STYLES ========== */
+
+/* Base skeleton color - slightly lighter than app background */
+.skeletonBase {
+    background-color: #2a2a2a;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+/* Shimmer Animation */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Shimmer Overlay Effect */
+.shimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            #3a3a3a 50%,
+            transparent 100%);
+    animation: shimmer 2s infinite ease-in-out;
+}
+
+/* ========== UTILITY CLASSES ========== */
+
+/* Text Line - for title, description, etc */
+.textLine {
+    color-scheme: skeletonBase;
+    height: 20px;
+    width: 100%;
+}
+
+.textLine.thick {
+    height: 40px;
+}
+
+.textLine.thin {
+    height: 16px;
+}
+
+/* Rectangle - for images, buttons */
+.rect {
+    color-scheme: skeletonBase;
+    width: 100%;
+    height: 100%;
+}
+
+/* Circle - for avatars, icons */
+.circle {
+    color-scheme: skeletonBase;
+    border-radius: 50%;
+}
+
+/* ========== SPECIFIC SKELETON COMPONENTS ========== */
+
+/* Hero Skeleton */
+.heroContainer {
+    position: relative;
+    width: 100%;
+    height: 80vh;
+    min-height: 600px;
+    background-color: #1a1a1a;
+    overflow: hidden;
+}
+
+.heroBanner {
+    color-scheme: skeletonBase;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+}
+
+.heroContent {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 64px;
+    background: linear-gradient(to top,
+            rgba(10, 10, 10, 0.95) 0%,
+            rgba(10, 10, 10, 0.7) 60%,
+            transparent 100%);
+    z-index: 1;
+}
+
+.heroTitle {
+    color-scheme: textLine;
+    color-scheme: thick;
+    width: 50%;
+    max-width: 600px;
+    height: 56px;
+    margin-bottom: 24px;
+}
+
+.heroMetadata {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.metaItem {
+    color-scheme: textLine;
+    width: 100px;
+    height: 24px;
+}
+
+.heroDescription {
+    margin-bottom: 32px;
+}
+
+.descLine {
+    color-scheme: textLine;
+    margin-bottom: 12px;
+}
+
+.descLine:nth-child(1) {
+    width: 100%;
+}
+
+.descLine:nth-child(2) {
+    width: 95%;
+}
+
+.descLine:nth-child(3) {
+    width: 85%;
+}
+
+.descLine:nth-child(4) {
+    width: 60%;
+}
+
+.heroButtons {
+    display: flex;
+    gap: 16px;
+}
+
+.button {
+    color-scheme: skeletonBase;
+    width: 160px;
+    height: 52px;
+    border-radius: 8px;
+}
+
+/* Card Skeleton - Movie Poster with 2:3 Aspect Ratio */
+.cardContainer {
+    width: 100%;
+    position: relative;
+}
+
+.card {
+    color-scheme: skeletonBase;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    /* Critical: Maintains movie poster ratio */
+    border-radius: 12px;
+}
+
+/* Row Skeleton - Horizontal Movie List */
+.rowContainer {
+    padding: 0 64px;
+    margin-bottom: 48px;
+}
+
+.rowTitle {
+    color-scheme: textLine;
+    color-scheme: thick;
+    width: 250px;
+    height: 36px;
+    margin-bottom: 24px;
+}
+
+.rowCards {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+/* Tablet - 768px to 1024px */
+@media (max-width: 1024px) {
+    .heroContainer {
+        height: 60vh;
+        min-height: 500px;
+    }
+
+    .heroContent {
+        padding: 48px;
+    }
+
+    .heroTitle {
+        width: 60%;
+        height: 48px;
+    }
+
+    .rowContainer {
+        padding: 0 48px;
+    }
+
+    .rowCards {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+}
+
+/* Mobile - Below 768px */
+@media (max-width: 768px) {
+    .heroContainer {
+        height: 50vh;
+        min-height: 400px;
+    }
+
+    .heroContent {}
+
+    .heroTitle {
+        width: 80%;
+        height: 40px;
+        margin-bottom: 16px;
+    }
+
+    .heroMetadata {
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .metaItem {
+        width: 70px;
+        height: 20px;
+    }
+
+    .descLine {
+        height: 16px;
+        margin-bottom: 10px;
+    }
+
+    .heroButtons {
+        gap: 12px;
+    }
+
+    .button {
+        width: 130px;
+        height: 44px;
+    }
+
+    .rowContainer {
+        padding: 0 24px;
+        margin-bottom: 32px;
+    }
+
+    .rowTitle {
+        width: 180px;
+        height: 28px;
+        margin-bottom: 16px;
+    }
+
+    .rowCards {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+}
+
+/* Small Mobile - Below 480px */
+@media (max-width: 480px) {
+    .heroContainer {
+        height: 45vh;
+        min-height: 350px;
+    }
+
+    .heroContent {
+        padding: 24px 16px;
+    }
+
+    .heroTitle {
+        width: 90%;
+        height: 36px;
+    }
+
+    .rowContainer {
+        padding: 0 16px;
+    }
+
+    .rowCards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+}

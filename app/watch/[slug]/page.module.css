@@ -1,0 +1,458 @@
+.page {
+    min-height: 100vh;
+    background: var(--color-background);
+}
+
+.main {
+    padding-top: 64px;
+    min-height: 100vh;
+    background: var(--color-background);
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    margin: 24px 24px 16px;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    font-size: 14px;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: fit-content;
+}
+
+.backButton:hover {
+    color: var(--color-accent);
+    background: rgba(255, 204, 112, 0.1);
+    border-color: rgba(255, 204, 112, 0.3);
+    transform: translateX(-4px);
+}
+
+/* Hero Banner Section - Top */
+.heroSection {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    margin-bottom: 32px;
+    overflow: hidden;
+}
+
+.bannerContainer {
+    position: absolute;
+    inset: 0;
+}
+
+.bannerImage {
+    object-fit: cover;
+    object-position: center;
+}
+
+.bannerOverlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+            rgba(10, 10, 10, 0.3) 0%,
+            rgba(10, 10, 10, 0.7) 70%,
+            rgba(10, 10, 10, 0.95) 100%);
+}
+
+.placeholderBanner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    color: var(--color-text-secondary);
+}
+
+.heroContent {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 48px 48px 32px;
+    z-index: 1;
+}
+
+.heroTitle {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    color: var(--color-text-primary);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.heroMeta {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.metaItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1rem;
+    color: var(--color-text-primary);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.genreSection {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.genreTag {
+    padding: 8px 20px;
+    background: rgba(255, 204, 112, 0.15);
+    color: var(--color-accent);
+    border: 1px solid rgba(255, 204, 112, 0.3);
+    border-radius: 24px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(10px);
+}
+
+/* Wishlist Button - Hero Section (Icon Only) */
+.wishlistHeroButton {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.wishlistHeroButton:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 204, 112, 0.5);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(255, 204, 112, 0.2);
+}
+
+/* Wishlisted State */
+.wishlistHeroButton.wishlisted {
+    background: rgba(255, 204, 112, 0.2);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.wishlistHeroButton.wishlisted:hover {
+    background: rgba(255, 204, 112, 0.3);
+}
+
+/* Content Type Badge */
+.contentTypeBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(255, 204, 112, 0.15);
+    border: 1px solid rgba(255, 204, 112, 0.3);
+    border-radius: 20px;
+    color: var(--color-accent);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+/* Current Episode Display */
+.currentEpisode {
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    font-weight: 500;
+    margin-bottom: 12px;
+    opacity: 0.9;
+}
+
+/* Container for Description and Video */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
+}
+
+/* Description Card */
+.descriptionCard {
+    background: var(--color-surface);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sectionTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--color-text-primary);
+}
+
+.description {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--color-text-secondary);
+}
+
+/* ==================== TV SHOW LAYOUT ==================== */
+.contentWrapper {
+    display: block;
+}
+
+/* TV Show: 70/30 split on Desktop */
+.tvShowLayout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.tvShowLayout .videoCard {
+    flex: 0 0 70%;
+    max-width: 70%;
+}
+
+.episodeListWrapper {
+    flex: 0 0 calc(30% - 24px);
+    max-width: calc(30% - 24px);
+    position: sticky;
+    top: 100px;
+    max-height: calc(100vh - 150px);
+}
+
+/* Video Card */
+.videoCard {
+    background: var(--color-surface);
+    border-radius: 16px;
+    padding: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.videoPlayer {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    overflow: hidden;
+}
+
+.video {
+    width: 100%;
+    height: 100%;
+    border: none;
+    object-fit: cover;
+}
+
+.placeholderVideo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+}
+
+.placeholderIcon {
+    width: 96px;
+    height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 204, 112, 0.1);
+    border: 2px solid rgba(255, 204, 112, 0.3);
+    border-radius: 50%;
+    color: var(--color-accent);
+    margin-bottom: 24px;
+}
+
+.placeholderTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 8px;
+}
+
+.placeholderText {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    opacity: 0.7;
+}
+
+/* ========== MOBILE RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .main {
+        margin-left: 0;
+    }
+
+    .backButton {
+        margin: 16px;
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+
+    .heroSection {
+        height: 400px;
+        margin-bottom: 24px;
+    }
+
+    .heroContent {
+        padding: 32px 20px 24px;
+    }
+
+    .heroTitle {
+        font-size: 2rem;
+        margin-bottom: 12px;
+    }
+
+    .heroMeta {
+        gap: 16px;
+    }
+
+    .rating {
+        font-size: 1rem;
+    }
+
+    .metaItem {
+        font-size: 0.9rem;
+    }
+
+    .genreSection {
+        gap: 8px;
+    }
+
+    .genreTag {
+        padding: 6px 16px;
+        font-size: 0.75rem;
+    }
+
+    .container {
+        padding: 0 16px 32px;
+    }
+
+    .descriptionCard,
+    .videoCard {
+        padding: 24px 20px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+    }
+
+    .sectionTitle {
+        font-size: 1.25rem;
+        margin-bottom: 12px;
+    }
+
+    .description {
+        font-size: 0.95rem;
+        line-height: 1.7;
+    }
+
+    .placeholderIcon {
+        width: 72px;
+        height: 72px;
+    }
+
+    .placeholderTitle {
+        font-size: 1.1rem;
+    }
+
+    /* TV Show Mobile Layout - Stacked */
+    .tvShowLayout {
+        flex-direction: column;
+    }
+
+    .tvShowLayout .videoCard {
+        flex: none;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .episodeListWrapper {
+        flex: none;
+        max-width: 100%;
+        width: 100%;
+        position: static;
+        max-height: none;
+        margin-top: 24px;
+    }
+
+    .contentTypeBadge {
+        padding: 5px 12px;
+        font-size: 0.7rem;
+    }
+
+    .currentEpisode {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .heroSection {
+        height: 350px;
+    }
+
+    .heroContent {
+        padding: 24px 16px 20px;
+    }
+
+    .heroTitle {
+        font-size: 1.75rem;
+    }
+
+    .backButton {
+        margin: 12px;
+    }
+
+    .container {
+        padding: 0 12px 24px;
+    }
+
+    .descriptionCard,
+    .videoCard {
+        padding: 20px 16px;
+    }
+}

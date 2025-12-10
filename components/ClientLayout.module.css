@@ -1,0 +1,24 @@
+.layoutContainer {
+  display: flex;
+  min-height: 100vh;
+}
+
+.mainContent {
+  flex: 1;
+  /* margin-left handled via inline style in ClientLayout.tsx */
+  background-color: var(--color-background);
+}
+
+.mainContentStudio {
+  flex: 1;
+  margin-left: 0;
+  background-color: var(--color-background);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .mainContent {
+    margin-left: 0 !important;
+    /* Override inline style on mobile */
+  }
+}

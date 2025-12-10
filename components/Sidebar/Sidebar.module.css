@@ -1,0 +1,395 @@
+/* ==================== LAYOUT ==================== */
+.sidebar {
+  position: fixed;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #0b0b0b;
+  border-right: 1px solid #1f1f1f;
+  transition: width 0.3s cubic-bezier(0.25, 0.1, 0.25, 1.0), transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+  z-index: 1000;
+  overflow: hidden;
+  /* Clean clipping */
+}
+
+/* Desktop Styles */
+.desktop {
+  top: 64px;
+  /* Below Navbar */
+  height: calc(100vh - 64px);
+  width: 260px;
+}
+
+.desktop.collapsed {
+  width: 80px;
+}
+
+/* Mobile Styles */
+.mobile {
+  top: 0;
+  height: 100vh;
+  width: 280px;
+  transform: translateX(-100%);
+  z-index: 2000;
+  /* Above everything */
+  border-right: none;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+}
+
+.mobile.open {
+  transform: translateX(0);
+}
+
+/* ==================== HEADER ==================== */
+.sidebarHeader {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+.desktop.collapsed .sidebarHeader {
+  justify-content: center;
+  padding: 8px 0 0 0;
+  height: auto;
+  min-height: 32px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.logoText {
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.logoAccent {
+  color: #ffcc70;
+}
+
+/* Toggle/Close Buttons */
+.toggleBtn,
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: #888888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.toggleBtn:hover,
+.closeBtn:hover {
+  background: #1f1f1f;
+  color: #ffffff;
+}
+
+/* ==================== NAVIGATION ==================== */
+.nav {
+  flex: 1;
+  padding: 16px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Scrollbar hiding for cleaner look */
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+
+.navDivider {
+  height: 1px;
+  background: #1f1f1f;
+  margin: 12px 24px;
+  opacity: 0.5;
+}
+
+/* Base Nav Item */
+.navItem {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 24px;
+  color: #888888;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.navItem:hover {
+  color: #ffffff;
+}
+
+.navItemActive {
+  color: #ffcc70;
+  background: linear-gradient(90deg, rgba(255, 204, 112, 0.08) 0%, transparent 100%);
+  border-right: 3px solid #ffcc70;
+  /* Right accent border looks modern */
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  margin-right: 16px;
+  transition: transform 0.2s;
+}
+
+.desktop.collapsed .navItem {
+  justify-content: center;
+  padding: 0;
+}
+
+.desktop.collapsed .icon {
+  margin-right: 0;
+}
+
+.desktop.collapsed .label,
+.desktop.collapsed .chevron {
+  display: none;
+}
+
+/* ==================== TOOLTIP (Collapsed State) ==================== */
+.navItem .tooltip {
+  display: none;
+}
+
+.desktop.collapsed .navItem .tooltip {
+  display: block;
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #1a1a1a;
+  color: #ffffff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1001;
+}
+
+/* Sidebar.module.css */
+
+.fixedTooltip {
+  position: fixed;
+  z-index: 9999;
+  /* හැමදේටම උඩින් */
+  background: #1a1a1a;
+  color: #ffffff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  /* Mouse එක tooltip එකට වදින්නෙ නැති වෙන්න */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  /* මැදට ගන්න */
+  transform: translateY(-50%);
+
+  /* Animation (Optional) */
+  animation: tooltipFadeIn 0.2s ease forwards;
+}
+
+/* පුංචි ඊතලයක් (Arrow) ඕන නම් මේක දාන්න */
+.fixedTooltip::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent #1a1a1a transparent transparent;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* Sidebar.module.css */
+
+.fixedTooltip {
+  position: fixed;
+  z-index: 9999;
+  background: #1a1a1a;
+  color: #ffffff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  /* Mouse එක tooltip එකට වදින්නෙ නැති වෙන්න */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  /* Y අක්ෂයේ මැදට ගැනීමට */
+  transform: translateY(-50%);
+
+  /* Fade In Animation */
+  animation: tooltipFadeIn 0.2s ease forwards;
+}
+
+/* Tooltip Arrow (Optional) */
+.fixedTooltip::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent #1a1a1a transparent transparent;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* Accordion Trigger Specifics */
+.chevron {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+  opacity: 0.5;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* ==================== SUBMENU / ACCORDION ==================== */
+.subMenu {
+  height: 0;
+  overflow: hidden;
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.subMenuOpen {
+  height: auto;
+}
+
+.subMenuContent {
+  padding: 4px 0 12px 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.subMenuItem {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding-left: 64px;
+  /* Indent child items */
+  padding-right: 24px;
+  color: #888888;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.subMenuItem:hover {
+  color: var(--text-main);
+}
+
+.subMenuItemActive {
+  color: #ffcc70;
+  font-weight: 500;
+}
+
+/* Small dot indicator for submenu items */
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: currentColor;
+  margin-right: 12px;
+  opacity: 0.5;
+}
+
+/* Movie count badge */
+.count {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #888888;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  opacity: 0.7;
+}
+
+/* Empty state for submenus */
+.subMenuEmpty {
+  padding: 12px 64px;
+  color: #888888;
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+.desktop.collapsed .subMenu {
+  display: none;
+  /* Cannot expand submenu when collapsed */
+}
+
+/* ==================== BACKDROP ==================== */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
