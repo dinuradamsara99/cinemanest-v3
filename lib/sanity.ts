@@ -2,6 +2,100 @@ import { createClient, type ClientConfig } from "next-sanity";
 import imageUrlBuilder from "@sanity/image-url";
 import { SanityImageSource } from "@sanity/image-url/lib/types/types";
 
+// Type definitions
+export interface SanityImage {
+  asset: {
+    _id: string;
+    url: string;
+  };
+  alt?: string;
+}
+
+export interface Episode {
+  _key: string;
+  episodeNumber: number;
+  title: string;
+  thumbnail?: {
+    asset: {
+      _id: string;
+      url: string;
+    };
+  };
+  videoUrl: string;
+  duration: number;
+}
+
+export interface Season {
+  _key: string;
+  seasonNumber: number;
+  title: string;
+  episodes: Episode[];
+}
+
+export interface Language {
+  _id: string;
+  title: string;
+  slug: {
+    current: string;
+  };
+}
+
+export interface BaseContent {
+  _id: string;
+  _type: string;
+  title: string;
+  slug: {
+    current: string;
+  };
+  posterImage: SanityImage;
+  bannerImage: SanityImage;
+  rating: number;
+  isFeatured: boolean;
+  isTrending: boolean;
+  description: string;
+  releaseYear: number;
+  genre: string[];
+  language: Language;
+}
+
+export interface Movie extends BaseContent {
+  _type: "movie";
+  duration: number;
+  videoUrl: string;
+  contentType?: "movie";
+}
+
+export interface TVShow extends BaseContent {
+  _type: "tvshow";
+  seasons: Season[];
+  contentType?: "tvshow";
+}
+
+export type Content = Movie | TVShow;
+
+export interface Category {
+  _id: string;
+  title: string;
+  slug: {
+    current: string;
+  };
+  description: string;
+  movies?: Movie[];
+  movieCount?: number;
+}
+
+export interface SearchResult {
+  _id: string;
+  _type: string;
+  title: string;
+  slug: {
+    current: string;
+  };
+  posterImage: SanityImage;
+  rating: number;
+  releaseYear: number;
+}
+
 // Sanity client configuration
 const config: ClientConfig = {
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -20,7 +114,7 @@ export const client = createClient(config);
 // Add a helper function for safer data fetching
 export async function safeFetch<T>(
   query: string,
-  params: Record<string, any> = {}
+  params: Record<string, unknown> = {}
 ): Promise<T | null> {
   try {
     const result = await client.fetch<T>(query, params);
@@ -144,7 +238,7 @@ export async function getFeaturedMovies() {
     }
   }`;
 
-  return safeFetch<any[]>(query) || [];
+  return safeFetch<Content[]>(query) || [];
 }
 
 // Fetch all movies with optional limit
@@ -153,7 +247,7 @@ export async function getMovies(limit = 50) {
     ${MOVIE_FIELDS}
   }`;
 
-  return safeFetch<any[]>(query) || [];
+  return safeFetch<Movie[]>(query) || [];
 }
 
 // Fetch all TV shows with optional limit
@@ -162,7 +256,7 @@ export async function getTVShows(limit = 50) {
     ${TVSHOW_FIELDS}
   }`;
 
-  return safeFetch<any[]>(query) || [];
+  return safeFetch<TVShow[]>(query) || [];
 }
 
 // Fetch a single movie by slug
@@ -171,7 +265,7 @@ export async function getMovieBySlug(slug: string) {
   const movieQuery = `*[_type == "movie" && slug.current == $slug][0] {
     ${MOVIE_FIELDS}
   }`;
-  const movie = await safeFetch<any>(movieQuery, { slug });
+  const movie = await safeFetch<Movie>(movieQuery, { slug });
 
   if (movie) return { ...movie, contentType: "movie" };
 
@@ -179,7 +273,7 @@ export async function getMovieBySlug(slug: string) {
   const tvShowQuery = `*[_type == "tvshow" && slug.current == $slug][0] {
     ${TVSHOW_FIELDS}
   }`;
-  const tvShow = await safeFetch<any>(tvShowQuery, { slug });
+  const tvShow = await safeFetch<TVShow>(tvShowQuery, { slug });
 
   if (tvShow) return { ...tvShow, contentType: "tvshow" };
 
@@ -196,7 +290,7 @@ export async function getMoviesByCategory(categorySlug: string) {
     }
   }`;
 
-  return safeFetch<any>(query, { categorySlug });
+  return safeFetch<Category>(query, { categorySlug });
 }
 
 // Fetch all categories
@@ -209,7 +303,7 @@ export async function getCategories() {
     "movieCount": count(movies)
   }`;
 
-  return safeFetch<any[]>(query) || [];
+  return safeFetch<Category[]>(query) || [];
 }
 
 // Fetch all languages
@@ -220,7 +314,7 @@ export async function getLanguages() {
     slug
   }`;
 
-  return safeFetch<any[]>(query) || [];
+  return safeFetch<Language[]>(query) || [];
 }
 
 // Fetch movies by language
@@ -229,7 +323,7 @@ export async function getMoviesByLanguage(languageSlug: string) {
     ${MOVIE_FIELDS}
   }`;
 
-  return safeFetch<any[]>(query, { languageSlug }) || [];
+  return safeFetch<Movie[]>(query, { languageSlug }) || [];
 }
 
 // Fetch trending content (movies + tv shows)
@@ -253,7 +347,7 @@ export async function getTrendingMovies(limit = 12) {
     }
   }`;
 
-  return safeFetch<any[]>(query) || [];
+  return safeFetch<Content[]>(query) || [];
 }
 
 // Fetch recently added content (movies + tv shows)
@@ -277,7 +371,7 @@ export async function getRecentlyAddedMovies(limit = 12) {
     }
   }`;
 
-  return safeFetch<any[]>(query) || [];
+  return safeFetch<Content[]>(query) || [];
 }
 
 // Search movies and TV shows by title
@@ -298,5 +392,5 @@ export async function searchMovies(searchQuery: string) {
     releaseYear
   }`;
 
-  return safeFetch<any[]>(query, { searchQuery }) || [];
+  return safeFetch<SearchResult[]>(query, { searchQuery }) || [];
 }
