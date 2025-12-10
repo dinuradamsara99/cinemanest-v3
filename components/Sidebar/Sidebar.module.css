@@ -11,7 +11,13 @@
   overflow: hidden;
   /* Clean clipping */
 }
+/* Sidebar.module.css එකේ දැනට තියෙන .mobile.open කොටස */
+.mobile.open {
+  transform: translateX(0);
+}
 
+/* මේ කොටස අලුතින් add කරන්න. මේකෙන් styles.open වැඩ කරන්න ගන්නවා */
+.open {}
 /* Desktop Styles */
 .desktop {
   top: 64px;
