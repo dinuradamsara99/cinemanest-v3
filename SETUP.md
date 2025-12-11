@@ -137,16 +137,36 @@ Make sure `.env.local` exists in the root directory with all required variables.
 ```
 cinemanest/
 ├── app/
-│   ├── page.tsx              # Home page (async server component)
-│   ├── page.module.css       # Home page styles
-│   ├── layout.tsx            # Root layout
-│   ├── globals.css           # Global styles & CSS variables
-│   └── watch/[slug]/         # Dynamic watch page
-│       ├── page.tsx
-│       └── page.module.css
+│   ├── api/
+│   │   ├── categories/
+│   │   │   └── route.ts
+│   │   ├── languages/
+│   │   │   └── route.ts
+│   │   └── search/
+│   │       └── route.ts
+│   ├── category/[slug]/
+│   │   ├── page.module.css
+│   │   └── page.tsx
+│   ├── language/[slug]/
+│   │   ├── page.module.css
+│   │   └── page.tsx
+│   ├── studio/[[...tool]]/
+│   │   ├── loading.tsx
+│   │   └── page.tsx
+│   ├── tv-shows/
+│   │   ├── page.module.css
+│   │   └── page.tsx
+│   ├── watch/[slug]/
+│   │   ├── WatchPageClient.tsx
+│   │   ├── page.module.css
+│   │   └── page.tsx
+│   ├── globals.css
+│   ├── layout.tsx
+│   ├── not-found.tsx
+│   ├── page.module.css
+│   └── page.tsx
 ├── components/
 │   ├── Navbar/               # Top navigation bar
-│   ├── Sidebar/              # Left sidebar navigation
 │   ├── HeroSection/          # Auto-rotating banner slider
 │   ├── MovieCard/            # Individual movie card
 │   ├── MovieRow/             # Horizontal movie list
@@ -166,17 +186,20 @@ cinemanest/
 ## 9. Next Steps
 
 ### Add More Content Types
+
 - TV Shows
 - Actors/Cast
 - Reviews
 
 ### Enhance Features
+
 - User authentication
 - Watchlists/Favorites
 - Search functionality
 - Video streaming integration
 
 ### Deploy to Production
+
 1. Deploy Sanity Studio to Sanity hosting
 2. Deploy Next.js app to Vercel/Netlify
 3. Update CORS settings for production domain

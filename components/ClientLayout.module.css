@@ -5,20 +5,20 @@
 
 .mainContent {
   flex: 1;
-  /* margin-left handled via inline style in ClientLayout.tsx */
   background-color: var(--color-background);
+  min-height: 100vh;
+  margin-left: var(--sidebar-width, 260px);
+  transition: margin-left 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+@media (max-width: 1023px) {
+  .mainContent {
+    margin-left: 0;
+  }
 }
 
 .mainContentStudio {
   flex: 1;
   margin-left: 0;
   background-color: var(--color-background);
-}
-
-/* Mobile responsive adjustments */
-@media (max-width: 768px) {
-  .mainContent {
-    margin-left: 0 !important;
-    /* Override inline style on mobile */
-  }
 }

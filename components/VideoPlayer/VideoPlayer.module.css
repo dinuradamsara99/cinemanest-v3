@@ -1,583 +1,188 @@
-/* ==================== PLAYER CONTAINER ==================== */
+/* VideoPlayer.module.css */
+
 .player {
+    --primary-color: #ffcc70;
+    --text-color: #f3f4f6;
     position: relative;
     width: 100%;
+    /* Maintain Aspect Ratio but allow flexibility */
     aspect-ratio: 16 / 9;
     background: #000;
-    overflow: hidden;
+    overflow: visible;
     border-radius: 12px;
-    outline: none;
-    cursor: default;
+    user-select: none;
+    font-family: sans-serif;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    touch-action: manipulation;
+    /* Improves touch response */
 }
 
 .player.fullscreen {
-    border-radius: 0;
     width: 100vw;
     height: 100vh;
-    aspect-ratio: auto;
+    border-radius: 0;
+    z-index: 9999;
 }
 
 .videoWrapper {
-    position: relative;
     width: 100%;
     height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
     overflow: hidden;
+    border-radius: 12px;
 }
 
-/* ==================== VIDEO ELEMENT ==================== */
 .video {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    object-position: center;
-    background: #000;
-    transition: transform 0.1s ease-out;
+    /* Ensures video isn't cropped */
 }
 
-/* ==================== LOADING OVERLAY ==================== */
-.loadingOverlay {
+.poster {
     position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 5;
+}
+
+/* OVERLAYS & ANIMATIONS */
+.overlayLayer {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 20;
+    pointer-events: none;
 }
 
-.spinner {
-    color: white;
+.centerPulse {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    border-radius: 50%;
+    padding: 20px;
+    animation: pulsePop 0.5s ease-out forwards;
+}
+
+@keyframes pulsePop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.3);
+        opacity: 0;
+    }
+}
+
+.loader {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
     to {
         transform: rotate(360deg);
     }
 }
 
-/* ==================== SEEK INDICATOR ==================== */
-.seekIndicator {
+/* CONTROLS */
+.controlsOverlay {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    z-index: 30;
-    pointer-events: none;
-}
-
-.seekIndicator::before {
-    content: '';
-    position: absolute;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.15);
-    animation: rippleExpand 0.6s ease-out forwards;
-}
-
-.seekIndicator::after {
-    content: '';
-    position: absolute;
-    width: 70%;
-    height: 70%;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.25);
-    animation: rippleExpandInner 0.4s ease-out forwards;
-}
-
-.seekIndicator.left {
-    left: 20%;
-}
-
-.seekIndicator.right {
-    right: 20%;
-}
-
-.seekIconWrapper {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
-}
-
-.seekIndicator.left .seekIconWrapper {
-    animation: seekRotateLeft 0.5s ease-out;
-}
-
-.seekIndicator.right .seekIconWrapper {
-    animation: seekRotateRight 0.5s ease-out;
-}
-
-.seekSeconds {
-    position: relative;
-    z-index: 2;
-    font-size: 13px;
-    font-weight: 700;
-    color: white;
-    margin-top: 4px;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-}
-
-@keyframes rippleExpand {
-    0% {
-        transform: scale(0.3);
-        opacity: 0.8;
-    }
-
-    100% {
-        transform: scale(1.2);
-        opacity: 0;
-    }
-}
-
-@keyframes rippleExpandInner {
-    0% {
-        transform: scale(0.5);
-        opacity: 1;
-    }
-
-    100% {
-        transform: scale(1);
-        opacity: 0;
-    }
-}
-
-@keyframes seekRotateLeft {
-    0% {
-        transform: rotate(0deg) scale(0.8);
-        opacity: 0;
-    }
-
-    30% {
-        opacity: 1;
-    }
-
-    100% {
-        transform: rotate(-360deg) scale(1);
-        opacity: 0;
-    }
-}
-
-@keyframes seekRotateRight {
-    0% {
-        transform: rotate(0deg) scale(0.8);
-        opacity: 0;
-    }
-
-    30% {
-        opacity: 1;
-    }
-
-    100% {
-        transform: rotate(360deg) scale(1);
-        opacity: 0;
-    }
-}
-
-/* ==================== VOLUME INDICATOR ==================== */
-.volumeIndicator {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 24px;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(8px);
-    border-radius: 12px;
-    z-index: 30;
-    color: white;
-    animation: volumeFadeIn 0.15s ease-out, volumeFadeOut 0.3s ease-in 0.7s forwards;
-}
-
-.volumeBarContainer {
-    width: 100px;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.volumeBarFill {
-    height: 100%;
-    background: white;
-    border-radius: 4px;
-    transition: width 0.1s ease;
-}
-
-.volumeValue {
-    font-size: 14px;
-    font-weight: 600;
-    min-width: 40px;
-    text-align: right;
-}
-
-@keyframes volumeFadeIn {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.9);
-    }
-
-    to {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-}
-
-@keyframes volumeFadeOut {
-    from {
-        opacity: 1;
-    }
-
-    to {
-        opacity: 0;
-    }
-}
-
-/* ==================== ERROR OVERLAY ==================== */
-.errorOverlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 25;
-}
-
-.errorContent {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 32px;
-    max-width: 400px;
-}
-
-.errorIcon {
-    color: rgba(255, 255, 255, 0.3);
-    margin-bottom: 16px;
-}
-
-.errorTitle {
-    font-size: 20px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.9);
-    margin: 0 0 8px 0;
-}
-
-.errorText {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.5);
-    margin: 0;
-    line-height: 1.5;
-}
-
-/* ==================== CENTER PLAY/PAUSE BUTTON ==================== */
-.centerButton {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(8px);
-    border: none;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 15;
-    opacity: 0;
-    transition: all 0.3s ease;
-}
-
-.centerButton.visible {
-    opacity: 1;
-}
-
-.centerButton:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%) scale(1.05);
-}
-
-.centerButton svg {
-    margin-left: 2px;
-}
-
-/* ==================== ZOOM CONTROLS ==================== */
-.zoomControls {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    border-radius: 10px;
-    z-index: 25;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-}
-
-.zoomControls.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.zoomResetBtn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    background: rgba(255, 255, 255, 0.15);
-    border: none;
-    border-radius: 6px;
-    color: white;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s ease;
-}
-
-.zoomResetBtn:hover {
-    background: rgba(255, 255, 255, 0.25);
-}
-
-.zoomLevel {
-    font-size: 13px;
-    font-weight: 600;
-    color: white;
-}
-
-/* ==================== BOTTOM GRADIENT ==================== */
-.bottomGradient {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 200px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.5) 50%, transparent 100%);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: 5;
-}
-
-.bottomGradient.visible {
-    opacity: 1;
-}
-
-/* ==================== CONTROLS CONTAINER ==================== */
-.controlsContainer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 16px 20px 20px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+    padding: 20px;
     opacity: 0;
     transform: translateY(10px);
-    transition: all 0.3s ease;
-    z-index: 10;
-    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 20;
+    /* IMPORTANT: Allow clicks on controls */
+    pointer-events: auto;
 }
 
-.controlsContainer.visible {
+.controlsOverlay.visible {
     opacity: 1;
     transform: translateY(0);
-    pointer-events: all;
 }
 
-/* ==================== TITLE BAR ==================== */
-.titleBar {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-}
-
-.titleInfo {
+.controlsContent {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 10px;
 }
 
-.videoTitle {
-    font-size: 18px;
-    font-weight: 600;
-    color: white;
-    margin: 0;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-}
-
-.videoSubtitle {
-    font-size: 13px;
-    font-weight: 400;
-    color: rgba(255, 255, 255, 0.7);
-    margin: 0;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-}
-
-.timeDisplay {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 14px;
-    font-weight: 500;
-    color: white;
-    font-variant-numeric: tabular-nums;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-}
-
-.timeSeparator {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-/* ==================== PROGRESS BAR ==================== */
-.progressContainer {
+/* PROGRESS BAR */
+.progressBarContainer {
     position: relative;
     width: 100%;
-    height: 20px;
-    cursor: pointer;
+    height: 12px;
     display: flex;
     align-items: center;
-    margin-bottom: 8px;
+    cursor: pointer;
 }
 
 .progressTrack {
     position: relative;
     width: 100%;
-    height: 3px;
+    height: 4px;
     background: rgba(255, 255, 255, 0.3);
     border-radius: 4px;
-    overflow: visible;
-    transition: height 0.15s ease;
+    transition: height 0.2s;
 }
 
-.progressContainer:hover .progressTrack {
-    height: 5px;
+.progressBarContainer:hover .progressTrack {
+    height: 6px;
 }
 
 .progressBuffered {
     position: absolute;
-    top: 0;
-    left: 0;
     height: 100%;
     background: rgba(255, 255, 255, 0.4);
     border-radius: 4px;
-    transition: width 0.1s linear;
 }
 
-.progressFilled {
+.progressCurrent {
     position: absolute;
-    top: 0;
-    left: 0;
     height: 100%;
-    background: linear-gradient(90deg, #dd9613 0%, #ffcc70 100%);
+    background: var(--primary-color);
     border-radius: 4px;
-    transition: width 0.05s linear;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 .scrubber {
-    position: absolute;
-    top: 50%;
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     background: white;
     border-radius: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    transition: transform 0.15s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    z-index: 2;
+    transform: scale(0);
+    transition: transform 0.2s;
 }
 
-.progressContainer:hover .scrubber {
-    transform: translate(-50%, -50%) scale(1);
+.progressBarContainer:hover .scrubber {
+    transform: scale(1);
 }
 
-/* ==================== TIME TOOLTIP ==================== */
-.timeTooltip {
-    position: absolute;
-    bottom: 100%;
-    margin-bottom: 12px;
-    padding: 8px 14px;
-    background: rgba(0, 0, 0, 0.9);
-    color: white;
-    font-size: 13px;
-    font-weight: 600;
-    border-radius: 6px;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    pointer-events: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    z-index: 10;
-}
-
-.thumbnailPreview {
-    position: absolute;
-    bottom: 100%;
-    margin-bottom: 16px;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    pointer-events: none;
-    z-index: 10;
-}
-
-.thumbnailImage {
-    border-radius: 6px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    background-size: auto;
-    background-repeat: no-repeat;
-}
-
-.thumbnailPlaceholder {
-    width: 120px;
-    height: 68px;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(255, 255, 255, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-.thumbnailTime {
-    padding: 4px 10px;
-    background: rgba(0, 0, 0, 0.9);
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    color: white;
-}
-
-/* ==================== CONTROLS ROW ==================== */
+/* BUTTONS ROW */
 .controlsRow {
     display: flex;
     align-items: center;
@@ -588,339 +193,179 @@
 .rightControls {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
-/* ==================== CONTROL BUTTONS ==================== */
-.controlBtn {
+.iconBtn {
+    background: none;
+    border: none;
+    color: white;
+    padding: 6px;
+    cursor: pointer;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    border-radius: 50%;
-    transition: all 0.2s ease;
 }
 
-.controlBtn:hover {
+.iconBtn:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
-.controlBtn.active {
-    color: #e91e63;
+.iconBtn svg {
+    width: 24px;
+    height: 24px;
 }
 
-/* ==================== VOLUME CONTROL ==================== */
-.volumeWrapper {
+/* VOLUME */
+.volumeContainer {
     display: flex;
     align-items: center;
-    position: relative;
-}
-
-.volumeSliderContainer {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 0;
-    overflow: hidden;
-    opacity: 0;
-    transition: width 0.25s ease, opacity 0.2s ease;
-}
-
-.volumeSliderContainer.visible {
-    width: 120px;
-    opacity: 1;
+    gap: 5px;
 }
 
 .volumeSlider {
-    width: 80px;
+    width: 0;
+    opacity: 0;
+    transition: all 0.3s ease;
+    cursor: pointer;
     height: 4px;
-    -webkit-appearance: none;
-    appearance: none;
-    border-radius: 4px;
-    outline: none;
-    cursor: pointer;
 }
 
-.volumeSlider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    background: white;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    transition: transform 0.15s ease;
+.volumeContainer:hover .volumeSlider {
+    width: 60px;
+    opacity: 1;
 }
 
-.volumeSlider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
+.timeDisplay {
+    font-size: 13px;
+    color: #ddd;
+    font-weight: 500;
 }
 
-.volumeSlider::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    background: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.volumePercent {
-    font-size: 12px;
-    font-weight: 600;
-    color: white;
-    min-width: 32px;
-    text-align: right;
-}
-
-/* ==================== PLAYBACK SPEED CONTROL ==================== */
-.speedWrapper {
+/* SETTINGS MENU */
+.settingsContainer {
     position: relative;
 }
 
-.speedBtn {
-    width: auto !important;
-    padding: 0 12px !important;
-    border-radius: 6px !important;
+.settingsMenu {
+    position: absolute;
+    bottom: 40px;
+    right: 0;
+    min-width: 180px;
+    padding: 10px;
+    border-radius: 14px;
+    background: rgba(12, 14, 18, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+    max-height: 320px;
+    overflow: auto;
+    transform: translateY(6px);
+    transition: transform 0.18s ease, opacity 0.18s ease;
 }
 
-.speedLabel {
+.settingsMenu::-webkit-scrollbar {
+    width: 8px;
+}
+
+.settingsMenu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.settingsMenu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.settingsMenu:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 204, 112, 0.35);
+}
+
+.menuItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 11px;
+    padding: 10px 12px;
     font-size: 13px;
     font-weight: 600;
-}
-
-.speedMenu {
-    position: absolute;
-    bottom: 100%;
-    right: 0;
-    margin-bottom: 12px;
-    background: rgba(20, 20, 20, 0.95);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 12px;
-    min-width: 140px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    animation: menuFadeIn 0.2s ease;
-    z-index: 100;
-}
-
-.speedMenuHeader {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.5);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding-bottom: 8px;
-    margin-bottom: 6px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.speedOptions {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.speedOption {
-    padding: 10px 12px;
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 14px;
-    font-weight: 500;
-    text-align: left;
+    color: #f6f7fb;
     cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.15s ease;
+    border-radius: 10px;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-.speedOption:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+.menuItem + .menuItem {
+    margin-top: 6px;
 }
 
-.speedOption.active {
-    background: rgba(233, 30, 99, 0.2);
-    color: #e91e63;
+.menuItem:hover,
+.menuItem.active {
+    background: linear-gradient(135deg, rgba(255, 204, 112, 0.16), rgba(255, 255, 255, 0.06));
+    color: var(--primary-color);
+    border-color: rgba(255, 204, 112, 0.35);
 }
 
-@keyframes menuFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.menuItem.active::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(255, 204, 112, 0.18);
 }
 
-/* ==================== RESPONSIVE DESIGN ==================== */
+/* ================= RESPONSIVE FIXES ================= */
+
 @media (max-width: 768px) {
-    .player {
-        border-radius: 8px;
+    .controlsOverlay {
+        padding: 10px;
     }
 
-    .controlsContainer {
-        padding: 12px 16px 16px;
-    }
-
-    .centerButton {
-        width: 56px;
-        height: 56px;
-    }
-
-    .centerButton svg {
-        width: 24px;
-        height: 24px;
-    }
-
-    .videoTitle {
-        font-size: 15px;
-    }
-
-    .videoSubtitle {
-        font-size: 11px;
+    .iconBtn svg {
+        width: 20px;
+        height: 20px;
     }
 
     .timeDisplay {
-        font-size: 12px;
+        font-size: 11px;
     }
 
-    .controlBtn {
-        width: 36px;
-        height: 36px;
+    /* Hide Volume Slider on Mobile (Use button only) */
+    .volumeSlider {
+        display: none !important;
     }
 
-    .controlBtn svg {
-        width: 18px;
-        height: 18px;
+    /* Ensure bezel doesn't block view */
+    .volumeBezel {
+        top: 20px;
+        transform: scale(0.8);
     }
 
-    .zoomControls {
-        top: 12px;
-        right: 12px;
-        padding: 8px 12px;
-    }
-
-    .thumbnailPreview {
-        margin-bottom: 12px;
-    }
-
-    .thumbnailPlaceholder {
-        width: 100px;
-        height: 56px;
+    .seekOverlay {
+        transform: scale(0.8);
     }
 }
 
 @media (max-width: 480px) {
     .player {
         border-radius: 0;
+        /* Full width on small phones */
     }
 
-    .controlsContainer {
-        padding: 10px 12px 14px;
+    .iconBtn {
+        padding: 8px;
+        /* Larger touch target */
     }
 
-    .titleBar {
-        margin-bottom: 8px;
-    }
-
-    .centerButton {
-        width: 48px;
-        height: 48px;
-    }
-
-    .videoTitle {
-        font-size: 13px;
-    }
-
-    .videoSubtitle {
+    /* Hide less important controls on very small screens */
+    .timeDisplay span:nth-child(2),
+    /* Slash */
+    .timeDisplay span:nth-child(3) {
+        /* Total Time */
         display: none;
     }
-
-    .timeDisplay {
-        font-size: 11px;
-    }
-
-    .controlBtn {
-        width: 32px;
-        height: 32px;
-    }
-
-    .leftControls {
-        gap: 4px;
-    }
-
-    .rightControls {
-        gap: 4px;
-    }
-
-    .seekIndicator {
-        width: 80px;
-        height: 80px;
-    }
-
-    .speedBtn {
-        display: none;
-    }
-}
-
-/* ==================== FULLSCREEN ADJUSTMENTS ==================== */
-.player.fullscreen .controlsContainer {
-    padding: 24px 40px 32px;
-}
-
-.player.fullscreen .centerButton {
-    width: 88px;
-    height: 88px;
-}
-
-.player.fullscreen .centerButton svg {
-    width: 40px;
-    height: 40px;
-}
-
-.player.fullscreen .videoTitle {
-    font-size: 22px;
-}
-
-.player.fullscreen .videoSubtitle {
-    font-size: 15px;
-}
-
-.player.fullscreen .timeDisplay {
-    font-size: 16px;
-}
-
-.player.fullscreen .controlBtn {
-    width: 48px;
-    height: 48px;
-}
-
-.player.fullscreen .controlBtn svg {
-    width: 24px;
-    height: 24px;
-}
-
-.player.fullscreen .progressTrack {
-    height: 4px;
-}
-
-.player.fullscreen .progressContainer:hover .progressTrack {
-    height: 6px;
-}
-
-.player.fullscreen .thumbnailImage,
-.player.fullscreen .thumbnailPlaceholder {
-    width: 180px;
-    height: 101px;
 }

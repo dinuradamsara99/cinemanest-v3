@@ -1,62 +1,98 @@
+/* components/MovieRow/MovieRow.module.css */
+
 .section {
-    margin-bottom: var(--spacing-3xl);
+    margin-bottom: 3rem;
+    padding: 0 4%;
+}
+
+.header {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin-bottom: var(--spacing-lg);
-    padding: 0 var(--spacing-xl);
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #e5e5e5;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.scrollContainer {
-    position: relative;
-    padding: 0 var(--spacing-xl);
+/* ✅ GRID LAYOUT: Cards will wrap automatically */
+.gridContainer {
+    display: grid;
+    /* Auto-fill columns: Cards will be at least 200px wide */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px 20px;
+    /* Row Gap: 24px, Column Gap: 20px */
+    width: 100%;
 }
 
-.movieGrid {
+/* Wrapper is simpler now, just needs to fit the grid cell */
+.cardWrapper {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    /* Keeps the card shape consistent */
+}
+
+/* "Load More" Button Styling */
+.loadMoreContainer {
     display: flex;
-    gap: var(--spacing-lg);
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-behavior: smooth;
-    padding-bottom: var(--spacing-md);
-
-    /* Hide scrollbar for cleaner look but keep functionality */
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-surface-elevated) transparent;
+    justify-content: center;
+    margin-top: 32px;
 }
 
-.movieGrid::-webkit-scrollbar {
-    height: 6px;
+.loadMoreBtn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
-.movieGrid::-webkit-scrollbar-track {
-    background: transparent;
+.loadMoreBtn:hover {
+    background: #f5c518;
+    /* Yellow Accent */
+    color: #000;
+    border-color: #f5c518;
+    transform: translateY(-2px);
 }
 
-.movieGrid::-webkit-scrollbar-thumb {
-    background: var(--color-surface-elevated);
-    border-radius: var(--radius-full);
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1024px) {
+    .gridContainer {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 20px 16px;
+    }
 }
 
-.movieGrid::-webkit-scrollbar-thumb:hover {
-    background: var(--color-text-tertiary);
-}
-
-/* Responsive */
 @media (max-width: 768px) {
+    .section {
+        padding: 0 16px;
+    }
+
     .title {
         font-size: 1.25rem;
-        padding: 0 var(--spacing-md);
     }
 
-    .scrollContainer {
-        padding: 0 var(--spacing-md);
+    /* On Mobile: Force 2 Columns (Looks like Netflix mobile grid) */
+    .gridContainer {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px 12px;
     }
+}
 
-    .movieGrid {
-        gap: var(--spacing-md);
+@media (max-width: 480px) {
+
+    /* On very small screens (iPhone SE), ensure spacing is tight */
+    .gridContainer {
+        gap: 16px 10px;
     }
 }

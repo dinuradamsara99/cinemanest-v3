@@ -3,7 +3,7 @@
 }
 
 .main {
-  padding-top: var(--navbar-height);
+  padding-top: 0;
 }
 
 .sections {

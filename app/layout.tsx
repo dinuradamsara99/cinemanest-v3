@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Noto_Sans_Sinhala } from "next/font/google";
-import ClientLayout from "@/components/ClientLayout";
 import "./globals.css";
+import ClientLayout from "@/components/ClientLayout";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     "Stream the latest movies and TV shows on CinemaNest. Discover trending content, watch trailers, and enjoy unlimited entertainment.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -32,7 +32,9 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} ${notoSansSinhala.variable} antialiased`}
       >
-        <ClientLayout>{children}</ClientLayout>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );

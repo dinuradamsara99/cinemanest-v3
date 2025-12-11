@@ -10,15 +10,16 @@
     "sanity": "sanity dev"
   },
   "dependencies": {
-    "next": "15.1.9",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "@sanity/client": "^6.22.7",
     "@sanity/image-url": "^1.0.2",
     "@sanity/vision": "^3.68.1",
-    "next-sanity": "^9.8.21",
-    "sanity": "^3.68.1",
+    "framer-motion": "^12.23.26",
     "lucide-react": "^0.462.0",
+    "next": "15.1.9",
+    "next-sanity": "^9.8.21",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sanity": "^3.68.1",
     "styled-components": "^6.1.13"
   },
   "devDependencies": {

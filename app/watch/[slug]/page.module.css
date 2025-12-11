@@ -24,7 +24,7 @@
 .bannerOverlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(7, 7, 10, 0.25) 0%, rgba(7, 7, 10, 0.7) 55%, rgba(7, 7, 10, 0.96) 100%);
+    background: linear-gradient(180deg, rgba(7, 7, 10, 0.548) 0%, rgba(7, 7, 10, 0.7) 55%, rgba(7, 7, 10, 0.96) 100%);
     backdrop-filter: blur(1px);
 }
 
@@ -63,9 +63,9 @@
     gap: 8px;
     padding: 10px 14px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.342);
     color: var(--color-text-primary);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.384);
     transition: all 0.2s ease;
 }
 
@@ -189,31 +189,29 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 18px;
-    border-radius: 12px;
+    padding: 10px 20px;
+    border-radius: 999px;
     background: linear-gradient(135deg, #ffcc70 0%, #f88324 100%);
     color: #0b0b0f;
     font-weight: 800;
     border: 1px solid rgba(255, 204, 112, 0.4);
-    box-shadow: 0 12px 30px rgba(248, 131, 36, 0.3);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .primaryButton:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 16px 36px rgba(248, 131, 36, 0.38);
+   color: #0b0b0f;
 }
 
 .ghostButton {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 18px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.06);
+    padding: 15px 20px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
     color: var(--color-text-primary);
     font-weight: 700;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.15s ease;
 }
 
@@ -227,6 +225,7 @@
     flex-direction: column;
     gap: 14px;
     align-items: flex-start;
+    justify-self: end;
 }
 
 .posterFrame {
@@ -283,15 +282,15 @@
 
 .contentShell {
     position: relative;
-    margin-top: -48px;
-    padding: 0 24px 72px;
+    margin-top: 0;
+    padding: 32px 24px 72px;
 }
 
 .layout {
     max-width: 1280px;
     margin: 0 auto;
     display: grid;
-    gap: 24px;
+    gap: 16px;
 }
 
 .withSidebar {
@@ -302,13 +301,13 @@
 .primaryColumn {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 14px;
 }
 
 .sideColumn {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 14px;
     position: relative;
 }
 
@@ -316,7 +315,7 @@
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.02));
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 18px;
-    padding: 24px;
+    padding: 20px;
     box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
 }
 
@@ -430,7 +429,7 @@
 .detailGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
+    gap: 10px;
 }
 
 .detailItem {
@@ -470,9 +469,13 @@
         padding: 60px 20px 48px;
     }
 
+    .heroGrid {
+        grid-template-columns: 1fr;
+    }
+
     .contentShell {
-        margin-top: -28px;
-        padding: 0 16px 60px;
+        margin-top: 0;
+        padding: 16px 16px 60px;
     }
 
     .withSidebar {

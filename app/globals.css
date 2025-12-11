@@ -29,7 +29,10 @@
   --radius-full: 9999px;
 
   /* Typography */
-  --font-sans: var(--font-poppins), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-sans:
+    var(--font-poppins), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
   --font-sinhala: var(--font-noto-sans-sinhala), sans-serif;
 
   /* Transitions */
@@ -38,15 +41,14 @@
   --transition-slow: 350ms ease;
 
   /* Z-index */
-  --z-navbar: 100;
-  --z-sidebar: 90;
-  --z-modal: 1000;
-  --z-tooltip: 1100;
+  --z-navbar: 1000;
+  --z-search-overlay: 10000;
+  --z-search-dropdown: 10001;
+  --z-modal: 11000;
+  --z-tooltip: 11100;
 
-  /* Layout - Sidebar */
-  --sidebar-w-full: 260px;
-  --sidebar-w-mini: 80px;
-  --navbar-height: 64px;
+  /* Layout */
+  --navbar-height: 0px;
 }
 
 /* CSS Reset & Base Styles */
@@ -154,6 +156,7 @@ img {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
+  padding: 0 var(--spacing-md);
 }
 
 .visually-hidden {
@@ -165,4 +168,35 @@ img {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+/* ==================== LAYOUT SYSTEM ==================== */
+/* Main Content Area - Accounts for Navbar */
+.main-content {
+  min-height: 100vh;
+  padding-top: var(--navbar-height);
+}
+
+/* ==================== RESPONSIVE HELPERS ==================== */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .main-content {
+    padding-top: 70px;
+    /* Match navbar height on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.375rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+    --spacing-xl: 1.5rem;
+    --spacing-2xl: 2rem;
+    --spacing-3xl: 2.5rem;
+  }
 }

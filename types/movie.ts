@@ -9,6 +9,7 @@ export interface Language {
 
 // Episode type for TV Shows
 export interface Episode {
+    thumbnailSprite: string | undefined
     _key: string
     episodeNumber: number
     title: string
@@ -32,6 +33,7 @@ export interface Season {
 
 // Movie type from Sanity (also used for TV Shows)
 export interface Movie {
+    thumbnailSprite: string | undefined
     _id: string
     _type?: 'movie' | 'tvshow'
     title: string

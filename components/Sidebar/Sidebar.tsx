@@ -1,264 +1,288 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { createPortal } from 'react-dom' // 1. Portal import කරන ලදී
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Film, Tv, ChevronLeft, ChevronRight, ChevronDown, X, Grid3X3 } from 'lucide-react'
-import { Language, Category } from '@/types/movie'
-import { useSidebar } from '@/context/SidebarContext'
+import { Home, Tv, Grid3x3, Film, ChevronUp, ChevronDown, Menu, X } from 'lucide-react'
 import styles from './Sidebar.module.css'
 
-interface SidebarProps {
-    languages?: Language[]
-    categories?: Category[]
+interface Category {
+  _id: string
+  title: string
+  slug: {
+    current: string
+  }
+  description?: string
+  movieCount?: number
 }
 
-// Tooltip State Type Definition
-interface TooltipState {
-    label: string;
-    top: number;
-    left: number;
+interface Language {
+  _id: string
+  title: string
+  slug: {
+    current: string
+  }
 }
 
-export default function Sidebar({ languages = [], categories = [] }: SidebarProps) {
-    const [isLanguageOpen, setIsLanguageOpen] = useState(false)
-    const [isCategoryOpen, setIsCategoryOpen] = useState(false)
+export default function Sidebar() {
+  const pathname = usePathname()
+  const [isMobile, setIsMobile] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [languages, setLanguages] = useState<Language[]>([])
+  const [loading, setLoading] = useState(true)
+  const [expandedSections, setExpandedSections] = useState<{
+    categories: boolean
+    languages: boolean
+  }>({
+    categories: true,
+    languages: true,
+  })
 
-    // 2. Tooltip සදහා අලුත් States
-    const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+      if (window.innerWidth >= 1024) {
+        setIsOpen(false)
+      }
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
-    const pathname = usePathname()
-    const { isOpen, isCollapsed, isMobile, hasMounted, closeSidebar, toggleCollapse } = useSidebar()
+  // Update CSS variable for collapsed state
+  useEffect(() => {
+    if (!isMobile) {
+      document.documentElement.style.setProperty(
+        '--sidebar-width',
+        isCollapsed ? '80px' : '260px'
+      )
+    } else {
+      document.documentElement.style.setProperty('--sidebar-width', '0px')
+    }
+    return () => {
+      document.documentElement.style.removeProperty('--sidebar-width')
+    }
+  }, [isCollapsed, isMobile])
 
-    // Close mobile sidebar when route changes
-    useEffect(() => {
-        if (isMobile) {
-            closeSidebar()
+  // Fetch categories and languages
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const [categoriesRes, languagesRes] = await Promise.all([
+          fetch('/api/categories'),
+          fetch('/api/languages'),
+        ])
+
+        if (categoriesRes.ok) {
+          const cats = await categoriesRes.json()
+          setCategories(cats || [])
         }
-    }, [pathname, isMobile, closeSidebar])
 
-    // Prevent body scroll when mobile sidebar is open
-    useEffect(() => {
-        if (isMobile && isOpen) {
-            document.body.style.overflow = 'hidden'
-        } else {
-            document.body.style.overflow = ''
+        if (languagesRes.ok) {
+          const langs = await languagesRes.json()
+          setLanguages(langs || [])
         }
-        return () => {
-            document.body.style.overflow = ''
-        }
-    }, [isMobile, isOpen])
-
-    // Toggle dropdowns
-    const toggleLanguageAccordion = () => setIsLanguageOpen(!isLanguageOpen)
-    const toggleCategoryAccordion = () => setIsCategoryOpen(!isCategoryOpen)
-
-    // 3. Tooltip පෙන්වන Function එක (Mouse Enter)
-    const handleMouseEnter = (e: React.MouseEvent, label: string) => {
-        // Tooltip පෙන්වන්නේ Desktop එකේ Sidebar එක Collapsed නම් පමණයි
-        if (!isMobile && isCollapsed) {
-            const rect = e.currentTarget.getBoundingClientRect()
-            setTooltip({
-                label,
-                top: rect.top + (rect.height / 2), // Icon එකේ මැදට
-                left: rect.right + 10 // දකුණු පැත්තෙන් පොඩි පරතරයක්
-            })
-        }
+      } catch (error) {
+        console.error('Error fetching sidebar data:', error)
+      } finally {
+        setLoading(false)
+      }
     }
 
-    // Tooltip සැඟවෙන Function එක (Mouse Leave)
-    const handleMouseLeave = () => {
-        setTooltip(null)
-    }
+    fetchData()
+  }, [])
 
-    // Determine sidebar classes
-    const sidebarClasses = [
-        styles.sidebar,
-        isMobile ? styles.mobile : styles.desktop,
-        isMobile && isOpen ? styles.open : '',
-        !isMobile && isCollapsed ? styles.collapsed : '',
-    ].filter(Boolean).join(' ')
+  const toggleSection = (section: 'categories' | 'languages') => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }))
+  }
 
-    return (
-        <>
-            {/* Backdrop - Mobile Only */}
-            {isMobile && isOpen && (
-                <div
-                    className={styles.backdrop}
-                    onClick={closeSidebar}
-                    aria-hidden="true"
-                />
-            )}
+  const isActive = (path: string) => pathname === path
+  const isCategoryActive = (slug: string) => pathname === `/category/${slug}`
+  const isLanguageActive = (slug: string) => pathname === `/language/${slug}`
 
-            {/* Sidebar */}
-            <aside className={sidebarClasses}>
-                {/* Header (Logo + Toggle) */}
-                <div className={styles.sidebarHeader}>
-                    {(!isCollapsed || isMobile) && (
-                        <div className={styles.logo}>
-                            <span className={styles.logoText}>Discover</span>
-                        </div>
-                    )}
+  const sidebarClasses = `${styles.sidebar} ${isMobile ? styles.mobile : styles.desktop} ${isMobile && isOpen ? styles.open : ''} ${!isMobile && isCollapsed ? styles.collapsed : ''}`
 
-                    {isMobile ? (
-                        <button
-                            className={styles.closeBtn}
-                            onClick={closeSidebar}
-                            aria-label="Close menu"
-                        >
-                            <X size={20} />
-                        </button>
-                    ) : (
-                        <button
-                            className={styles.toggleBtn}
-                            onClick={toggleCollapse}
-                            aria-label={isCollapsed ? "Expand" : "Collapse"}
-                        >
-                            {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-                        </button>
-                    )}
+  return (
+    <>
+      {/* Mobile Menu Button */}
+      {isMobile && (
+        <button
+          className={styles.mobileToggle}
+          onClick={() => setIsOpen(true)}
+          aria-label="Open menu"
+        >
+          <Menu size={24} />
+        </button>
+      )}
+
+      {/* Backdrop for mobile */}
+      {isMobile && isOpen && (
+        <div className={styles.backdrop} onClick={() => setIsOpen(false)} />
+      )}
+
+      {/* Sidebar */}
+      <aside className={sidebarClasses}>
+        {/* Header */}
+        <div className={styles.sidebarHeader}>
+          {!isMobile && !isCollapsed && (
+            <div className={styles.logo}>
+              <span className={styles.logoText}>CinemaNest</span>
+            </div>
+          )}
+          {!isMobile && (
+            <button
+              className={styles.toggleBtn}
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              <ChevronDown
+                size={20}
+                style={{
+                  transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.3s',
+                }}
+              />
+            </button>
+          )}
+          {isMobile && (
+            <button
+              className={styles.closeBtn}
+              onClick={() => setIsOpen(false)}
+              aria-label="Close menu"
+            >
+              <X size={24} />
+            </button>
+          )}
+        </div>
+
+        {/* Navigation */}
+        <nav className={styles.nav}>
+          {/* Home */}
+          <Link
+            href="/"
+            className={`${styles.navItem} ${isActive('/') ? styles.navItemActive : ''}`}
+            onClick={() => isMobile && setIsOpen(false)}
+          >
+            <span className={styles.icon}>
+              <Home size={20} />
+            </span>
+            <span className={styles.label}>Home</span>
+          </Link>
+
+          {/* TV Shows */}
+          <Link
+            href="/tv-shows"
+            className={`${styles.navItem} ${isActive('/tv-shows') ? styles.navItemActive : ''}`}
+            onClick={() => isMobile && setIsOpen(false)}
+          >
+            <span className={styles.icon}>
+              <Tv size={20} />
+            </span>
+            <span className={styles.label}>TV Shows</span>
+          </Link>
+
+          {/* Divider */}
+          <div className={styles.navDivider} />
+
+          {/* Categories Section */}
+          <div>
+            <button
+              className={styles.navItem}
+              onClick={() => toggleSection('categories')}
+            >
+              <span className={styles.icon}>
+                <Grid3x3 size={20} />
+              </span>
+              <span className={styles.label}>Categories</span>
+              <span className={`${styles.chevron} ${expandedSections.categories ? styles.chevronOpen : ''}`}>
+                <ChevronUp size={16} />
+              </span>
+            </button>
+
+            {expandedSections.categories && (
+              <div className={`${styles.subMenu} ${styles.subMenuOpen}`}>
+                <div className={styles.subMenuContent}>
+                  {loading ? (
+                    <div className={styles.loadingState}>
+                      <div className={styles.loadingSpinner} />
+                      <span>Loading categories...</span>
+                    </div>
+                  ) : categories.length > 0 ? (
+                    categories.map((category) => (
+                      <Link
+                        key={category._id}
+                        href={`/category/${category.slug.current}`}
+                        className={`${styles.subMenuItem} ${isCategoryActive(category.slug.current) ? styles.subMenuItemActive : ''}`}
+                        onClick={() => isMobile && setIsOpen(false)}
+                      >
+                        <span className={styles.dot} />
+                        <span>{category.title}</span>
+                        {category.movieCount !== undefined && (
+                          <span className={styles.count}>{category.movieCount}</span>
+                        )}
+                      </Link>
+                    ))
+                  ) : (
+                    <div className={styles.subMenuEmpty}>No categories available</div>
+                  )}
                 </div>
-
-                {/* Navigation */}
-                <nav className={styles.nav}>
-                    <div className={styles.navGroup}>
-                        {/* HOME Link */}
-                        <Link
-                            href="/"
-                            className={`${styles.navItem} ${pathname === '/' ? styles.navItemActive : ''}`}
-                            onMouseEnter={(e) => handleMouseEnter(e, 'Home')}
-                            onMouseLeave={handleMouseLeave}
-                        >
-                            <span className={styles.icon}>
-                                <Home size={22} strokeWidth={2} />
-                            </span>
-                            <span className={styles.label}>Home</span>
-                            {/* Old tooltip span removed */}
-                        </Link>
-
-                        {/* TV SHOWS Link */}
-                        <Link
-                            href="/tv-shows"
-                            className={`${styles.navItem} ${pathname === '/tv-shows' ? styles.navItemActive : ''}`}
-                            onMouseEnter={(e) => handleMouseEnter(e, 'TV Shows')}
-                            onMouseLeave={handleMouseLeave}
-                        >
-                            <span className={styles.icon}>
-                                <Tv size={22} strokeWidth={2} />
-                            </span>
-                            <span className={styles.label}>TV Shows</span>
-                        </Link>
-                    </div>
-
-                    <div className={styles.navDivider} />
-
-                    {/* Categories Dropdown */}
-                    <div className={styles.navGroup}>
-                        <button
-                            className={`${styles.navItem} ${styles.accordionTrigger} ${isCategoryOpen ? styles.accordionOpen : ''}`}
-                            onClick={toggleCategoryAccordion}
-                            aria-expanded={isCategoryOpen}
-                            onMouseEnter={(e) => handleMouseEnter(e, 'Categories')}
-                            onMouseLeave={handleMouseLeave}
-                        >
-                            <span className={styles.icon}>
-                                <Grid3X3 size={22} strokeWidth={2} />
-                            </span>
-                            <span className={styles.label}>Categories</span>
-                            {(!isCollapsed || isMobile) && (
-                                <ChevronDown
-                                    size={16}
-                                    className={`${styles.chevron} ${isCategoryOpen ? styles.chevronOpen : ''}`}
-                                />
-                            )}
-                        </button>
-
-                        {/* Categories Expandable Section */}
-                        <div
-                            className={`${styles.subMenu} ${isCategoryOpen && (!isCollapsed || isMobile) ? styles.subMenuOpen : ''}`}
-                        >
-                            <div className={styles.subMenuContent}>
-                                {categories.length > 0 ? (
-                                    categories.map((category) => (
-                                        <Link
-                                            key={category._id}
-                                            href={`/movies/category/${category.slug.current}`}
-                                            className={`${styles.subMenuItem} ${pathname === `/movies/category/${category.slug.current}` ? styles.subMenuItemActive : ''}`}
-                                        >
-                                            <span className={styles.dot} />
-                                            <span>{category.title}</span>
-                                            {category.movieCount !== undefined && category.movieCount > 0 && (
-                                                <span className={styles.count}>{category.movieCount}</span>
-                                            )}
-                                        </Link>
-                                    ))
-                                ) : (
-                                    <div className={styles.subMenuEmpty}>No categories</div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Languages Dropdown */}
-                    <div className={styles.navGroup}>
-                        <button
-                            className={`${styles.navItem} ${styles.accordionTrigger} ${isLanguageOpen ? styles.accordionOpen : ''}`}
-                            onClick={toggleLanguageAccordion}
-                            aria-expanded={isLanguageOpen}
-                            onMouseEnter={(e) => handleMouseEnter(e, 'Languages')}
-                            onMouseLeave={handleMouseLeave}
-                        >
-                            <span className={styles.icon}>
-                                <Film size={22} strokeWidth={2} />
-                            </span>
-                            <span className={styles.label}>Languages</span>
-                            {(!isCollapsed || isMobile) && (
-                                <ChevronDown
-                                    size={16}
-                                    className={`${styles.chevron} ${isLanguageOpen ? styles.chevronOpen : ''}`}
-                                />
-                            )}
-                        </button>
-
-                        {/* Languages Expandable Section */}
-                        <div
-                            className={`${styles.subMenu} ${isLanguageOpen && (!isCollapsed || isMobile) ? styles.subMenuOpen : ''}`}
-                        >
-                            <div className={styles.subMenuContent}>
-                                {languages.length > 0 ? (
-                                    languages.map((language) => (
-                                        <Link
-                                            key={language._id}
-                                            href={`/movies/language/${language.slug.current}`}
-                                            className={`${styles.subMenuItem} ${pathname === `/movies/language/${language.slug.current}` ? styles.subMenuItemActive : ''}`}
-                                        >
-                                            <span className={styles.dot} />
-                                            <span>{language.title}</span>
-                                        </Link>
-                                    ))
-                                ) : (
-                                    <div className={styles.subMenuEmpty}>No languages</div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </nav>
-            </aside>
-
-            {/* 4. Portal Render - Tooltip එක Body එකේ Render වේ */}
-            {hasMounted && tooltip && createPortal(
-                <div
-                    className={styles.fixedTooltip}
-                    style={{
-                        top: tooltip.top,
-                        left: tooltip.left
-                    }}
-                >
-                    {tooltip.label}
-                </div>,
-                document.body
+              </div>
             )}
-        </>
-    )
+          </div>
+
+          {/* Languages Section */}
+          <div>
+            <button
+              className={styles.navItem}
+              onClick={() => toggleSection('languages')}
+            >
+              <span className={styles.icon}>
+                <Film size={20} />
+              </span>
+              <span className={styles.label}>Languages</span>
+              <span className={`${styles.chevron} ${expandedSections.languages ? styles.chevronOpen : ''}`}>
+                <ChevronUp size={16} />
+              </span>
+            </button>
+
+            {expandedSections.languages && (
+              <div className={`${styles.subMenu} ${styles.subMenuOpen}`}>
+                <div className={styles.subMenuContent}>
+                  {loading ? (
+                    <div className={styles.loadingState}>
+                      <div className={styles.loadingSpinner} />
+                      <span>Loading languages...</span>
+                    </div>
+                  ) : languages.length > 0 ? (
+                    languages.map((language) => (
+                      <Link
+                        key={language._id}
+                        href={`/language/${language.slug.current}`}
+                        className={`${styles.subMenuItem} ${isLanguageActive(language.slug.current) ? styles.subMenuItemActive : ''}`}
+                        onClick={() => isMobile && setIsOpen(false)}
+                      >
+                        <span className={styles.dot} />
+                        <span>{language.title}</span>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className={styles.subMenuEmpty}>No languages available</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </nav>
+      </aside>
+    </>
+  )
 }
+
