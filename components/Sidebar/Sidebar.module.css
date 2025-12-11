@@ -9,19 +9,11 @@
   transition: width 0.3s cubic-bezier(0.25, 0.1, 0.25, 1.0), transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1.0);
   z-index: 1000;
   overflow: hidden;
-  /* Clean clipping */
-}
-/* Sidebar.module.css එකේ දැනට තියෙන .mobile.open කොටස */
-.mobile.open {
-  transform: translateX(0);
 }
 
-/* මේ කොටස අලුතින් add කරන්න. මේකෙන් styles.open වැඩ කරන්න ගන්නවා */
-.open {}
 /* Desktop Styles */
 .desktop {
   top: 64px;
-  /* Below Navbar */
   height: calc(100vh - 64px);
   width: 260px;
 }
@@ -37,14 +29,17 @@
   width: 280px;
   transform: translateX(-100%);
   z-index: 2000;
-  /* Above everything */
   border-right: none;
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
 }
 
+/* Sidebar Open State - Mobile */
 .mobile.open {
   transform: translateX(0);
 }
+
+/* Next.js Module CSS fix - This is crucial! */
+.open {}
 
 /* ==================== HEADER ==================== */
 .sidebarHeader {
@@ -77,11 +72,6 @@
   font-size: 1rem;
 }
 
-.logoAccent {
-  color: #ffcc70;
-}
-
-/* Toggle/Close Buttons */
 .toggleBtn,
 .closeBtn {
   background: transparent;
@@ -108,7 +98,6 @@
   padding: 16px 0;
   overflow-y: auto;
   overflow-x: hidden;
-  /* Scrollbar hiding for cleaner look */
   scrollbar-width: thin;
   scrollbar-color: #333 transparent;
 }
@@ -120,7 +109,6 @@
   opacity: 0.5;
 }
 
-/* Base Nav Item */
 .navItem {
   display: flex;
   align-items: center;
@@ -147,7 +135,6 @@
   color: #ffcc70;
   background: linear-gradient(90deg, rgba(255, 204, 112, 0.08) 0%, transparent 100%);
   border-right: 3px solid #ffcc70;
-  /* Right accent border looks modern */
 }
 
 .icon {
@@ -173,39 +160,10 @@
   display: none;
 }
 
-/* ==================== TOOLTIP (Collapsed State) ==================== */
-.navItem .tooltip {
-  display: none;
-}
-
-.desktop.collapsed .navItem .tooltip {
-  display: block;
-  position: absolute;
-  left: calc(100% + 12px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: #1a1a1a;
-  color: #ffffff;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  z-index: 1001;
-}
-
-/* Sidebar.module.css */
-
+/* ==================== TOOLTIP ==================== */
 .fixedTooltip {
   position: fixed;
   z-index: 9999;
-  /* හැමදේටම උඩින් */
   background: #1a1a1a;
   color: #ffffff;
   padding: 8px 14px;
@@ -214,18 +172,12 @@
   font-weight: 500;
   white-space: nowrap;
   pointer-events: none;
-  /* Mouse එක tooltip එකට වදින්නෙ නැති වෙන්න */
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.1);
-
-  /* මැදට ගන්න */
   transform: translateY(-50%);
-
-  /* Animation (Optional) */
   animation: tooltipFadeIn 0.2s ease forwards;
 }
 
-/* පුංචි ඊතලයක් (Arrow) ඕන නම් මේක දාන්න */
 .fixedTooltip::before {
   content: '';
   position: absolute;
@@ -242,62 +194,12 @@
     opacity: 0;
     transform: translateY(-50%) translateX(-5px);
   }
-
   to {
     opacity: 1;
     transform: translateY(-50%) translateX(0);
   }
 }
 
-/* Sidebar.module.css */
-
-.fixedTooltip {
-  position: fixed;
-  z-index: 9999;
-  background: #1a1a1a;
-  color: #ffffff;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  white-space: nowrap;
-  pointer-events: none;
-  /* Mouse එක tooltip එකට වදින්නෙ නැති වෙන්න */
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-
-  /* Y අක්ෂයේ මැදට ගැනීමට */
-  transform: translateY(-50%);
-
-  /* Fade In Animation */
-  animation: tooltipFadeIn 0.2s ease forwards;
-}
-
-/* Tooltip Arrow (Optional) */
-.fixedTooltip::before {
-  content: '';
-  position: absolute;
-  left: -6px;
-  top: 50%;
-  transform: translateY(-50%);
-  border-width: 6px;
-  border-style: solid;
-  border-color: transparent #1a1a1a transparent transparent;
-}
-
-@keyframes tooltipFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-50%) translateX(-5px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(-50%) translateX(0);
-  }
-}
-
-/* Accordion Trigger Specifics */
 .chevron {
   margin-left: auto;
   transition: transform 0.3s ease;
@@ -308,7 +210,7 @@
   transform: rotate(180deg);
 }
 
-/* ==================== SUBMENU / ACCORDION ==================== */
+/* ==================== SUBMENU ==================== */
 .subMenu {
   height: 0;
   overflow: hidden;
@@ -329,7 +231,6 @@
   align-items: center;
   height: 40px;
   padding-left: 64px;
-  /* Indent child items */
   padding-right: 24px;
   color: #888888;
   text-decoration: none;
@@ -338,7 +239,7 @@
 }
 
 .subMenuItem:hover {
-  color: var(--text-main);
+  color: #ffffff;
 }
 
 .subMenuItemActive {
@@ -346,7 +247,6 @@
   font-weight: 500;
 }
 
-/* Small dot indicator for submenu items */
 .dot {
   width: 4px;
   height: 4px;
@@ -356,7 +256,6 @@
   opacity: 0.5;
 }
 
-/* Movie count badge */
 .count {
   margin-left: auto;
   font-size: 0.75rem;
@@ -367,7 +266,6 @@
   opacity: 0.7;
 }
 
-/* Empty state for submenus */
 .subMenuEmpty {
   padding: 12px 64px;
   color: #888888;
@@ -377,7 +275,6 @@
 
 .desktop.collapsed .subMenu {
   display: none;
-  /* Cannot expand submenu when collapsed */
 }
 
 /* ==================== BACKDROP ==================== */
@@ -394,7 +291,6 @@
   from {
     opacity: 0;
   }
-
   to {
     opacity: 1;
   }
