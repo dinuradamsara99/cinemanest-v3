@@ -49,8 +49,10 @@ function ContentWrapper({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Navbar />
+      {/* Sidebar එක layoutContainer එකෙන් එළියට ගත්තා */}
+      <SidebarWrapper />
+      
       <div className={styles.layoutContainer}>
-        <SidebarWrapper />
         <MainContent>{children}</MainContent>
       </div>
     </>
