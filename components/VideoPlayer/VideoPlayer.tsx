@@ -17,8 +17,7 @@ import {
     Minimize,
     PictureInPicture2,
     ChevronsRight,
-    ChevronsLeft,
-    X
+    ChevronsLeft
 } from 'lucide-react'
 import { usePinchZoom } from '@/hooks/usePinchZoom'
 import { useVideoThumbnails, ThumbnailSprite } from '@/hooks/useVideoThumbnails'
@@ -67,7 +66,6 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         const [showControls, setShowControls] = useState(true)
 
         const [isBuffering, setIsBuffering] = useState(false)
-        const [hasError, setHasError] = useState(false)
 
         // Hover/Drag States
         const [hoverTime, setHoverTime] = useState<number | null>(null)
@@ -103,7 +101,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
             }
         }, [isPlaying, isDragging])
 
-        const handleContainerClick = (e: React.MouseEvent) => {
+        const handleContainerClick = () => {
             // Mobile: Tap shows controls first, then toggles play
             if (window.matchMedia('(hover: none)').matches) {
                 if (!showControls) {
@@ -221,15 +219,15 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
         useEffect(() => {
             if (isDragging) {
-                window.addEventListener('mousemove', handleSeekMove as any)
+                window.addEventListener('mousemove', handleSeekMove as (e: MouseEvent) => void)
                 window.addEventListener('mouseup', handleSeekEnd)
-                window.addEventListener('touchmove', handleSeekMove as any)
+                window.addEventListener('touchmove', handleSeekMove as (e: TouchEvent) => void)
                 window.addEventListener('touchend', handleSeekEnd)
             }
             return () => {
-                window.removeEventListener('mousemove', handleSeekMove as any)
+                window.removeEventListener('mousemove', handleSeekMove as (e: MouseEvent) => void)
                 window.removeEventListener('mouseup', handleSeekEnd)
-                window.removeEventListener('touchmove', handleSeekMove as any)
+                window.removeEventListener('touchmove', handleSeekMove as (e: TouchEvent) => void)
                 window.removeEventListener('touchend', handleSeekEnd)
             }
         }, [isDragging, handleSeekMove, handleSeekEnd])
@@ -297,7 +295,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
                             <span className={styles.bezelText}>{volumeOverlay.muted ? '0%' : Math.round(volumeOverlay.val * 100) + '%'}</span>
                         </div>
                     )}
-                    {(isBuffering || isLoading) && !hasError && <div className={styles.loader}><div className={styles.spinner}></div></div>}
+                    {(isBuffering || isLoading) && <div className={styles.loader}><div className={styles.spinner}></div></div>}
                 </div>
 
                 {/* --- CONTROLS BAR --- */}

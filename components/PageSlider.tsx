@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { Home, Tv, Layers, Globe, ArrowRight } from "lucide-react";
+import type { LucideIcon } from 'lucide-react';
 import styles from "./PageSlider.module.css";
 
 interface Page {
@@ -11,14 +12,14 @@ interface Page {
     title: string;
     slug?: string;
     description?: string;
-    mainImage?: any;
+    mainImage?: { asset?: { _ref: string } };
 }
 
 interface PageSliderProps {
     pages: Page[];
 }
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, LucideIcon> = {
     "Home": Home,
     "TV Shows": Tv,
     "Categories": Layers,
@@ -81,7 +82,8 @@ const PageSlider: React.FC<PageSliderProps> = ({ pages }) => {
                                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                                 >
                                     <div className={styles.iconWrapper}>
-                                        <Icon size={48} color="white" strokeWidth={1.5} />
+                                        {/* Use the icon component directly */}
+                                        {React.createElement(Icon, { size: 48, color: "white", strokeWidth: 1.5 })}
                                     </div>
 
                                     <div className={styles.cardContent}>

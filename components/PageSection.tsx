@@ -7,7 +7,7 @@ interface Page {
     title: string;
     slug?: string;
     description?: string;
-    mainImage?: any;
+    mainImage?: { asset?: { _ref: string } };
 }
 
 export default async function PageSection() {

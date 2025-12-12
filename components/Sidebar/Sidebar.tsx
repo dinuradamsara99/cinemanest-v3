@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Home, Tv, Grid3x3, Film, ChevronUp, ChevronDown, Menu, X, Search, ChevronLeft } from 'lucide-react'
+import { Home, Tv, Grid3x3, Film, ChevronUp, Menu, X, Search, ChevronLeft } from 'lucide-react'
 import { urlFor } from '@/lib/sanity'
 import styles from './Sidebar.module.css'
 
@@ -44,10 +44,17 @@ export default function Sidebar() {
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [searchResults, setSearchResults] = useState<Array<{
+    _id: string;
+    title: string;
+    slug: { current: string } | string;
+    posterImage?: { asset?: { _ref: string } };
+    contentType?: string;
+    releaseYear?: number;
+    rating?: number;
+  }>>([])
   const [isSearching, setIsSearching] = useState(false)
   const [showSearchResults, setShowSearchResults] = useState(false)
-  const [selectedResultIndex, setSelectedResultIndex] = useState(-1)
 
 
   // Check if mobile
@@ -286,28 +293,28 @@ export default function Sidebar() {
                     <span>Searching...</span>
                   </div>
                 ) : searchResults.length > 0 ? (
-                  searchResults.map((result, index) => (
+                  searchResults.map((result) => (
                     <Link
                       key={result._id}
                       href={`/watch/${typeof result.slug === 'string' ? result.slug : result.slug?.current || result.slug}`}
                       className={styles.searchResultItem}
                       onClick={() => {
-                        setSearchQuery('')
-                        setShowSearchResults(false)
-                        isMobile && setIsOpen(false)
+                        setSearchQuery('');
+                        setShowSearchResults(false);
+                        if (isMobile) setIsOpen(false);
                       }}
                     >
                       <div className={styles.resultPoster}>
                         {result.posterImage?.asset ? (
-                          <img
+                          <Image
                             src={urlFor(result.posterImage).width(100).height(150).url()}
                             alt={result.title}
+                            width={56}
+                            height={80}
                             className={styles.resultPosterImage}
                           />
                         ) : (
-                          <div className={styles.resultPosterPlaceholder}>
-                            <Film size={24} />
-                          </div>
+                          <div className={styles.resultPosterPlaceholder}>🎬</div>
                         )}
                       </div>
                       <div className={styles.resultInfo}>
@@ -329,7 +336,7 @@ export default function Sidebar() {
                 ) : (
                   <div className={styles.searchEmpty}>
                     <Search size={32} />
-                    <p>No results found for "{searchQuery}"</p>
+                    <p>No results found for &quot;{searchQuery}&quot;</p>
                     <span>Try different keywords</span>
                   </div>
                 )}
