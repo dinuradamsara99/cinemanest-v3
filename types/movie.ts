@@ -45,6 +45,9 @@ export interface Movie {
         asset: {
             _ref: string
             _type: string
+        } | {
+            _id: string
+            url: string
         }
         alt?: string
     }
@@ -52,6 +55,9 @@ export interface Movie {
         asset: {
             _ref: string
             _type: string
+        } | {
+            _id: string
+            url: string
         }
         alt?: string
     }

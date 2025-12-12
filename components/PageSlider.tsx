@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Home, Tv, Layers, Globe, ArrowRight } from "lucide-react";
 import type { LucideIcon } from 'lucide-react';
 import styles from "./PageSlider.module.css";
+import React from "react";
 
 interface Page {
     _id: string;
