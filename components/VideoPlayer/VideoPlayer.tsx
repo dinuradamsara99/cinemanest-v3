@@ -15,14 +15,13 @@ import {
     VolumeX,
     Maximize,
     Minimize,
-    Settings,
     PictureInPicture2,
     ChevronsRight,
-    ChevronsLeft
+    ChevronsLeft,
+    X
 } from 'lucide-react'
 import { usePinchZoom } from '@/hooks/usePinchZoom'
 import { useVideoThumbnails, ThumbnailSprite } from '@/hooks/useVideoThumbnails'
-import { usePlaybackSpeed } from '@/hooks/usePlaybackSpeed'
 import { useVideoSecurity } from '@/hooks/useSecureVideo'
 import styles from './VideoPlayer.module.css'
 
@@ -66,7 +65,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         const [isFullscreen, setIsFullscreen] = useState(false)
         const [hasPlayedOnce, setHasPlayedOnce] = useState(false)
         const [showControls, setShowControls] = useState(true)
-        const [showSettings, setShowSettings] = useState(false)
+
         const [isBuffering, setIsBuffering] = useState(false)
         const [hasError, setHasError] = useState(false)
 
@@ -84,7 +83,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         // Hooks
         const { blobUrl, isLoading } = useVideoSecurity(src, containerRef)
         useVideoThumbnails(duration, thumbnailData, thumbnailBaseUrl)
-        const { playbackSpeed, setPlaybackSpeed, speeds } = usePlaybackSpeed(videoRef)
+
         const { zoomState } = usePinchZoom(videoWrapperRef)
 
         useImperativeHandle(ref, () => ({
@@ -99,10 +98,10 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         const showControlsTemporarily = useCallback(() => {
             setShowControls(true)
             if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
-            if (isPlaying && !showSettings && !isDragging) {
+            if (isPlaying && !isDragging) {
                 controlsTimeoutRef.current = setTimeout(() => setShowControls(false), 2500)
             }
-        }, [isPlaying, showSettings, isDragging])
+        }, [isPlaying, isDragging])
 
         const handleContainerClick = (e: React.MouseEvent) => {
             // Mobile: Tap shows controls first, then toggles play
@@ -363,21 +362,6 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
                             </div>
 
                             <div className={styles.rightControls}>
-                                <div className={styles.settingsContainer}>
-                                    <button className={styles.iconBtn} onClick={() => setShowSettings(!showSettings)}>
-                                        <Settings size={20} />
-                                    </button>
-                                    {showSettings && (
-                                        <div className={styles.settingsMenu}>
-                                            <div className={styles.menuHeader}></div>
-                                            {speeds.map(speed => (
-                                                <div key={speed} className={`${styles.menuItem} ${playbackSpeed === speed ? styles.active : ''}`} onClick={() => { setPlaybackSpeed(speed); setShowSettings(false); }}>
-                                                    {speed}x
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
                                 <button className={styles.iconBtn} onClick={() => document.pictureInPictureElement ? document.exitPictureInPicture() : videoRef.current?.requestPictureInPicture()}><PictureInPicture2 size={20} /></button>
                                 <button onClick={toggleFullscreen} className={styles.iconBtn}>{isFullscreen ? <Minimize /> : <Maximize />}</button>
                             </div>

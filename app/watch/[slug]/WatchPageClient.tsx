@@ -284,6 +284,10 @@ export default function WatchPageClient({ movie }: Props) {
                                     </div>
                                 ) : (
                                     <VideoPlayer
+                                        key={isTVShow && movie.seasons
+                                            ? `${movie._id}-s${currentSeasonIndex + 1}-e${currentEpisodeIndex + 1}`
+                                            : movie._id
+                                        }
                                         src={currentVideoUrl}
                                         poster={movie.posterImage?.asset ? urlFor(movie.posterImage).width(1920).url() : undefined}
                                         title={movie.title}

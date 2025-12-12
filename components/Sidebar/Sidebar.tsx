@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Home, Tv, Grid3x3, Film, ChevronUp, ChevronDown, Menu, X } from 'lucide-react'
+import { Home, Tv, Grid3x3, Film, ChevronUp, ChevronDown, Menu, X, Search, ChevronLeft } from 'lucide-react'
+import { urlFor } from '@/lib/sanity'
 import styles from './Sidebar.module.css'
 
 interface Category {
@@ -39,6 +41,14 @@ export default function Sidebar() {
     categories: true,
     languages: true,
   })
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [showSearchResults, setShowSearchResults] = useState(false)
+  const [selectedResultIndex, setSelectedResultIndex] = useState(-1)
+
 
   // Check if mobile
   useEffect(() => {
@@ -97,6 +107,48 @@ export default function Sidebar() {
     fetchData()
   }, [])
 
+  // Debounced search
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchQuery.trim().length >= 2) {
+        setIsSearching(true)
+        setShowSearchResults(true)
+        try {
+          const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}`)
+          if (response.ok) {
+            const data = await response.json()
+            setSearchResults(data || [])
+          }
+        } catch (error) {
+          console.error('Search error:', error)
+          setSearchResults([])
+        } finally {
+          setIsSearching(false)
+        }
+      } else {
+        setSearchResults([])
+        setShowSearchResults(false)
+      }
+    }, 300)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [searchQuery])
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      if (!target.closest(`.${styles.searchSection}`)) {
+        setShowSearchResults(false)
+      }
+    }
+
+    if (showSearchResults) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showSearchResults])
+
   const toggleSection = (section: 'categories' | 'languages') => {
     setExpandedSections((prev) => ({
       ...prev,
@@ -133,35 +185,169 @@ export default function Sidebar() {
         {/* Header */}
         <div className={styles.sidebarHeader}>
           {!isMobile && !isCollapsed && (
-            <div className={styles.logo}>
-              <span className={styles.logoText}>CinemaNest</span>
-            </div>
-          )}
-          {!isMobile && (
-            <button
-              className={styles.toggleBtn}
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              <ChevronDown
-                size={20}
-                style={{
-                  transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.3s',
-                }}
+            <Link href="/" className={styles.logo}>
+              <Image
+                src="/logo1.png"
+                alt="CinemaNest"
+                width={40}
+                height={40}
+                className={styles.logoImage}
+                priority
               />
-            </button>
+              <span className={styles.logoText}>CinemaNest</span>
+            </Link>
+          )}
+          {!isMobile && isCollapsed && (
+            <Link href="/" className={styles.logoCollapsed}>
+              <Image
+                src="/logo1.png"
+                alt="CinemaNest"
+                width={36}
+                height={36}
+                className={styles.logoImage}
+                priority
+              />
+            </Link>
           )}
           {isMobile && (
-            <button
-              className={styles.closeBtn}
-              onClick={() => setIsOpen(false)}
-              aria-label="Close menu"
-            >
-              <X size={24} />
-            </button>
+            <>
+              <Link href="/" className={styles.logo}>
+                <Image
+                  src="/logo1.png"
+                  alt="CinemaNest"
+                  width={32}
+                  height={32}
+                  className={styles.logoImage}
+                  priority
+                />
+                <span className={styles.logoText}>CinemaNest</span>
+              </Link>
+              <button
+                className={styles.closeBtn}
+                onClick={() => setIsOpen(false)}
+                aria-label="Close menu"
+              >
+                <X size={24} />
+              </button>
+            </>
           )}
         </div>
+
+        {/* Toggle button - always visible for desktop */}
+        {!isMobile && (
+          <button
+            className={styles.toggleBtn}
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <ChevronLeft
+              size={20}
+              style={{
+                transform: isCollapsed ? 'rotate(-180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.3s',
+              }}
+            />
+          </button>
+        )}
+
+        {/* Search Section */}
+        {!isCollapsed ? (
+          <div className={styles.searchSection}>
+            <div className={styles.searchInputWrapper}>
+              <Search className={styles.searchIcon} size={18} />
+              <input
+                type="text"
+                placeholder="Search movies & TV shows..."
+                className={styles.searchInput}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => searchQuery.length >= 2 && setShowSearchResults(true)}
+              />
+              {searchQuery && (
+                <button
+                  className={styles.clearSearch}
+                  onClick={() => {
+                    setSearchQuery('')
+                    setShowSearchResults(false)
+                  }}
+                  aria-label="Clear search"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            {/* Search Results Dropdown */}
+            {showSearchResults && (
+              <div className={styles.searchResults}>
+                {isSearching ? (
+                  <div className={styles.searchLoading}>
+                    <div className={styles.searchLoadingSpinner} />
+                    <span>Searching...</span>
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  searchResults.map((result, index) => (
+                    <Link
+                      key={result._id}
+                      href={`/watch/${typeof result.slug === 'string' ? result.slug : result.slug?.current || result.slug}`}
+                      className={styles.searchResultItem}
+                      onClick={() => {
+                        setSearchQuery('')
+                        setShowSearchResults(false)
+                        isMobile && setIsOpen(false)
+                      }}
+                    >
+                      <div className={styles.resultPoster}>
+                        {result.posterImage?.asset ? (
+                          <img
+                            src={urlFor(result.posterImage).width(100).height(150).url()}
+                            alt={result.title}
+                            className={styles.resultPosterImage}
+                          />
+                        ) : (
+                          <div className={styles.resultPosterPlaceholder}>
+                            <Film size={24} />
+                          </div>
+                        )}
+                      </div>
+                      <div className={styles.resultInfo}>
+                        <div className={styles.resultTitle}>{result.title}</div>
+                        <div className={styles.resultMeta}>
+                          <span className={styles.resultType}>
+                            {result.contentType === 'tvshow' ? 'TV Show' : 'Movie'}
+                          </span>
+                          {result.releaseYear && (
+                            <span className={styles.resultYear}> · {result.releaseYear}</span>
+                          )}
+                          {result.rating && (
+                            <span className={styles.resultRating}> · ⭐ {result.rating.toFixed(1)}</span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className={styles.searchEmpty}>
+                    <Search size={32} />
+                    <p>No results found for "{searchQuery}"</p>
+                    <span>Try different keywords</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className={styles.searchIconOnly}>
+            <button
+              className={styles.searchIconBtn}
+              onClick={() => setIsCollapsed(false)}
+              aria-label="Search"
+              title="Search"
+            >
+              <Search size={20} />
+            </button>
+          </div>
+        )}
 
         {/* Navigation */}
         <nav className={styles.nav}>
@@ -211,9 +397,19 @@ export default function Sidebar() {
               <div className={`${styles.subMenu} ${styles.subMenuOpen}`}>
                 <div className={styles.subMenuContent}>
                   {loading ? (
-                    <div className={styles.loadingState}>
-                      <div className={styles.loadingSpinner} />
-                      <span>Loading categories...</span>
+                    <div className={styles.skeletonContainer}>
+                      {[
+                        { key: 1, width: '65%' },
+                        { key: 2, width: '80%' },
+                        { key: 3, width: '55%' },
+                        { key: 4, width: '70%' },
+                        { key: 5, width: '60%' }
+                      ].map((item) => (
+                        <div key={item.key} className={styles.skeletonItem}>
+                          <div className={styles.skeletonDot} />
+                          <div className={styles.skeletonText} style={{ width: item.width }} />
+                        </div>
+                      ))}
                     </div>
                   ) : categories.length > 0 ? (
                     categories.map((category) => (
@@ -239,7 +435,7 @@ export default function Sidebar() {
           </div>
 
           {/* Languages Section */}
-          <div>
+          < div >
             <button
               className={styles.navItem}
               onClick={() => toggleSection('languages')}
@@ -253,35 +449,46 @@ export default function Sidebar() {
               </span>
             </button>
 
-            {expandedSections.languages && (
-              <div className={`${styles.subMenu} ${styles.subMenuOpen}`}>
-                <div className={styles.subMenuContent}>
-                  {loading ? (
-                    <div className={styles.loadingState}>
-                      <div className={styles.loadingSpinner} />
-                      <span>Loading languages...</span>
-                    </div>
-                  ) : languages.length > 0 ? (
-                    languages.map((language) => (
-                      <Link
-                        key={language._id}
-                        href={`/language/${language.slug.current}`}
-                        className={`${styles.subMenuItem} ${isLanguageActive(language.slug.current) ? styles.subMenuItemActive : ''}`}
-                        onClick={() => isMobile && setIsOpen(false)}
-                      >
-                        <span className={styles.dot} />
-                        <span>{language.title}</span>
-                      </Link>
-                    ))
-                  ) : (
-                    <div className={styles.subMenuEmpty}>No languages available</div>
-                  )}
+            {
+              expandedSections.languages && (
+                <div className={`${styles.subMenu} ${styles.subMenuOpen}`}>
+                  <div className={styles.subMenuContent}>
+                    {loading ? (
+                      <div className={styles.skeletonContainer}>
+                        {[
+                          { key: 1, width: '50%' },
+                          { key: 2, width: '65%' },
+                          { key: 3, width: '58%' },
+                          { key: 4, width: '72%' }
+                        ].map((item) => (
+                          <div key={item.key} className={styles.skeletonItem}>
+                            <div className={styles.skeletonDot} />
+                            <div className={styles.skeletonText} style={{ width: item.width }} />
+                          </div>
+                        ))}
+                      </div>
+                    ) : languages.length > 0 ? (
+                      languages.map((language) => (
+                        <Link
+                          key={language._id}
+                          href={`/language/${language.slug.current}`}
+                          className={`${styles.subMenuItem} ${isLanguageActive(language.slug.current) ? styles.subMenuItemActive : ''}`}
+                          onClick={() => isMobile && setIsOpen(false)}
+                        >
+                          <span className={styles.dot} />
+                          <span>{language.title}</span>
+                        </Link>
+                      ))
+                    ) : (
+                      <div className={styles.subMenuEmpty}>No languages available</div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </nav>
-      </aside>
+              )
+            }
+          </div >
+        </nav >
+      </aside >
     </>
   )
 }
