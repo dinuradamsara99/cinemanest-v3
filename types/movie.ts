@@ -71,6 +71,7 @@ export interface Movie {
     videoUrl?: string
     seasons?: Season[]
     language?: Language
+    categories?: Category[]
 }
 
 // Category type from Sanity

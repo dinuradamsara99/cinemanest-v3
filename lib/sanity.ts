@@ -41,6 +41,11 @@ const BASE_FIELDS = `
     _id,
     title,
     slug
+  },
+  categories[]-> {
+    _id,
+    title,
+    slug
   }
 `;
 

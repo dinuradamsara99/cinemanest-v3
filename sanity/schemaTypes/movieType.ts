@@ -121,6 +121,13 @@ export const movieType = defineType({
             description: 'Select the language of this movie',
         }),
         defineField({
+            name: 'categories',
+            title: 'Categories',
+            type: 'array',
+            of: [{ type: 'reference', to: [{ type: 'category' }] }],
+            description: 'Select categories/playlists for this movie',
+        }),
+        defineField({
             name: 'videoUrl',
             title: 'Video URL',
             type: 'url',

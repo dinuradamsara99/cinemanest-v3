@@ -117,6 +117,13 @@ export const tvShowType = defineType({
             description: 'Select the language of this TV Show',
         }),
         defineField({
+            name: 'categories',
+            title: 'Categories',
+            type: 'array',
+            of: [{ type: 'reference', to: [{ type: 'category' }] }],
+            description: 'Select categories/playlists for this TV Show',
+        }),
+        defineField({
             name: 'seasons',
             title: 'Seasons',
             type: 'array',

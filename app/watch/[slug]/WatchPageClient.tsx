@@ -199,10 +199,9 @@ export default function WatchPageClient({ movie }: Props) {
                             <h3>Details</h3>
                             <div className={styles.metaGrid}>
                                 <div className={styles.metaItem}>
-                                    <span className={styles.label}>Rating</span>
+                                    <span className={styles.label}>IMDb</span>
                                     <div className={styles.ratingValue}>
-                                        <Star size={16} fill="var(--color-accent)" strokeWidth={0} />
-                                        <span>{movie.rating.toFixed(1)}</span>
+                                        <span>{movie.rating.toFixed(1)}/10</span>
                                     </div>
                                 </div>
                                 {movie.releaseYear && (
@@ -227,6 +226,16 @@ export default function WatchPageClient({ movie }: Props) {
                                         <div className={styles.genreTags}>
                                             {movie.genre.map(g => (
                                                 <span key={g} className={styles.miniTag}>{g}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {movie.categories && movie.categories.length > 0 && (
+                                    <div className={styles.metaItem}>
+                                        <span className={styles.label}>Categories</span>
+                                        <div className={styles.genreTags}>
+                                            {movie.categories.map((category: any) => (
+                                                <span key={category._id} className={styles.miniTag}>{category.title}</span>
                                             ))}
                                         </div>
                                     </div>

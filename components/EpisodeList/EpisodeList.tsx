@@ -122,8 +122,8 @@ export default function EpisodeList({
                         aria-expanded={isDropdownOpen}
                     >
                         <span className={styles.seasonLabel}>
-
-                            {currentSeason?.title && ` ${currentSeason.title}`}
+                            S{currentSeason?.seasonNumber}
+                            {currentSeason?.title && `: ${currentSeason.title}`}
                         </span>
                         <ChevronDown
                             size={20}
