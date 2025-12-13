@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, Star, Play, Maximize2 } from 'lucide-react'
+import { ArrowLeft, Star, Play } from 'lucide-react'
 import { urlFor } from '@/lib/sanity'
 import type { Movie } from '@/types/movie'
 import VideoPlayer from '@/components/VideoPlayer/VideoPlayer'
@@ -18,9 +18,7 @@ export default function WatchPageClient({ movie }: Props) {
     const [currentSeasonIndex, setCurrentSeasonIndex] = useState(0)
     const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(0)
 
-    // Theater mode state
-    const [isTheaterMode, setIsTheaterMode] = useState(false)
-    const toggleTheaterMode = () => setIsTheaterMode(prev => !prev)
+
 
     // Handle episode selection
     const handleEpisodeSelect = useCallback((seasonIndex: number, episodeIndex: number) => {
@@ -75,7 +73,7 @@ export default function WatchPageClient({ movie }: Props) {
     const languageLabel = movie.language?.title
 
     return (
-        <main className={`${styles.page} ${isTheaterMode ? styles.theaterModeActive : ''}`}>
+        <main className={styles.page}>
             {/* Ambient Background */}
             <div className={styles.ambientBackground}>
                 {movie.posterImage?.asset && (
@@ -90,8 +88,7 @@ export default function WatchPageClient({ movie }: Props) {
                 <div className={styles.ambientOverlay} />
             </div>
 
-            {/* Theater Mode Overlay */}
-            {isTheaterMode && <div className={styles.theaterBackdrop} onClick={toggleTheaterMode} />}
+
 
             <div className={styles.mainContainer}>
                 {/* Hero / Player Section */}
@@ -104,7 +101,7 @@ export default function WatchPageClient({ movie }: Props) {
                         </Link>
                     </div>
 
-                    <div className={`${styles.playerContainer} ${isTheaterMode ? styles.theaterPlayer : ''}`}>
+                    <div className={styles.playerContainer}>
                         <div className={styles.playerWrapper}>
                             {currentVideoUrl ? (
                                 isEmbedUrl ? (
@@ -125,7 +122,7 @@ export default function WatchPageClient({ movie }: Props) {
                                         }
                                         src={currentVideoUrl}
                                         poster={movie.posterImage?.asset ? urlFor(movie.posterImage).width(1920).url() : undefined}
-                                        className={isTheaterMode ? styles.theaterModeVideo : ''}
+
                                     />
                                 )
                             ) : (
@@ -155,26 +152,14 @@ export default function WatchPageClient({ movie }: Props) {
                                     )}
                                 </div>
 
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        toggleTheaterMode()
-                                    }}
-                                    className={styles.theaterToggle}
-                                    title={isTheaterMode ? "Exit Theater Mode" : "Enter Theater Mode"}
-                                >
-                                    <Maximize2 size={20} />
-                                    <span>{isTheaterMode ? 'Exit Theater' : 'Theater Mode'}</span>
-                                </button>
+
                             </div>
-
-
                         </div>
                     </div>
                 </section>
 
                 {/* Content Details & Episodes */}
-                <div className={`${styles.contentGrid} ${isTheaterMode ? styles.dimmed : ''}`}>
+                <div className={styles.contentGrid}>
                     <div className={styles.leftColumn}>
                         {/* Episodes Section - First for TV Shows */}
                         {isTVShow && movie.seasons && (

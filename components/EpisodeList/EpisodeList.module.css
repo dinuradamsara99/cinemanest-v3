@@ -447,8 +447,8 @@
     color: var(--color-text-primary);
     line-height: 1.3;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     margin-bottom: 4px;
@@ -505,7 +505,7 @@
 
     .episodeThumbnail {
         width: 90px;
-        height: 50px;
+        height: 60px;
     }
 
     .episodeTitle {
@@ -524,7 +524,7 @@
 
     .episodeThumbnail {
         width: 80px;
-        height: 45px;
+        height: 60px;
     }
 
     .seasonLabel {
