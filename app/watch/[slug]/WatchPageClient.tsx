@@ -2,9 +2,9 @@
 import { useState, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, Star, Play } from 'lucide-react'
+import { ArrowLeft, Play } from 'lucide-react'
 import { urlFor } from '@/lib/sanity'
-import type { Movie } from '@/types/movie'
+import type { Movie, Category } from '@/types/movie'
 import VideoPlayer from '@/components/VideoPlayer/VideoPlayer'
 import EpisodeList from '@/components/EpisodeList/EpisodeList'
 import styles from './page.module.css'
@@ -234,7 +234,7 @@ export default function WatchPageClient({ movie }: Props) {
                                     <div className={styles.metaItem}>
                                         <span className={styles.label}>Categories</span>
                                         <div className={styles.genreTags}>
-                                            {movie.categories.map((category: any) => (
+                                            {movie.categories.map((category: Category) => (
                                                 <span key={category._id} className={styles.miniTag}>{category.title}</span>
                                             ))}
                                         </div>
