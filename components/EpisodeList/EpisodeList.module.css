@@ -388,7 +388,7 @@
 .episodeThumbnail {
     position: relative;
     width: 100px;
-    height: 56px;
+    height: 66px;
     border-radius: 6px;
     overflow: hidden;
     flex-shrink: 0;

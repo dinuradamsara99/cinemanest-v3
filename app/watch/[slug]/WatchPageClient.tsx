@@ -126,14 +126,6 @@ export default function WatchPageClient({ movie }: Props) {
                                         src={currentVideoUrl}
                                         poster={movie.posterImage?.asset ? urlFor(movie.posterImage).width(1920).url() : undefined}
                                         title={movie.title}
-                                        contentId={isTVShow && movie.seasons
-                                            ? `${movie._id}-s${currentSeasonIndex + 1}-e${currentEpisodeIndex + 1}`
-                                            : movie._id
-                                        }
-                                        subtitle={isTVShow && currentEpisodeInfo
-                                            ? `S${movie.seasons![currentSeasonIndex].seasonNumber}:E${currentEpisodeInfo.episodeNumber} ${currentEpisodeInfo.title}`
-                                            : undefined
-                                        }
                                         className={isTheaterMode ? styles.theaterModeVideo : ''}
                                     />
                                 )
@@ -185,19 +177,7 @@ export default function WatchPageClient({ movie }: Props) {
                 {/* Content Details & Episodes */}
                 <div className={`${styles.contentGrid} ${isTheaterMode ? styles.dimmed : ''}`}>
                     <div className={styles.leftColumn}>
-                        {/* Description Section - Always visible for both movies and TV shows */}
-                        {movie.description && (
-                            <div className={styles.aboutSection}>
-                                <div className={styles.sectionHeader}>
-                                    <h2>{isTVShow ? 'About This Show' : 'About This Movie'}</h2>
-                                </div>
-                                <div className={styles.aboutContent}>
-                                    <p className={styles.description}>{movie.description}</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Episodes Section - Only for TV Shows */}
+                        {/* Episodes Section - First for TV Shows */}
                         {isTVShow && movie.seasons && (
                             <div id="episodes" className={styles.episodesSection}>
                                 <div className={styles.sectionHeader}>
@@ -213,6 +193,18 @@ export default function WatchPageClient({ movie }: Props) {
                                         currentEpisodeIndex={currentEpisodeIndex}
                                         onEpisodeSelect={handleEpisodeSelect}
                                     />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Description Section - Always visible for both movies and TV shows */}
+                        {movie.description && (
+                            <div className={styles.aboutSection}>
+                                <div className={styles.sectionHeader}>
+                                    <h2>{isTVShow ? 'About This Show' : 'About This Movie'}</h2>
+                                </div>
+                                <div className={styles.aboutContent}>
+                                    <p className={styles.description}>{movie.description}</p>
                                 </div>
                             </div>
                         )}

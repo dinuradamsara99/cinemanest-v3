@@ -2,33 +2,25 @@
 
 .player {
     --primary-color: #ffcc70;
-    --text-color: #f3f4f6;
-    --bg-overlay: rgba(0, 0, 0, 0.75);
-    --border-color: rgba(255, 255, 255, 0.1);
+    --text-color: #ffffff;
+    --bg-overlay: rgba(0, 0, 0, 0.6);
+    --control-bg: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
+    --transition-ease: cubic-bezier(0.4, 0.0, 0.2, 1);
 
     position: relative;
     width: 100%;
     aspect-ratio: 16 / 9;
-    /* Default aspect ratio, but video will maintain its natural ratio */
     background: #000;
     overflow: hidden;
-    /* Keep hidden for clean design, video will fit with object-fit: contain */
-    border-radius: 0px;
-    /* Modern flat players look better with sharp or slightly rounded corners */
+    border-radius: 12px;
+    /* Modern rounded corners */
     user-select: none;
-    font-family: 'Inter', sans-serif;
-    /* Recommended font if available */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     touch-action: manipulation;
-    /* NO SHADOWS */
     z-index: 1;
-    /* Ensure video player doesn't cover other content */
     isolation: isolate;
-    /* Create new stacking context for video player */
-    transition: cursor 0.3s ease;
-}
-
-.player.hideCursor {
-    cursor: none;
+    outline: none;
+    transition: all 0.3s var(--transition-ease);
 }
 
 .player.fullscreen {
@@ -36,37 +28,27 @@
     height: 100vh;
     border-radius: 0;
     z-index: 9999;
-    isolation: isolate;
-    /* Create new stacking context for fullscreen */
 }
 
+.player.hideCursor {
+    cursor: none;
+}
+
+/* VIDEO WRAPPER */
 .videoWrapper {
     width: 100%;
     height: 100%;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #000;
-    position: relative;
-    z-index: 1;
-    /* Base layer for video */
-    overflow: hidden;
-    /* Keep hidden to prevent overflow, video will fit with object-fit: contain */
-    /* Video will maintain its natural aspect ratio within this container */
 }
 
 .video {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    /* Contain ensures full video is visible without cropping or stretching */
-    object-position: center;
-    /* Center the video within the container */
-    display: block;
-    /* Ensure proper rendering */
-    /* Maintain original aspect ratio */
 }
 
 .poster {
@@ -75,62 +57,50 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: 1;
-    /* Same level as video */
+    z-index: 2;
+    transition: opacity 0.5s ease;
 }
 
-/* OVERLAYS & ANIMATIONS */
+/* OVERLAYS LAYER (Loading, Center Play, Skip) */
 .overlayLayer {
     position: absolute;
     inset: 0;
-    z-index: 2;
-    /* Lower z-index within player stacking context */
+    z-index: 10;
+    pointer-events: none;
+    /* Let clicks pass through to container */
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
 }
 
-.centerPulse {
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 50%;
-    padding: 24px;
-    /* Removed Blur for cleaner flat look, kept animation */
-    animation: pulsePop 0.4s ease-out forwards;
-}
-
-@keyframes pulsePop {
-    0% {
-        transform: scale(0.8);
-        opacity: 0;
-    }
-
-    50% {
-        transform: scale(1.1);
-        opacity: 1;
-    }
-
-    100% {
-        transform: scale(1.2);
-        opacity: 0;
-    }
-}
-
+/* MODERN LOADING ANIMATION */
 .loader {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    animation: fadeIn 0.3s ease-in-out;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    padding: 30px;
+    border-radius: 20px;
+    animation: fadeIn 0.3s ease-out;
 }
 
 .spinner {
-    width: 56px;
-    height: 56px;
-    border: 5px solid rgba(255, 255, 255, 0.1);
-    border-top-color: var(--primary-color);
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--primary-color);
+    border-right-color: var(--primary-color);
     animation: spin 0.8s linear infinite;
+    box-shadow: 0 0 15px rgba(255, 204, 112, 0.2);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes fadeIn {
@@ -145,114 +115,100 @@
     }
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* Volume Bezel Overlay - Inspired by modern players */
-.volumeBezel {
+/* SKIP ANIMATION (Double Tap) */
+.skipOverlay {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    padding: 20px 30px;
+    border-radius: 50px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 24px 32px;
-    background: rgba(0, 0, 0, 0.85);
-    border-radius: 16px;
-    backdrop-filter: blur(10px);
-    animation: bezelPop 0.2s ease-out;
-    min-width: 120px;
+    color: #fff;
+    z-index: 20;
+    animation: skipPop 0.4s ease-out forwards;
 }
 
-.volumeBezel svg {
+.skipOverlay.left {
+    left: 15%;
+}
+
+.skipOverlay.right {
+    right: 15%;
+}
+
+.skipIcon {
+    margin-bottom: 5px;
     color: var(--primary-color);
 }
 
-.bezelBar {
-    width: 80px;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-    overflow: hidden;
-    position: relative;
+.skipText {
+    font-size: 14px;
+    font-weight: 700;
 }
 
-.bezelFill {
-    height: 100%;
-    background: var(--primary-color);
-    border-radius: 3px;
-    transition: width 0.15s ease;
-}
-
-.bezelText {
-    font-size: 15px;
-    font-weight: 600;
-    color: #fff;
-    font-family: 'Inter', -apple-system, sans-serif;
-}
-
-@keyframes bezelPop {
-    from {
+@keyframes skipPop {
+    0% {
         opacity: 0;
-        transform: scale(0.8);
+        transform: translateY(-50%) scale(0.5);
     }
 
-    to {
+    50% {
         opacity: 1;
-        transform: scale(1);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-50%) scale(1);
     }
 }
 
-/* Seek Overlay - Forward/Rewind indicator */
-.seekOverlay {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 20px 28px;
-    background: rgba(0, 0, 0, 0.85);
-    border-radius: 16px;
-    backdrop-filter: blur(10px);
-    animation: bezelPop 0.2s ease-out;
+/* CENTER PLAY BUTTON */
+.centerPulse {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    border-radius: 50%;
+    padding: 24px;
+    animation: pulsePop 0.5s ease-out forwards;
 }
 
-.seekIconWrapper {
-    color: var(--primary-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+@keyframes pulsePop {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
 
-.seekText {
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    font-family: 'Inter', -apple-system, sans-serif;
-}
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
+    100% {
+        transform: scale(1.0);
+        opacity: 0;
     }
 }
 
-/* CONTROLS CONTAINER */
+/* CONTROLS BAR */
 .controlsOverlay {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    /* Flat Gradient */
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0) 100%);
-    padding: 40px 20px 20px;
-    /* Added more top padding for fade */
+    padding: 60px 20px 20px 20px;
+    /* High top padding for gradient fade */
+    background: var(--control-bg);
     opacity: 0;
     transform: translateY(10px);
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-    z-index: 3;
-    /* Lower z-index within player stacking context */
-    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .controlsOverlay.visible {
@@ -261,31 +217,27 @@
     pointer-events: auto;
 }
 
-.controlsContent {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-/* PROGRESS BAR - FLAT STYLE */
+/* PROGRESS BAR */
 .progressBarContainer {
     position: relative;
     width: 100%;
     height: 20px;
-    /* Hit area */
+    /* Touch target height */
     display: flex;
     align-items: center;
     cursor: pointer;
+    touch-action: none;
 }
 
 .progressTrack {
-    position: relative;
     width: 100%;
     height: 4px;
     background: rgba(255, 255, 255, 0.2);
-    margin-left: 5px;
-    /* Flat edges */
-    transition: height 0.1s ease;
+    border-radius: 2px;
+    position: relative;
+    transition: height 0.2s;
+    overflow: hidden;
+    /* Keeps buffered/current inside rounded corners */
 }
 
 .progressBarContainer:hover .progressTrack {
@@ -302,32 +254,28 @@
     position: absolute;
     height: 100%;
     background: var(--primary-color);
-    /* Flat color, no gradient */
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    /* NO SHADOWS */
+    border-radius: 2px;
 }
 
 .scrubber {
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%) scale(0);
     width: 14px;
     height: 14px;
-    background: var(--primary-color);
+    background: #fff;
     border-radius: 50%;
-    transform: scale(0);
-    transition: transform 0.1s ease;
-    /* NO SHADOWS */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.progressBarContainer:hover .scrubber {
-    transform: scale(1);
+.progressBarContainer:hover .scrubber,
+.progressBarContainer:active .scrubber {
+    transform: translateY(-50%) scale(1);
 }
 
-.scrubber:active {
-    transform: scale(1.3);
-}
-
-/* BUTTONS */
+/* BUTTONS & ROW */
 .controlsRow {
     display: flex;
     align-items: center;
@@ -338,40 +286,28 @@
 .rightControls {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .iconBtn {
     background: transparent;
     border: none;
     color: #fff;
-    padding: 8px;
     cursor: pointer;
-    border-radius: 4px;
-    /* Minimal radius */
+    padding: 8px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s ease, color 0.2s ease;
-    min-width: 36px;
-    min-height: 36px;
+    transition: background 0.2s, transform 0.1s;
 }
 
 .iconBtn:hover {
     background: rgba(255, 255, 255, 0.15);
-    /* Flat background change */
-    color: #fff;
-    /* NO SHADOWS, NO SCALE */
 }
 
 .iconBtn:active {
-    background: rgba(255, 255, 255, 0.25);
-}
-
-.iconBtn svg {
-    width: 24px;
-    height: 24px;
-    /* NO DROP-SHADOW */
+    transform: scale(0.95);
 }
 
 /* VOLUME */
@@ -379,21 +315,31 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-right: 10px;
+    /* Hover interaction for desktop */
+    position: relative;
+}
+
+.volumeSliderContainer {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.volumeContainer:hover .volumeSliderContainer {
+    width: 80px;
 }
 
 .volumeSlider {
-    width: 0;
-    opacity: 0;
-    transition: all 0.2s ease;
-    cursor: pointer;
+    width: 70px;
     height: 4px;
+    -webkit-appearance: none;
     background: rgba(255, 255, 255, 0.3);
-    appearance: none;
     border-radius: 2px;
+    outline: none;
 }
 
-/* Custom Range Slider Styling for Webkit */
 .volumeSlider::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 12px;
@@ -403,132 +349,130 @@
     cursor: pointer;
 }
 
-.volumeContainer:hover .volumeSlider {
-    width: 70px;
-    opacity: 1;
-}
-
+/* TIME DISPLAY */
 .timeDisplay {
     font-size: 13px;
-    color: #e5e5e5;
+    font-family: 'Roboto Mono', monospace;
+    color: rgba(255, 255, 255, 0.9);
+    margin-left: 5px;
     font-weight: 500;
-    font-family: monospace;
-    padding: 0 5px;
-    /* NO SHADOW, NO BACKGROUND */
 }
 
-/* SETTINGS MENU - FLAT */
-.settingsMenu {
+/* TOOLTIP */
+.thumbnailTooltip {
     position: absolute;
-    bottom: 70px;
-    right: 20px;
-    width: 280px;
-    background: rgba(20, 20, 20, 0.95);
-    /* Nearly solid dark background */
-    border: 1px solid var(--border-color);
-    /* Subtle border instead of shadow */
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    bottom: 25px;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    pointer-events: none;
     z-index: 30;
-    /* NO BOX SHADOW */
 }
 
-.menuItem {
-    width: 100%;
-    padding: 12px 16px;
-    background: transparent;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: background 0.2s;
-    text-align: left;
-}
-
-.menuItem:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.menuItem.active {
-    background: rgba(255, 204, 112, 0.1);
-    border-left: 3px solid var(--primary-color);
-    /* Border highlight instead of glow */
-}
-
-.labelText {
-    font-size: 14px;
+.tooltipTime {
     color: #fff;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
 }
 
-.speedValue {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.6);
-}
+/* ---------------------------------------------------- */
+/* RESPONSIVE DESIGN */
+/* ---------------------------------------------------- */
 
-.menuItem.active .speedValue {
-    color: var(--primary-color);
-}
-
-.menuDivider {
-    height: 1px;
-    background: var(--border-color);
-    margin: 0;
-}
-
-
-/* RESPONSIVE */
+/* Tablet & Mobile (Max width 768px) */
 @media (max-width: 768px) {
-
-    /* Make volume slider always visible on mobile (no hover needed) */
-    .volumeSlider {
-        width: 60px !important;
-        opacity: 1 !important;
-        height: 5px !important;
-        /* Larger touch target */
-    }
-
-    /* Larger volume button thumb for touch */
-    .volumeSlider::-webkit-slider-thumb {
-        width: 14px;
-        height: 14px;
-    }
-
-    .volumeContainer {
-        gap: 6px;
+    .player {
+        border-radius: 0;
+        /* Full width usually on mobile */
     }
 
     .controlsOverlay {
-        padding: 15px;
+        padding: 40px 15px 15px;
+    }
+
+    .volumeSliderContainer {
+        display: none;
+        /* Hide volume slider on touch devices (use physical buttons) */
+    }
+
+    .volumeContainer:hover .volumeSliderContainer {
+        width: 0;
+        /* Disable hover expansion */
+    }
+
+    .iconBtn {
+        padding: 10px;
+        /* Larger touch targets */
+    }
+}
+
+/* Mobile Portrait (Max width 480px) */
+@media (max-width: 480px) {
+    .controlsRow {
+        gap: 0;
+    }
+
+    .leftControls,
+    .rightControls {
+        gap: 4px;
+    }
+
+    /* Make progress bar taller for easier seeking */
+    .progressBarContainer {
+        height: 25px;
+    }
+
+    .progressTrack {
+        height: 4px;
+    }
+
+    /* Scrubber always visible on mobile for better UX */
+    .scrubber {
+        transform: translateY(-50%) scale(1);
+    }
+
+    /* Smaller Time Font */
+    .timeDisplay {
+        font-size: 11px;
+        margin-left: 2px;
+    }
+
+    /* Hide PiP button on very small screens to save space */
+    .pipBtn {
+        display: none;
+    }
+
+    /* Adjust Skip Overlay for mobile */
+    .skipOverlay {
+        padding: 15px 20px;
+    }
+
+    .skipIcon svg {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+/* Ultra Small (Galaxy Fold outer screen etc. < 320px) */
+@media (max-width: 350px) {
+    .controlsOverlay {
+        padding: 30px 10px 10px;
     }
 
     .iconBtn {
         padding: 6px;
-        min-width: 32px;
-        min-height: 32px;
     }
 
-    /* Mobile-optimized overlays */
-    .volumeBezel,
-    .seekOverlay {
-        padding: 18px 24px;
-        min-width: 100px;
+    .iconBtn svg {
+        width: 20px;
+        height: 20px;
     }
 
-    .bezelBar {
-        width: 60px;
-    }
-
-    .spinner {
-        width: 48px;
-        height: 48px;
-    }
-
-    .seekIconWrapper svg {
-        width: 40px;
-        height: 40px;
+    /* Show only current time to save space */
+    .timeDisplay span:nth-child(2),
+    .timeDisplay span:nth-child(3) {
+        display: none;
     }
 }

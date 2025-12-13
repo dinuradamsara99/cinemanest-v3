@@ -66,6 +66,8 @@
 /* Top Navigation */
 .topNav {
     padding: 16px 0;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .backButton {
@@ -319,6 +321,7 @@
 
 .aboutContent {
     padding: 24px;
+    padding-right: 0;
 }
 
 .aboutSection .description {
@@ -534,5 +537,455 @@
 
     .playerMeta {
         padding: 0 8px;
+    }
+}
+
+/* Extra Small Devices - Mobile Optimized (≤390px) */
+@media (max-width: 390px) {
+    .mainContainer {
+        padding: 8px;
+        gap: 20px;
+    }
+
+    .topNav {
+        padding: 8px 0;
+    }
+
+    .backButton {
+        font-size: 0.85rem;
+        padding: 8px 14px;
+        gap: 8px;
+    }
+
+    .playerSection {
+        gap: 16px;
+    }
+
+    .playerWrapper {
+        border-radius: 12px;
+    }
+
+    .playerMeta {
+        margin-top: 16px;
+        gap: 12px;
+    }
+
+    .playerHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .titleGroup h1 {
+        font-size: 1.2rem;
+        line-height: 1.3;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .episodeBadge {
+        font-size: 0.8rem;
+        padding: 3px 10px;
+        margin-top: 6px;
+    }
+
+    .theaterToggle {
+        align-self: flex-start;
+        padding: 8px 14px;
+        font-size: 0.85rem;
+        gap: 8px;
+    }
+
+    .contentGrid {
+        gap: 24px;
+    }
+
+    .aboutSection,
+    .episodesSection {
+        border-radius: 16px;
+        margin-bottom: 16px;
+    }
+
+    .sectionHeader {
+        padding: 16px;
+    }
+
+    .sectionHeader h2 {
+        font-size: 1.1rem;
+    }
+
+    .seasonCount {
+        font-size: 0.85rem;
+    }
+
+    .aboutContent {
+        padding: 16px;
+    }
+
+    .aboutSection .description {
+        font-size: 0.88rem;
+        line-height: 1.6;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+
+    .metaCard {
+        padding: 16px;
+        gap: 16px;
+        border-radius: 14px;
+    }
+
+    .metaCard h3 {
+        font-size: 1rem;
+    }
+
+    .metaGrid {
+        gap: 12px;
+    }
+
+    .metaItem {
+        font-size: 0.85rem;
+    }
+
+    .label {
+        font-size: 0.8rem;
+    }
+
+    .miniTag {
+        font-size: 0.75rem;
+        padding: 3px 8px;
+    }
+
+    .ratingValue {
+        font-size: 0.9rem;
+    }
+
+    .ratingValue svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .placeholderVideo h3 {
+        font-size: 1rem;
+    }
+
+    .placeholderVideo p {
+        font-size: 0.85rem;
+    }
+
+    /* Theater mode optimizations for small screens */
+    .theaterPlayer .playerMeta {
+        padding: 16px 12px;
+        margin: 16px auto 0;
+    }
+
+    .theaterPlayer .titleGroup h1 {
+        font-size: 1.1rem;
+    }
+
+    .theaterPlayer .theaterToggle {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Ultra Small Devices - Enhanced for very narrow screens (≤320px) */
+@media (max-width: 320px) {
+    .mainContainer {
+        padding: 6px;
+        gap: 16px;
+    }
+
+    .topNav {
+        padding: 6px 0;
+    }
+
+    .backButton {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        gap: 6px;
+    }
+
+    .playerSection {
+        gap: 12px;
+    }
+
+    .playerWrapper {
+        border-radius: 10px;
+    }
+
+    .playerMeta {
+        margin-top: 12px;
+        gap: 10px;
+    }
+
+    .playerHeader {
+        gap: 10px;
+    }
+
+    .titleGroup h1 {
+        font-size: 1.1rem;
+        line-height: 1.25;
+    }
+
+    .episodeBadge {
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        margin-top: 4px;
+    }
+
+    .theaterToggle {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        gap: 6px;
+    }
+
+    .contentGrid {
+        gap: 16px;
+    }
+
+    .aboutSection,
+    .episodesSection {
+        border-radius: 12px;
+        margin-bottom: 12px;
+    }
+
+    .sectionHeader {
+        padding: 12px;
+    }
+
+    .sectionHeader h2 {
+        font-size: 1rem;
+    }
+
+    .seasonCount {
+        font-size: 0.8rem;
+    }
+
+    .aboutContent {
+        padding: 12px;
+    }
+
+    .aboutSection .description {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+
+    .metaCard {
+        padding: 12px;
+        gap: 12px;
+        border-radius: 12px;
+    }
+
+    .metaCard h3 {
+        font-size: 0.95rem;
+    }
+
+    .metaGrid {
+        gap: 10px;
+    }
+
+    .metaItem {
+        font-size: 0.8rem;
+    }
+
+    .label {
+        font-size: 0.75rem;
+    }
+
+    .miniTag {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+    }
+
+    .ratingValue {
+        font-size: 0.85rem;
+    }
+
+    .ratingValue svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    .placeholderVideo h3 {
+        font-size: 0.95rem;
+    }
+
+    .placeholderVideo p {
+        font-size: 0.8rem;
+    }
+
+    /* Theater mode optimizations */
+    .theaterPlayer .playerMeta {
+        padding: 12px 8px;
+        margin: 12px auto 0;
+    }
+
+    .theaterPlayer .titleGroup h1 {
+        font-size: 1rem;
+    }
+
+    .theaterPlayer .theaterToggle {
+        padding: 5px 8px;
+        font-size: 0.75rem;
+    }
+}
+
+/* Ultra-Extreme Devices - Minimal layout for 200px width (≤200px) */
+@media (max-width: 200px) {
+    .mainContainer {
+        padding: 4px;
+        gap: 12px;
+    }
+
+    .topNav {
+        padding: 4px 0;
+    }
+
+    .backButton {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+        gap: 4px;
+    }
+
+    .backButton svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .playerSection {
+        gap: 8px;
+    }
+
+    .playerWrapper {
+        border-radius: 8px;
+    }
+
+    .playerMeta {
+        margin-top: 8px;
+        gap: 8px;
+    }
+
+    .playerHeader {
+        gap: 8px;
+    }
+
+    .titleGroup h1 {
+        font-size: 0.95rem;
+        line-height: 1.2;
+    }
+
+    .episodeBadge {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        margin-top: 3px;
+    }
+
+    .theaterToggle {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        gap: 4px;
+    }
+
+    .theaterToggle svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .contentGrid {
+        gap: 12px;
+    }
+
+    .aboutSection,
+    .episodesSection {
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .sectionHeader {
+        padding: 10px;
+    }
+
+    .sectionHeader h2 {
+        font-size: 0.9rem;
+    }
+
+    .seasonCount {
+        font-size: 0.7rem;
+    }
+
+    .aboutContent {
+        padding: 10px;
+    }
+
+    .aboutSection .description {
+        font-size: 0.75rem;
+        line-height: 1.4;
+    }
+
+    .metaCard {
+        padding: 10px;
+        gap: 10px;
+        border-radius: 10px;
+    }
+
+    .metaCard h3 {
+        font-size: 0.85rem;
+    }
+
+    .metaGrid {
+        gap: 8px;
+    }
+
+    .metaItem {
+        font-size: 0.7rem;
+        flex-wrap: wrap;
+    }
+
+    .label {
+        font-size: 0.65rem;
+    }
+
+    .miniTag {
+        font-size: 0.6rem;
+        padding: 2px 4px;
+    }
+
+    .ratingValue {
+        font-size: 0.75rem;
+    }
+
+    .ratingValue svg {
+        width: 10px;
+        height: 10px;
+    }
+
+    .placeholderVideo h3 {
+        font-size: 0.85rem;
+    }
+
+    .placeholderVideo p {
+        font-size: 0.7rem;
+    }
+
+    .placeholderVideo svg {
+        width: 32px;
+        height: 32px;
+    }
+
+    /* Theater mode ultra-compact */
+    .theaterPlayer .playerMeta {
+        padding: 10px 6px;
+        margin: 10px auto 0;
+    }
+
+    .theaterPlayer .titleGroup h1 {
+        font-size: 0.9rem;
+    }
+
+    .theaterPlayer .theaterToggle {
+        padding: 4px 6px;
+        font-size: 0.65rem;
     }
 }
