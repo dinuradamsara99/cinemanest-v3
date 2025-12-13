@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Home, Tv, Grid3x3, Film, ChevronUp, Menu, X, Search, ChevronLeft } from 'lucide-react'
+import { Home, Tv, Grid3x3, Film, ChevronUp, Menu, X, Search, ChevronLeft, Languages } from 'lucide-react'
 import { urlFor } from '@/lib/sanity'
 import styles from './Sidebar.module.css'
 
@@ -448,7 +448,7 @@ export default function Sidebar() {
               onClick={() => toggleSection('languages')}
             >
               <span className={styles.icon}>
-                <Film size={20} />
+                <Languages size={20} />
               </span>
               <span className={styles.label}>Languages</span>
               <span className={`${styles.chevron} ${expandedSections.languages ? styles.chevronOpen : ''}`}>

@@ -242,6 +242,32 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
             if (hh) return `${hh}:${mm.toString().padStart(2, '0')}:${ss}`
             return `${mm}:${ss}`
         }
+        useEffect(() => {
+            const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+                if (!containerRef.current) return
+
+                // Check if click/tap is outside the video container
+                const target = e.target as Node
+                if (!containerRef.current.contains(target)) {
+                    // Hide controls when clicking outside
+                    if (isPlaying) {
+                        setShowControls(false)
+                        if (controlsTimeoutRef.current) {
+                            clearTimeout(controlsTimeoutRef.current)
+                        }
+                    }
+                }
+            }
+
+            // Add listeners for both mouse and touch events
+            document.addEventListener('mousedown', handleClickOutside)
+            document.addEventListener('touchstart', handleClickOutside)
+
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside)
+                document.removeEventListener('touchstart', handleClickOutside)
+            }
+        }, [isPlaying])
 
         const VolumeIcon = isMuted || volume === 0 ? VolumeX : Volume2
 

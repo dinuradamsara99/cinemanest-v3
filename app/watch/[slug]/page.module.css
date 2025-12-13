@@ -107,7 +107,7 @@
     width: 100%;
     /* Default 16:9 for normal view */
     aspect-ratio: 16/9;
-    max-height: 80vh;
+    max-height: auto;
     background: #000;
     border-radius: 16px;
     overflow: hidden;
@@ -306,6 +306,26 @@
     opacity: 0.1;
     pointer-events: none;
     filter: blur(2px);
+}
+
+/* About Section (Description) */
+.aboutSection {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.aboutContent {
+    padding: 24px;
+}
+
+.aboutSection .description {
+    color: #d4d4d8;
+    line-height: 1.7;
+    font-size: 1rem;
+    margin: 0;
 }
 
 /* Episodes Section */
