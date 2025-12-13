@@ -280,7 +280,7 @@
 
 .description {
     color: #a1a1aa;
-    line-height: 1.6;
+    line-height: 2;
     max-width: 800px;
     font-size: 1rem;
     transition: opacity 0.3s;
@@ -326,7 +326,7 @@
 
 .aboutSection .description {
     color: #d4d4d8;
-    line-height: 1.7;
+    line-height: 2;
     font-size: 1rem;
     margin: 0;
 }
@@ -337,6 +337,7 @@
     border: 1px solid var(--glass-border);
     border-radius: 20px;
     overflow: hidden;
+    margin-bottom: 30px;
 }
 
 .sectionHeader {

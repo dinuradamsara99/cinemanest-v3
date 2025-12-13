@@ -8,7 +8,6 @@ import React, {
     forwardRef,
     useImperativeHandle,
 } from 'react'
-import Image from 'next/image'
 import {
     Play,
     Pause,
@@ -34,13 +33,12 @@ export interface VideoPlayerRef {
 interface VideoPlayerProps {
     src: string
     poster?: string
-    title?: string
     autoPlay?: boolean
     className?: string
 }
 
 const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
-    ({ src, poster, title, autoPlay = false, className }, ref) => {
+    ({ src, poster, autoPlay = false, className }, ref) => {
         // Refs
         const containerRef = useRef<HTMLDivElement>(null)
         const videoRef = useRef<HTMLVideoElement>(null)

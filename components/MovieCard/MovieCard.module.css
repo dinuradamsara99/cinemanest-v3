@@ -204,6 +204,7 @@
 
     .playButton {
         width: 48px;
+        display: none;
         height: 48px;
     }
 

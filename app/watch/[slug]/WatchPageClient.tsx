@@ -125,7 +125,6 @@ export default function WatchPageClient({ movie }: Props) {
                                         }
                                         src={currentVideoUrl}
                                         poster={movie.posterImage?.asset ? urlFor(movie.posterImage).width(1920).url() : undefined}
-                                        title={movie.title}
                                         className={isTheaterMode ? styles.theaterModeVideo : ''}
                                     />
                                 )
