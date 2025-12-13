@@ -2,11 +2,12 @@
 import { useState, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, Play } from 'lucide-react'
+import { ArrowLeft, Play, Youtube } from 'lucide-react'
 import { urlFor } from '@/lib/sanity'
 import type { Movie, Category } from '@/types/movie'
 import VideoPlayer from '@/components/VideoPlayer/VideoPlayer'
 import EpisodeList from '@/components/EpisodeList/EpisodeList'
+import TrailerModal from '@/components/TrailerModal/TrailerModal'
 import styles from './page.module.css'
 
 type Props = {
@@ -17,6 +18,8 @@ export default function WatchPageClient({ movie }: Props) {
     // Episode selection state for TV Shows
     const [currentSeasonIndex, setCurrentSeasonIndex] = useState(0)
     const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(0)
+    // Trailer modal state
+    const [trailerOpen, setTrailerOpen] = useState(false)
 
 
 
@@ -25,6 +28,14 @@ export default function WatchPageClient({ movie }: Props) {
         setCurrentSeasonIndex(seasonIndex)
         setCurrentEpisodeIndex(episodeIndex)
     }, [])
+
+    // Trailer handlers
+    const handleOpenTrailer = () => setTrailerOpen(true)
+    const handleCloseTrailer = () => setTrailerOpen(false)
+    const handleTrailerEnd = () => {
+        setTrailerOpen(false)
+        // Trailer ended, user can now watch the full video
+    }
 
 
 
@@ -60,7 +71,9 @@ export default function WatchPageClient({ movie }: Props) {
             'supervideo',
             'embedsito',
             'koyeb.app',
+            'youtu.be',
             'workers.dev'
+
         ]
         return embedPatterns.some(pattern => currentVideoUrl.toLowerCase().includes(pattern))
     })()
@@ -152,6 +165,13 @@ export default function WatchPageClient({ movie }: Props) {
                                     )}
                                 </div>
 
+                                {/* Trailer Button */}
+                                {movie.trailerUrl && (
+                                    <button onClick={handleOpenTrailer} className={styles.trailerButton}>
+                                        <Youtube size={20} />
+                                        <span>Watch Trailer</span>
+                                    </button>
+                                )}
 
                             </div>
                         </div>
@@ -232,7 +252,7 @@ export default function WatchPageClient({ movie }: Props) {
                                 )}
                                 {movie.categories && movie.categories.length > 0 && (
                                     <div className={styles.metaItem}>
-                                        <span className={styles.label}>Categories</span>
+                                        <span className={styles.label}>Genre</span>
                                         <div className={styles.genreTags}>
                                             {movie.categories.map((category: Category) => (
                                                 <span key={category._id} className={styles.miniTag}>{category.title}</span>
@@ -257,6 +277,17 @@ export default function WatchPageClient({ movie }: Props) {
                     </div>
                 </div>
             </div>
+
+            {/* Trailer Modal */}
+            {trailerOpen && movie.trailerUrl && (
+                <TrailerModal
+                    trailerUrl={movie.trailerUrl}
+                    isOpen={trailerOpen}
+                    onClose={handleCloseTrailer}
+                    onTrailerEnd={handleTrailerEnd}
+                    movieTitle={movie.title}
+                />
+            )}
         </main>
     )
 }

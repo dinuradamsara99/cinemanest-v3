@@ -43,6 +43,10 @@ export default function HeroSection({ movies }: HeroSectionProps) {
                 // FIX: Determine the valid image source explicitly BEFORE using urlFor
                 const imageSource = movie.bannerImage?.asset ? movie.bannerImage : movie.posterImage;
 
+                function handleOpenTrailer(movie: Movie): void {
+                    throw new Error('Function not implemented.')
+                }
+
                 return (
                     <div
                         key={movie._id}

@@ -46,7 +46,8 @@ const BASE_FIELDS = `
     _id,
     title,
     slug
-  }
+  },
+  trailerUrl
 `;
 
 // Movie specific fields
@@ -193,6 +194,24 @@ export async function getMoviesByCategory(categorySlug: string) {
         _id,
         title,
         slug
+      },
+      categories[]-> {
+        _id,
+        title,
+        slug
+      },
+      seasons[] {
+        _key,
+        seasonNumber,
+        title,
+        episodes[] {
+          _key,
+          episodeNumber,
+          title,
+          thumbnail { asset-> },
+          videoUrl,
+          duration
+        }
       }
     }
   }`;
@@ -226,8 +245,23 @@ export async function getLanguages() {
 
 // Fetch movies by language
 export async function getMoviesByLanguage(languageSlug: string) {
-  const query = `*[_type == "movie" && language->slug.current == $languageSlug] | order(_createdAt desc) {
-    ${MOVIE_FIELDS}
+  const query = `*[(_type == "movie" || _type == "tvshow") && language->slug.current == $languageSlug] | order(_createdAt desc) {
+    ${BASE_FIELDS},
+    duration,
+    videoUrl,
+    seasons[] {
+      _key,
+      seasonNumber,
+      title,
+      episodes[] {
+        _key,
+        episodeNumber,
+        title,
+        thumbnail { asset-> },
+        videoUrl,
+        duration
+      }
+    }
   }`;
 
   return client.fetch(query, { languageSlug });

@@ -29,10 +29,18 @@ export const categoryType = defineType({
         }),
         defineField({
             name: 'movies',
-            title: 'Movies',
+            title: 'Movies & TV Shows',
             type: 'array',
-            of: [{ type: 'reference', to: { type: 'movie' } }],
-            description: 'Select movies for this category/playlist',
+            of: [
+                {
+                    type: 'reference',
+                    to: [
+                        { type: 'movie' },
+                        { type: 'tvshow' }
+                    ]
+                }
+            ],
+            description: 'Select movies and TV shows for this category/playlist',
         }),
     ],
     preview: {

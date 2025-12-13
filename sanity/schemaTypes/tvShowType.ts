@@ -93,6 +93,7 @@ export const tvShowType = defineType({
             type: 'array',
             of: [{ type: 'string' }],
             options: {
+                layout: 'tags',
                 list: [
                     { title: 'Action', value: 'action' },
                     { title: 'Adventure', value: 'adventure' },
@@ -122,6 +123,16 @@ export const tvShowType = defineType({
             type: 'array',
             of: [{ type: 'reference', to: [{ type: 'category' }] }],
             description: 'Select categories/playlists for this TV Show',
+        }),
+        defineField({
+            name: 'trailerUrl',
+            title: 'Trailer URL',
+            type: 'url',
+            description: 'Optional trailer video URL (YouTube, Vimeo, etc.)',
+            validation: Rule => Rule.uri({
+                allowRelative: false,
+                scheme: ['http', 'https']
+            })
         }),
         defineField({
             name: 'seasons',

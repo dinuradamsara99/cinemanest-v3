@@ -636,6 +636,7 @@
   color: #FFD700;
   font-weight: 500;
   background: rgba(255, 215, 0, 0.05);
+  margin-left: 4px;
 }
 
 .dot {

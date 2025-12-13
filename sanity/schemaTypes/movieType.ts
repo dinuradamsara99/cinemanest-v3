@@ -133,6 +133,16 @@ export const movieType = defineType({
             type: 'url',
             description: 'Link to the video (YouTube, Vimeo, etc.)',
         }),
+        defineField({
+            name: 'trailerUrl',
+            title: 'Trailer URL',
+            type: 'url',
+            description: 'Optional trailer video URL (YouTube, Vimeo, etc.)',
+            validation: Rule => Rule.uri({
+                allowRelative: false,
+                scheme: ['http', 'https']
+            })
+        }),
     ],
     preview: {
         select: {

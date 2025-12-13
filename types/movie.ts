@@ -69,6 +69,7 @@ export interface Movie {
     duration?: number
     genre?: string[]
     videoUrl?: string
+    trailerUrl?: string
     seasons?: Season[]
     language?: Language
     categories?: Category[]
