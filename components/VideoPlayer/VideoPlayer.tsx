@@ -39,10 +39,11 @@ interface VideoPlayerProps {
     subtitle?: string
     thumbnailData?: ThumbnailSprite[] | string
     thumbnailBaseUrl?: string
+    className?: string
 }
 
 const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
-    ({ src, poster, title, thumbnailData, thumbnailBaseUrl }, ref) => {
+    ({ src, poster, title, thumbnailData, thumbnailBaseUrl, className }, ref) => {
         const containerRef = useRef<HTMLDivElement>(null)
         const videoRef = useRef<HTMLVideoElement>(null)
         const videoWrapperRef = useRef<HTMLDivElement>(null)
@@ -247,7 +248,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         return (
             <div
                 ref={containerRef}
-                className={`${styles.player} ${isFullscreen ? styles.fullscreen : ''} ${!showControls && isPlaying ? styles.hideCursor : ''}`}
+                className={`${styles.player} ${isFullscreen ? styles.fullscreen : ''} ${!showControls && isPlaying ? styles.hideCursor : ''} ${className || ''}`}
                 onMouseMove={showControlsTemporarily}
                 onMouseLeave={() => isPlaying && setShowControls(false)}
                 onClick={handleContainerClick} // Mobile tap handling

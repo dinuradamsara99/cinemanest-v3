@@ -9,9 +9,10 @@
     position: relative;
     width: 100%;
     aspect-ratio: 16 / 9;
+    /* Default aspect ratio, but video will maintain its natural ratio */
     background: #000;
     overflow: hidden;
-    /* Changed to hidden to keep it clean */
+    /* Keep hidden for clean design, video will fit with object-fit: contain */
     border-radius: 0px;
     /* Modern flat players look better with sharp or slightly rounded corners */
     user-select: none;
@@ -19,6 +20,10 @@
     /* Recommended font if available */
     touch-action: manipulation;
     /* NO SHADOWS */
+    z-index: 1;
+    /* Ensure video player doesn't cover other content */
+    isolation: isolate;
+    /* Create new stacking context for video player */
 }
 
 .player.fullscreen {
@@ -26,6 +31,8 @@
     height: 100vh;
     border-radius: 0;
     z-index: 9999;
+    isolation: isolate;
+    /* Create new stacking context for fullscreen */
 }
 
 .videoWrapper {
@@ -35,12 +42,26 @@
     align-items: center;
     justify-content: center;
     background: #000;
+    position: relative;
+    z-index: 1;
+    /* Base layer for video */
+    overflow: hidden;
+    /* Keep hidden to prevent overflow, video will fit with object-fit: contain */
+    /* Video will maintain its natural aspect ratio within this container */
 }
 
 .video {
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
     object-fit: contain;
+    /* Contain ensures full video is visible without cropping or stretching */
+    object-position: center;
+    /* Center the video within the container */
+    display: block;
+    /* Ensure proper rendering */
+    /* Maintain original aspect ratio */
 }
 
 .poster {
@@ -49,14 +70,16 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: 5;
+    z-index: 1;
+    /* Same level as video */
 }
 
 /* OVERLAYS & ANIMATIONS */
 .overlayLayer {
     position: absolute;
     inset: 0;
-    z-index: 10;
+    z-index: 2;
+    /* Lower z-index within player stacking context */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -116,7 +139,8 @@
     opacity: 0;
     transform: translateY(0);
     transition: opacity 0.2s ease;
-    z-index: 20;
+    z-index: 3;
+    /* Lower z-index within player stacking context */
     pointer-events: auto;
 }
 

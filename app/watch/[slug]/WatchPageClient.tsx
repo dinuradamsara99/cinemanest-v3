@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, Star, Clock, Calendar, Play, Tv } from 'lucide-react'
+import { ArrowLeft, Star, Clock, Calendar, Play, Tv, Maximize2 } from 'lucide-react'
 import { urlFor } from '@/lib/sanity'
 import type { Movie } from '@/types/movie'
 import VideoPlayer from '@/components/VideoPlayer/VideoPlayer'
@@ -17,6 +17,10 @@ export default function WatchPageClient({ movie }: Props) {
     // Episode selection state for TV Shows
     const [currentSeasonIndex, setCurrentSeasonIndex] = useState(0)
     const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(0)
+
+    // Theater mode state
+    const [isTheaterMode, setIsTheaterMode] = useState(false)
+    const toggleTheaterMode = () => setIsTheaterMode(prev => !prev)
 
     // Handle episode selection
     const handleEpisodeSelect = useCallback((seasonIndex: number, episodeIndex: number) => {
@@ -76,212 +80,48 @@ export default function WatchPageClient({ movie }: Props) {
     const languageLabel = movie.language?.title
 
     return (
-        <main className={styles.page}>
-            <section className={styles.heroSection}>
-                <div className={styles.bannerContainer}>
-                    {movie.bannerImage?.asset ? (
-                        <Image
-                            src={urlFor(movie.bannerImage).width(1920).height(900).url()}
-                            alt={movie.bannerImage.alt || movie.title}
-                            fill
-                            className={styles.bannerImage}
-                            priority
-                        />
-                    ) : movie.posterImage?.asset ? (
-                        <Image
-                            src={urlFor(movie.posterImage).width(1920).height(900).url()}
-                            alt={movie.posterImage.alt || movie.title}
-                            fill
-                            className={styles.bannerImage}
-                            priority
-                        />
-                    ) : (
-                        <div className={styles.placeholderBanner}>
-                            <Play size={64} />
-                        </div>
-                    )}
-                    <div className={styles.bannerOverlay} />
-                </div>
+        <main className={`${styles.page} ${isTheaterMode ? styles.theaterModeActive : ''}`}>
+            {/* Ambient Background */}
+            <div className={styles.ambientBackground}>
+                {movie.posterImage?.asset && (
+                    <Image
+                        src={urlFor(movie.posterImage).width(200).url()}
+                        alt=""
+                        fill
+                        className={styles.ambientImage}
+                        priority
+                    />
+                )}
+                <div className={styles.ambientOverlay} />
+            </div>
 
-                <div className={styles.heroContent}>
-                    <div className={styles.heroTop}>
-                        <Link href="/" className={styles.backLink}>
-                            <ArrowLeft size={16} />
-                            Back to library
+            {/* Theater Mode Overlay */}
+            {isTheaterMode && <div className={styles.theaterBackdrop} onClick={toggleTheaterMode} />}
+
+            <div className={styles.mainContainer}>
+                {/* Hero / Player Section */}
+                <section className={styles.playerSection} id="watch">
+                    {/* Top Navigation */}
+                    <div className={styles.topNav}>
+                        <Link href="/" className={styles.backButton}>
+                            <ArrowLeft size={20} />
+                            <span>Back to Browse</span>
                         </Link>
-                        <div className={styles.contentTypeBadge}>
-                            {isTVShow ? (
-                                <>
-                                    <Tv size={16} />
-                                    <span>TV Series</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Play size={16} />
-                                    <span>Movie</span>
-                                </>
-                            )}
-                        </div>
                     </div>
 
-                    <div className={styles.heroGrid}>
-                        <div className={styles.heroCopy}>
-                            <h1 className={styles.heroTitle}>{movie.title}</h1>
-
-                            {isTVShow && currentEpisodeInfo && (
-                                <p className={styles.currentEpisode}>
-                                    Season {movie.seasons![currentSeasonIndex].seasonNumber} · Episode {currentEpisodeInfo.episodeNumber} — {currentEpisodeInfo.title}
-                                </p>
-                            )}
-
-                            <div className={styles.heroMeta}>
-                                <div className={styles.rating}>
-                                    <Star size={18} fill="var(--color-accent)" strokeWidth={0} />
-                                    <span>{movie.rating.toFixed(1)}</span>
-                                </div>
-                                {movie.releaseYear && (
-                                    <span className={styles.metaItem}>
-                                        <Calendar size={16} />
-                                        {movie.releaseYear}
-                                    </span>
-                                )}
-                                {!isTVShow && movie.duration && (
-                                    <span className={styles.metaItem}>
-                                        <Clock size={16} />
-                                        {movie.duration} min
-                                    </span>
-                                )}
-                                {isTVShow && movie.seasons && (
-                                    <span className={styles.metaItem}>
-                                        <Tv size={16} />
-                                        {movie.seasons.length} Season{movie.seasons.length !== 1 ? 's' : ''}
-                                    </span>
-                                )}
-                                {languageLabel && (
-                                    <span className={styles.metaItem}>
-                                        <span className={styles.metaDot} />
-                                        {languageLabel}
-                                    </span>
-                                )}
-                            </div>
-
-                            {movie.genre && movie.genre.length > 0 && (
-                                <div className={styles.genreSection}>
-                                    {movie.genre.map((genre: string) => (
-                                        <span key={genre} className={styles.genreTag}>
-                                            {genre}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-
-                            <div className={styles.actionRow}>
-                                <Link href="#watch" className={styles.primaryButton}>
-                                    <Play size={16} />
-                                    Watch now
-                                </Link>
-                                {isTVShow && (
-                                    <button type="button" onClick={handleScrollToEpisodes} className={styles.ghostButton}>
-                                        <Tv size={16} />
-                                        Episodes
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className={styles.posterPanel}>
-                            <div className={styles.posterFrame}>
-                                {movie.posterImage?.asset ? (
-                                    <Image
-                                        src={urlFor(movie.posterImage).width(700).height(1000).url()}
-                                        alt={movie.posterImage.alt || movie.title}
-                                        fill
-                                        sizes="320px"
-                                        className={styles.posterImage}
-                                    />
-                                ) : (
-                                    <div className={styles.posterPlaceholder}>
-                                        <Play size={42} />
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className={styles.statGrid}>
-                                <div className={styles.statCard}>
-                                    <span className={styles.statLabel}>Rating</span>
-                                    <span className={styles.statValue}>{movie.rating.toFixed(1)}</span>
-                                </div>
-                                {movie.releaseYear && (
-                                    <div className={styles.statCard}>
-                                        <span className={styles.statLabel}>Release</span>
-                                        <span className={styles.statValue}>{movie.releaseYear}</span>
-                                    </div>
-                                )}
-                                {!isTVShow && movie.duration && (
-                                    <div className={styles.statCard}>
-                                        <span className={styles.statLabel}>Duration</span>
-                                        <span className={styles.statValue}>{movie.duration} min</span>
-                                    </div>
-                                )}
-                                {isTVShow && movie.seasons && (
-                                    <div className={styles.statCard}>
-                                        <span className={styles.statLabel}>Seasons</span>
-                                        <span className={styles.statValue}>{movie.seasons.length}</span>
-                                    </div>
-                                )}
-                                {languageLabel && (
-                                    <div className={styles.statCard}>
-                                        <span className={styles.statLabel}>Language</span>
-                                        <span className={styles.statValue}>{languageLabel}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <div className={styles.contentShell}>
-                <div className={`${styles.layout} ${isTVShow ? styles.withSidebar : ''}`}>
-                    <div className={styles.primaryColumn}>
-                        {movie.description && (
-                            <div className={styles.card}>
-                                <div className={styles.cardHeader}>
-                                    <h2 className={styles.sectionTitle}>Overview</h2>
-                                    <span className={styles.accentPill} />
-                                </div>
-                                <p className={styles.description}>{movie.description}</p>
-                            </div>
-                        )}
-
-                        <div id="watch" className={`${styles.card} ${styles.videoCard}`}>
-                            <div className={styles.cardHeader}>
-                                <h2 className={styles.sectionTitle}>
-                                    {isTVShow && currentEpisodeInfo
-                                        ? `S${movie.seasons![currentSeasonIndex].seasonNumber} · E${currentEpisodeInfo.episodeNumber} — ${currentEpisodeInfo.title}`
-                                        : 'Watch now'}
-                                </h2>
-                                <div className={styles.smallMetaRow}>
-                                    <span>{isTVShow ? 'Episode stream' : 'Full feature'}</span>
-                                    {currentEpisodeInfo?.duration && (
-                                        <span className={styles.mutedText}>{currentEpisodeInfo.duration} min</span>
-                                    )}
-                                </div>
-                            </div>
-
+                    <div className={`${styles.playerContainer} ${isTheaterMode ? styles.theaterPlayer : ''}`}>
+                        <div className={styles.playerWrapper}>
                             {currentVideoUrl ? (
                                 isEmbedUrl ? (
-                                    <div className={styles.videoPlayer}>
-                                        <iframe
-                                            className={styles.iframe}
-                                            src={currentVideoUrl}
-                                            title={movie.title}
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                                            allowFullScreen
-                                            scrolling="no"
-                                            frameBorder="0"
-                                        />
-                                    </div>
+                                    <iframe
+                                        className={styles.iframe}
+                                        src={currentVideoUrl}
+                                        title={movie.title}
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                                        allowFullScreen
+                                        scrolling="no"
+                                        frameBorder="0"
+                                    />
                                 ) : (
                                     <VideoPlayer
                                         key={isTVShow && movie.seasons
@@ -296,9 +136,10 @@ export default function WatchPageClient({ movie }: Props) {
                                             : movie._id
                                         }
                                         subtitle={isTVShow && currentEpisodeInfo
-                                            ? `Season ${movie.seasons![currentSeasonIndex].seasonNumber} Episode ${currentEpisodeInfo.episodeNumber}`
+                                            ? `S${movie.seasons![currentSeasonIndex].seasonNumber}:E${currentEpisodeInfo.episodeNumber} ${currentEpisodeInfo.title}`
                                             : undefined
                                         }
+                                        className={isTheaterMode ? styles.theaterModeVideo : ''}
                                     />
                                 )
                             ) : (
@@ -306,67 +147,118 @@ export default function WatchPageClient({ movie }: Props) {
                                     <div className={styles.placeholderIcon}>
                                         <Play size={48} />
                                     </div>
-                                    <h3 className={styles.placeholderTitle}>No video available</h3>
-                                    <p className={styles.placeholderText}>Check back later for updates</p>
+                                    <h3>Video Unavailable</h3>
+                                    <p>Please check back later</p>
                                 </div>
                             )}
                         </div>
-                    </div>
 
-                    <div className={styles.sideColumn}>
-                        <div className={`${styles.card} ${styles.detailCard}`}>
-                            <div className={styles.cardHeader}>
-                                <h3 className={styles.sectionTitle}>Details</h3>
-                            </div>
-                            <div className={styles.detailGrid}>
-                                <div className={styles.detailItem}>
-                                    <span className={styles.detailLabel}>Type</span>
-                                    <span className={styles.detailValue}>{isTVShow ? 'TV Series' : 'Movie'}</span>
+                        {/* Player Controls / Meta */}
+                        <div className={styles.playerMeta}>
+                            <div className={styles.playerHeader}>
+                                <div className={styles.titleGroup}>
+                                    <h1>
+                                        {isTVShow && currentEpisodeInfo
+                                            ? currentEpisodeInfo.title
+                                            : movie.title}
+                                    </h1>
+                                    {isTVShow && currentEpisodeInfo && (
+                                        <span className={styles.episodeBadge}>
+                                            S{movie.seasons![currentSeasonIndex].seasonNumber} E{currentEpisodeInfo.episodeNumber}
+                                        </span>
+                                    )}
                                 </div>
-                                {movie.releaseYear && (
-                                    <div className={styles.detailItem}>
-                                        <span className={styles.detailLabel}>Release</span>
-                                        <span className={styles.detailValue}>{movie.releaseYear}</span>
-                                    </div>
-                                )}
-                                {!isTVShow && movie.duration && (
-                                    <div className={styles.detailItem}>
-                                        <span className={styles.detailLabel}>Runtime</span>
-                                        <span className={styles.detailValue}>{movie.duration} min</span>
-                                    </div>
-                                )}
-                                {isTVShow && movie.seasons && (
-                                    <div className={styles.detailItem}>
-                                        <span className={styles.detailLabel}>Seasons</span>
-                                        <span className={styles.detailValue}>{movie.seasons.length}</span>
-                                    </div>
-                                )}
-                                {languageLabel && (
-                                    <div className={styles.detailItem}>
-                                        <span className={styles.detailLabel}>Language</span>
-                                        <span className={styles.detailValue}>{languageLabel}</span>
-                                    </div>
-                                )}
-                                <div className={styles.detailItem}>
-                                    <span className={styles.detailLabel}>Rating</span>
-                                    <span className={styles.detailValue}>
-                                        <Star size={14} fill="var(--color-accent)" strokeWidth={0} />
-                                        {movie.rating.toFixed(1)}
+
+                                <button
+                                    onClick={toggleTheaterMode}
+                                    className={styles.theaterToggle}
+                                    title={isTheaterMode ? "Exit Theater Mode" : "Enter Theater Mode"}
+                                >
+                                    <Maximize2 size={20} />
+                                    <span>{isTheaterMode ? 'Exit Theater' : 'Theater Mode'}</span>
+                                </button>
+                            </div>
+
+                            {movie.description && (
+                                <p className={`${styles.description} ${isTheaterMode ? styles.hidden : ''}`}>
+                                    {movie.description}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Content Details & Episodes */}
+                <div className={`${styles.contentGrid} ${isTheaterMode ? styles.dimmed : ''}`}>
+                    <div className={styles.leftColumn}>
+                        {isTVShow && movie.seasons && (
+                            <div id="episodes" className={styles.episodesSection}>
+                                <div className={styles.sectionHeader}>
+                                    <h2>Episodes</h2>
+                                    <span className={styles.seasonCount}>
+                                        {movie.seasons.length} Season{movie.seasons.length !== 1 ? 's' : ''}
                                     </span>
                                 </div>
+                                <div className={styles.episodeListCard}>
+                                    <EpisodeList
+                                        seasons={movie.seasons}
+                                        currentSeasonIndex={currentSeasonIndex}
+                                        currentEpisodeIndex={currentEpisodeIndex}
+                                        onEpisodeSelect={handleEpisodeSelect}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className={styles.rightColumn}>
+                        <div className={styles.metaCard}>
+                            <h3>Details</h3>
+                            <div className={styles.metaGrid}>
+                                <div className={styles.metaItem}>
+                                    <span className={styles.label}>Rating</span>
+                                    <div className={styles.ratingValue}>
+                                        <Star size={16} fill="var(--color-accent)" strokeWidth={0} />
+                                        <span>{movie.rating.toFixed(1)}</span>
+                                    </div>
+                                </div>
+                                {movie.releaseYear && (
+                                    <div className={styles.metaItem}>
+                                        <span className={styles.label}>Released</span>
+                                        <span>{movie.releaseYear}</span>
+                                    </div>
+                                )}
+                                <div className={styles.metaItem}>
+                                    <span className={styles.label}>Type</span>
+                                    <span>{isTVShow ? 'TV Series' : 'Movie'}</span>
+                                </div>
+                                {languageLabel && (
+                                    <div className={styles.metaItem}>
+                                        <span className={styles.label}>Audio</span>
+                                        <span>{languageLabel}</span>
+                                    </div>
+                                )}
+                                {movie.genre && movie.genre.length > 0 && (
+                                    <div className={styles.metaItem}>
+                                        <span className={styles.label}>Genres</span>
+                                        <div className={styles.genreTags}>
+                                            {movie.genre.map(g => (
+                                                <span key={g} className={styles.miniTag}>{g}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        {isTVShow && movie.seasons && (
-                            <div id="episodes" className={`${styles.card} ${styles.episodeCard}`}>
-                                <div className={styles.cardHeader}>
-                                    <h3 className={styles.sectionTitle}>Episodes</h3>
-                                </div>
-                                <EpisodeList
-                                    seasons={movie.seasons}
-                                    currentSeasonIndex={currentSeasonIndex}
-                                    currentEpisodeIndex={currentEpisodeIndex}
-                                    onEpisodeSelect={handleEpisodeSelect}
+                        {movie.posterImage?.asset && (
+                            <div className={styles.posterCard}>
+                                <Image
+                                    src={urlFor(movie.posterImage).width(400).url()}
+                                    alt={movie.title}
+                                    width={300}
+                                    height={450}
+                                    className={styles.sidebarPoster}
                                 />
                             </div>
                         )}
