@@ -15,7 +15,8 @@ export default function TrailerModal({
     trailerUrl,
     isOpen,
     onClose,
-    onTrailerEnd,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onTrailerEnd: _onTrailerEnd, // Reserved for iframe video end event (not currently implemented)
     movieTitle
 }: TrailerModalProps) {
     const iframeRef = useRef<HTMLIFrameElement>(null)
