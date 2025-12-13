@@ -157,8 +157,38 @@ export async function getMoviesByCategory(categorySlug: string) {
   const query = `*[_type == "category" && slug.current == $categorySlug][0] {
     title,
     description,
-    "movies": movies[]->{
-      ${MOVIE_FIELDS}
+    "movies": movies[]-> {
+      _id,
+      _type,
+      title,
+      slug,
+      "posterImage": posterImage {
+        asset -> {
+          _id,
+          url
+        },
+        alt
+      },
+      "bannerImage": bannerImage {
+        asset -> {
+          _id,
+          url
+        },
+        alt
+      },
+      rating,
+      isFeatured,
+      isTrending,
+      description,
+      releaseYear,
+      duration,
+      genre,
+      videoUrl,
+      language-> {
+        _id,
+        title,
+        slug
+      }
     }
   }`;
 

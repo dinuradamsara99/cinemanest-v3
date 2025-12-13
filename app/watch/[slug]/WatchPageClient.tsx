@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, Star, Clock, Calendar, Play, Tv, Maximize2 } from 'lucide-react'
+import { ArrowLeft, Star, Play, Maximize2 } from 'lucide-react'
 import { urlFor } from '@/lib/sanity'
 import type { Movie } from '@/types/movie'
 import VideoPlayer from '@/components/VideoPlayer/VideoPlayer'
@@ -28,12 +28,7 @@ export default function WatchPageClient({ movie }: Props) {
         setCurrentEpisodeIndex(episodeIndex)
     }, [])
 
-    const handleScrollToEpisodes = useCallback(() => {
-        const el = document.getElementById('episodes')
-        if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        }
-    }, [])
+
 
     // Determine if this is a TV Show (check both _type from schema and contentType)
     const isTVShow = (movie._type === 'tvshow' || movie.contentType === 'tvshow') && movie.seasons && movie.seasons.length > 0

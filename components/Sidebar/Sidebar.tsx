@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Home, Tv, Grid3x3, Film, ChevronUp, Menu, X, Search, ChevronLeft, Languages } from 'lucide-react'
+import { Home, Tv, Grid3x3, ChevronUp, Menu, X, Search, ChevronLeft, Languages } from 'lucide-react'
 import { urlFor } from '@/lib/sanity'
 import styles from './Sidebar.module.css'
 

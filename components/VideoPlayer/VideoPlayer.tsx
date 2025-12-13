@@ -8,6 +8,7 @@ import React, {
     forwardRef,
     useImperativeHandle,
 } from 'react'
+import Image from 'next/image'
 import {
     Play,
     Pause,
@@ -288,7 +289,15 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
                 }}
             >
                 <div ref={videoWrapperRef} className={styles.videoWrapper}>
-                    {poster && !hasPlayedOnce && <img src={poster} alt={title} className={styles.poster} />}
+                    {poster && !hasPlayedOnce && (
+                        <Image
+                            src={poster}
+                            alt={title}
+                            fill
+                            className={styles.poster}
+                            priority
+                        />
+                    )}
                     <video
                         ref={videoRef}
                         src={blobUrl || src}
