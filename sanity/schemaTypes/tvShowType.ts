@@ -135,6 +135,13 @@ export const tvShowType = defineType({
             })
         }),
         defineField({
+            name: 'credit',
+            title: 'Video Credit',
+            type: 'text',
+            rows: 3,
+            description: 'Credit text for the video (e.g., "Video courtesy of...", "Special thanks to...")',
+        }),
+        defineField({
             name: 'seasons',
             title: 'Seasons',
             type: 'array',
@@ -197,6 +204,13 @@ export const tvShowType = defineType({
                                             title: 'Duration (minutes)',
                                             type: 'number',
                                             validation: (Rule) => Rule.positive().integer(),
+                                        },
+                                        {
+                                            name: 'credit',
+                                            title: 'Episode Credit',
+                                            type: 'text',
+                                            rows: 3,
+                                            description: 'Credit text for this episode (e.g., "Subtitle created by...", "Special thanks to...")',
                                         },
                                     ],
                                     preview: {
