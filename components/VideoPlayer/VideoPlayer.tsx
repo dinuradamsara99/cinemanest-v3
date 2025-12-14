@@ -60,6 +60,9 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         const [videoError, setVideoError] = useState(false)
         const [hasEnded, setHasEnded] = useState(false)
 
+        // Video Aspect Ratio (Dynamic)
+        const [videoAspectRatio, setVideoAspectRatio] = useState<number | null>(null)
+
         // Interaction State
         const [isDragging, setIsDragging] = useState(false)
         const [hoverTime, setHoverTime] = useState<number | null>(null)
@@ -240,8 +243,21 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
                 }
             }
 
+            const onLoadedMetadata = () => {
+                // Read video's intrinsic dimensions and calculate aspect ratio
+                if (video.videoWidth && video.videoHeight) {
+                    const aspectRatio = video.videoWidth / video.videoHeight
+                    setVideoAspectRatio(aspectRatio)
+                } else {
+                    // Fallback to 16:9 if dimensions aren't available
+                    setVideoAspectRatio(16 / 9)
+                }
+                setDuration(video.duration)
+            }
+
             video.addEventListener('timeupdate', onTimeUpdate)
             video.addEventListener('durationchange', onDurationChange)
+            video.addEventListener('loadedmetadata', onLoadedMetadata)
             video.addEventListener('waiting', onWaiting)
             video.addEventListener('playing', onPlaying)
             video.addEventListener('pause', onPause)
@@ -254,6 +270,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
             return () => {
                 video.removeEventListener('timeupdate', onTimeUpdate)
                 video.removeEventListener('durationchange', onDurationChange)
+                video.removeEventListener('loadedmetadata', onLoadedMetadata)
                 video.removeEventListener('waiting', onWaiting)
                 video.removeEventListener('playing', onPlaying)
                 video.removeEventListener('pause', onPause)
@@ -276,6 +293,9 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
             <div
                 ref={containerRef}
                 className={`${styles.player} ${isFullscreen ? styles.fullscreen : ''} ${!showControls && isPlaying ? styles.hideCursor : ''} ${className || ''}`}
+                style={{
+                    aspectRatio: videoAspectRatio ? `${videoAspectRatio}` : '16/9'
+                }}
                 onMouseMove={showControlsFunc}
                 onMouseLeave={() => isPlaying && setShowControls(false)}
                 onClick={handleSmartClick} // Handle both single and double tap
