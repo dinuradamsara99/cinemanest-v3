@@ -210,7 +210,8 @@ export const tvShowType = defineType({
                                             title: 'Episode Credit',
                                             type: 'text',
                                             rows: 3,
-                                            description: 'Credit text for this episode (e.g., "Subtitle created by...", "Special thanks to...")',
+                                            description: 'Credit text for this episode',
+                                            hidden: true, // Hidden from Studio UI but preserves existing data
                                         },
                                     ],
                                     preview: {
