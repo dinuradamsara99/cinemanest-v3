@@ -70,6 +70,7 @@ export interface Movie {
     genre?: string[]
     videoUrl?: string
     trailerUrl?: string
+    credit?: string
     seasons?: Season[]
     language?: Language
     categories?: Category[]

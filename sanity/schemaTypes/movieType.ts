@@ -143,6 +143,13 @@ export const movieType = defineType({
                 scheme: ['http', 'https']
             })
         }),
+        defineField({
+            name: 'credit',
+            title: 'Video Credit',
+            type: 'text',
+            rows: 3,
+            description: 'Credit text for the video (e.g., "Video courtesy of...", "Special thanks to...")',
+        }),
     ],
     preview: {
         select: {

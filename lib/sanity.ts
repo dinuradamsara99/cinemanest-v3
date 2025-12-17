@@ -47,7 +47,8 @@ const BASE_FIELDS = `
     title,
     slug
   },
-  trailerUrl
+  trailerUrl,
+  credit
 `;
 
 // Movie specific fields
