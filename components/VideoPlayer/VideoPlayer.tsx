@@ -13,13 +13,14 @@ import {
     Pause,
     Volume2,
     VolumeX,
-    Volume1,
     Maximize,
     Minimize,
     PictureInPicture2,
     ChevronsRight,
     ChevronsLeft,
-    RotateCcw
+    RotateCcw,
+    Settings,
+    Check
 } from 'lucide-react'
 import styles from './VideoPlayer.module.css'
 
@@ -35,17 +36,18 @@ interface VideoPlayerProps {
     poster?: string
     autoPlay?: boolean
     className?: string
+    primaryColor?: string
 }
 
 const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
-    ({ src, poster, autoPlay = false, className }, ref) => {
+    ({ src, poster, autoPlay = false, className, primaryColor = '#E50914' }, ref) => {
         // Refs
         const containerRef = useRef<HTMLDivElement>(null)
         const videoRef = useRef<HTMLVideoElement>(null)
         const progressRef = useRef<HTMLDivElement>(null)
         const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-        const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null)
         const lastClickTimeRef = useRef<number>(0)
+        const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
         // Player State
         const [isPlaying, setIsPlaying] = useState(false)
@@ -57,18 +59,19 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         const [isFullscreen, setIsFullscreen] = useState(false)
         const [showControls, setShowControls] = useState(true)
         const [isBuffering, setIsBuffering] = useState(false)
-        const [videoError, setVideoError] = useState(false)
         const [hasEnded, setHasEnded] = useState(false)
-
-        // Video Aspect Ratio (Dynamic)
         const [videoAspectRatio, setVideoAspectRatio] = useState<number | null>(null)
+
+        // Advanced State
+        const [playbackSpeed, setPlaybackSpeed] = useState(1)
+        const [showSettings, setShowSettings] = useState(false)
 
         // Interaction State
         const [isDragging, setIsDragging] = useState(false)
         const [hoverTime, setHoverTime] = useState<number | null>(null)
         const [hoverPosition, setHoverPosition] = useState(0)
 
-        // Animations / Overlays
+        // Animations
         const [skipAnimation, setSkipAnimation] = useState<'left' | 'right' | null>(null)
         const [centerIcon, setCenterIcon] = useState<'play' | 'pause' | null>(null)
 
@@ -79,53 +82,56 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
             getVideo: () => videoRef.current,
         }))
 
-        // --- Control Visibility Logic ---
-        const showControlsFunc = useCallback(() => {
+        // --- Controls Visibility ---
+        const handleMouseMove = useCallback(() => {
             setShowControls(true)
-            document.body.style.cursor = 'default'
             if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
-
-            if (isPlaying && !isDragging) {
+            if (isPlaying && !isDragging && !showSettings) {
                 controlsTimeoutRef.current = setTimeout(() => {
                     setShowControls(false)
-                    if (!containerRef.current?.matches(':hover')) {
-                        // Logic if mouse leaves
-                    }
+                    setShowSettings(false)
                 }, 2500)
             }
-        }, [isPlaying, isDragging])
+        }, [isPlaying, isDragging, showSettings])
+
+        useEffect(() => {
+            if (!isPlaying) {
+                setShowControls(true)
+                if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
+            } else {
+                handleMouseMove()
+            }
+        }, [isPlaying, handleMouseMove])
 
         // --- Playback Logic ---
         const togglePlay = useCallback(() => {
             if (!videoRef.current) return
             if (videoRef.current.paused || videoRef.current.ended) {
-                videoRef.current.play().catch(e => console.error("Play error:", e))
+                videoRef.current.play().catch(console.error)
                 setCenterIcon('play')
             } else {
                 videoRef.current.pause()
                 setCenterIcon('pause')
-                setShowControls(true)
             }
+            setShowSettings(false)
             setTimeout(() => setCenterIcon(null), 600)
         }, [])
 
         const handleVolumeChange = (newVolume: number) => {
             if (!videoRef.current) return
-            const clamped = Math.max(0, Math.min(1, newVolume))
-            videoRef.current.volume = clamped
-            videoRef.current.muted = clamped === 0
-            setVolume(clamped)
-            setIsMuted(clamped === 0)
+            const v = Math.max(0, Math.min(1, newVolume))
+            videoRef.current.volume = v
+            videoRef.current.muted = v === 0
+            setVolume(v)
+            setIsMuted(v === 0)
         }
 
         const toggleMute = () => {
             if (!videoRef.current) return
-            const nextMuteState = !isMuted
-            videoRef.current.muted = nextMuteState
-            setIsMuted(nextMuteState)
-            if (!nextMuteState && volume === 0) {
-                handleVolumeChange(0.5) // Unmute to 50% if volume was 0
-            }
+            const nextState = !isMuted
+            videoRef.current.muted = nextState
+            setIsMuted(nextState)
+            if (!nextState && volume === 0) handleVolumeChange(0.5)
         }
 
         const skip = (seconds: number) => {
@@ -133,75 +139,53 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
             const newTime = Math.max(0, Math.min(duration, videoRef.current.currentTime + seconds))
             videoRef.current.currentTime = newTime
             setCurrentTime(newTime)
-            showControlsFunc()
-
-            // Trigger Animation
-            setSkipAnimation(seconds > 0 ? 'right' : 'left')
-            setTimeout(() => setSkipAnimation(null), 500)
+            handleMouseMove()
+            
+            // Only show animation if NOT buffering (User Request)
+            if (!isBuffering) {
+                setSkipAnimation(seconds > 0 ? 'right' : 'left')
+                setTimeout(() => setSkipAnimation(null), 500)
+            }
         }
 
-        // --- Smart Click Handler (Tap vs Double Tap) ---
         const handleSmartClick = (e: React.MouseEvent | React.TouchEvent) => {
-            // If clicking controls, ignore
             if ((e.target as HTMLElement).closest(`.${styles.controlsOverlay}`)) return
+            if ((e.target as HTMLElement).closest(`.${styles.settingsMenu}`)) return
+            
+            // Close settings if open
+            if (showSettings) {
+                setShowSettings(false)
+                return
+            }
 
             const now = Date.now()
-            const timeSinceLastClick = now - lastClickTimeRef.current
-            const DOUBLE_TAP_DELAY = 300 // ms
-
-            if (timeSinceLastClick < DOUBLE_TAP_DELAY) {
-                // DOUBLE TAP DETECTED
+            if (now - lastClickTimeRef.current < 300) {
+                // Double Click
                 if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current)
-
-                // Calculate click position (Left or Right side of screen)
                 const rect = containerRef.current?.getBoundingClientRect()
                 if (rect) {
                     const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX
                     const clickX = clientX - rect.left
-
-                    if (clickX < rect.width / 2) {
-                        skip(-10) // Left side -> Rewind
-                    } else {
-                        skip(10) // Right side -> Forward
-                    }
+                    clickX < rect.width / 2 ? skip(-10) : skip(10)
                 }
             } else {
-                // SINGLE TAP DETECTED (Wait to see if it becomes double)
-                clickTimeoutRef.current = setTimeout(() => {
-                    // It was just a single tap -> Toggle Play
-                    togglePlay()
-                }, DOUBLE_TAP_DELAY)
+                // Single Click
+                clickTimeoutRef.current = setTimeout(() => togglePlay(), 300)
             }
-
             lastClickTimeRef.current = now
         }
 
-        const toggleFullscreen = async () => {
-            if (!containerRef.current) return
-            if (!document.fullscreenElement) {
-                try {
-                    await containerRef.current.requestFullscreen()
-                    setIsFullscreen(true)
-                } catch (e) { console.error(e) }
-            } else {
-                await document.exitFullscreen()
-                setIsFullscreen(false)
-            }
-        }
-
-        // --- Seek Handling ---
+        // --- Seek Logic ---
         const handleSeekStart = () => setIsDragging(true)
-
         const handleSeekMove = useCallback((e: MouseEvent | TouchEvent) => {
             if (!progressRef.current || !videoRef.current) return
             const rect = progressRef.current.getBoundingClientRect()
             const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX
-            const percentage = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
-            const seekTime = percentage * duration
-
+            const percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+            const time = percent * duration
             if (isDragging) {
-                videoRef.current.currentTime = seekTime
-                setCurrentTime(seekTime)
+                videoRef.current.currentTime = time
+                setCurrentTime(time)
             }
         }, [duration, isDragging])
 
@@ -225,137 +209,136 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
             }
         }, [isDragging, handleSeekMove, handleSeekEnd])
 
-        // --- Video Events ---
+        // --- Event Listeners ---
         useEffect(() => {
             const video = videoRef.current
             if (!video) return
 
-            const onTimeUpdate = () => setCurrentTime(video.currentTime)
-            const onDurationChange = () => setDuration(video.duration)
+            const updateTime = () => setCurrentTime(video.currentTime)
+            const updateDur = () => setDuration(video.duration)
             const onWaiting = () => setIsBuffering(true)
-            const onPlaying = () => { setIsBuffering(false); setIsPlaying(true); setHasEnded(false); }
+            const onPlaying = () => { setIsBuffering(false); setIsPlaying(true); setHasEnded(false) }
             const onPause = () => setIsPlaying(false)
-            const onEnded = () => { setIsPlaying(false); setHasEnded(true); setShowControls(true); }
-            const onError = () => { setVideoError(true); setIsBuffering(false); }
+            const onEnded = () => { setIsPlaying(false); setHasEnded(true); setShowControls(true) }
             const onProgress = () => {
-                if (video.buffered.length > 0) {
-                    setBuffered(video.buffered.end(video.buffered.length - 1))
-                }
+                if (video.buffered.length > 0) setBuffered(video.buffered.end(video.buffered.length - 1))
             }
-
-            const onLoadedMetadata = () => {
-                // Read video's intrinsic dimensions and calculate aspect ratio
-                if (video.videoWidth && video.videoHeight) {
-                    const aspectRatio = video.videoWidth / video.videoHeight
-                    setVideoAspectRatio(aspectRatio)
-                } else {
-                    // Fallback to 16:9 if dimensions aren't available
-                    setVideoAspectRatio(16 / 9)
-                }
+            const onLoadedMeta = () => {
                 setDuration(video.duration)
+                if (video.videoWidth && video.videoHeight) {
+                    setVideoAspectRatio(video.videoWidth / video.videoHeight)
+                }
             }
 
-            video.addEventListener('timeupdate', onTimeUpdate)
-            video.addEventListener('durationchange', onDurationChange)
-            video.addEventListener('loadedmetadata', onLoadedMetadata)
+            video.addEventListener('timeupdate', updateTime)
+            video.addEventListener('durationchange', updateDur)
             video.addEventListener('waiting', onWaiting)
             video.addEventListener('playing', onPlaying)
             video.addEventListener('pause', onPause)
             video.addEventListener('ended', onEnded)
-            video.addEventListener('error', onError)
             video.addEventListener('progress', onProgress)
-
-            if (autoPlay) video.play().catch(() => { })
+            video.addEventListener('loadedmetadata', onLoadedMeta)
 
             return () => {
-                video.removeEventListener('timeupdate', onTimeUpdate)
-                video.removeEventListener('durationchange', onDurationChange)
-                video.removeEventListener('loadedmetadata', onLoadedMetadata)
+                video.removeEventListener('timeupdate', updateTime)
+                video.removeEventListener('durationchange', updateDur)
                 video.removeEventListener('waiting', onWaiting)
                 video.removeEventListener('playing', onPlaying)
                 video.removeEventListener('pause', onPause)
                 video.removeEventListener('ended', onEnded)
-                video.removeEventListener('error', onError)
                 video.removeEventListener('progress', onProgress)
+                video.removeEventListener('loadedmetadata', onLoadedMeta)
             }
-        }, [autoPlay])
+        }, [])
 
-        // Format Time
-        const formatTime = (time: number) => {
-            const minutes = Math.floor(time / 60)
-            const seconds = Math.floor(time % 60)
-            return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
+        const changeSpeed = (rate: number) => {
+            if (videoRef.current) {
+                videoRef.current.playbackRate = rate
+                setPlaybackSpeed(rate)
+                setShowSettings(false)
+            }
         }
 
-        const VolumeIcon = isMuted || volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2
+        const toggleFullscreen = async () => {
+            if (!containerRef.current) return
+            if (!document.fullscreenElement) {
+                await containerRef.current.requestFullscreen()
+                setIsFullscreen(true)
+            } else {
+                await document.exitFullscreen()
+                setIsFullscreen(false)
+            }
+        }
+
+        const formatTime = (t: number) => {
+            const m = Math.floor(t / 60)
+            const s = Math.floor(t % 60)
+            return `${m}:${s < 10 ? '0' : ''}${s}`
+        }
 
         return (
             <div
                 ref={containerRef}
                 className={`${styles.player} ${isFullscreen ? styles.fullscreen : ''} ${!showControls && isPlaying ? styles.hideCursor : ''} ${className || ''}`}
-                style={{
-                    aspectRatio: videoAspectRatio ? `${videoAspectRatio}` : '16/9'
-                }}
-                onMouseMove={showControlsFunc}
+                style={{ 
+                    aspectRatio: videoAspectRatio ? `${videoAspectRatio}` : '16/9',
+                    '--primary-color': primaryColor 
+                } as React.CSSProperties}
+                onMouseMove={handleMouseMove}
                 onMouseLeave={() => isPlaying && setShowControls(false)}
-                onClick={handleSmartClick} // Handle both single and double tap
-                onKeyDown={(e) => {
-                    if (e.key === ' ' || e.key === 'k') togglePlay()
-                    if (e.key === 'f') toggleFullscreen()
-                    if (e.key === 'ArrowRight') skip(5)
-                    if (e.key === 'ArrowLeft') skip(-5)
-                }}
-                tabIndex={0}
+                onClick={handleSmartClick}
             >
-                <div className={styles.videoWrapper}>
-                    <video
-                        ref={videoRef}
-                        src={src}
-                        className={styles.video}
-                        playsInline
-                        poster={poster}
-                    />
-                </div>
+                <video
+                    ref={videoRef}
+                    src={src}
+                    className={styles.video}
+                    poster={poster}
+                    playsInline
+                />
 
-                {/* OVERLAYS LAYER */}
+                {/* --- OVERLAYS --- */}
                 <div className={styles.overlayLayer}>
-                    {/* 1. Buffering / Loading */}
-                    {isBuffering && !videoError && (
+                    {/* Buffering Loader (Supersedes everything else) */}
+                    {isBuffering && (
                         <div className={styles.loader}>
                             <div className={styles.spinner}></div>
                         </div>
                     )}
 
-                    {/* 2. Skip Animation (Double Tap) */}
-                    {skipAnimation && (
-                        <div className={`${styles.skipOverlay} ${skipAnimation === 'right' ? styles.right : styles.left}`}>
-                            <div className={styles.skipIcon}>
-                                {skipAnimation === 'right' ? <ChevronsRight size={32} /> : <ChevronsLeft size={32} />}
-                            </div>
-                            <span className={styles.skipText}>{skipAnimation === 'right' ? '+10s' : '-10s'}</span>
-                        </div>
-                    )}
+                    {/* Animations - Only show if NOT buffering */}
+                    {!isBuffering && (
+                        <>
+                            {/* Skip Animation */}
+                            {skipAnimation && (
+                                <div className={`${styles.skipOverlay} ${skipAnimation === 'right' ? styles.right : styles.left}`}>
+                                    {skipAnimation === 'right' ? <ChevronsRight size={36} /> : <ChevronsLeft size={36} />}
+                                    <span>{skipAnimation === 'right' ? '+10s' : '-10s'}</span>
+                                </div>
+                            )}
 
-                    {/* 3. Center Play/Pause Animation */}
-                    {centerIcon && (
-                        <div className={styles.centerPulse}>
-                            {centerIcon === 'play' ? <Play fill="white" size={48} /> : <Pause fill="white" size={48} />}
-                        </div>
-                    )}
+                            {/* Center Icon Pulse */}
+                            {centerIcon && (
+                                <div className={styles.centerPulse}>
+                                    {centerIcon === 'play' ? <Play fill="white" size={48} /> : <Pause fill="white" size={48} />}
+                                </div>
+                            )}
 
-                    {/* 4. Replay Button if Ended */}
-                    {hasEnded && (
-                        <button onClick={() => { videoRef.current?.play() }} className={styles.centerPulse} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
-                            <RotateCcw color="white" size={48} />
-                        </button>
+                            {/* Replay Button */}
+                            {hasEnded && (
+                                <button onClick={() => videoRef.current?.play()} className={styles.replayBtn}>
+                                    <RotateCcw size={48} />
+                                    <span>Replay</span>
+                                </button>
+                            )}
+                        </>
                     )}
                 </div>
 
-                {/* CONTROLS BAR */}
+                {/* --- CONTROLS --- */}
                 <div className={`${styles.controlsOverlay} ${showControls || !isPlaying ? styles.visible : ''}`} onClick={(e) => e.stopPropagation()}>
-
+                    
                     {/* Progress Bar */}
-                    <div
+                    <div 
                         className={styles.progressBarContainer}
                         ref={progressRef}
                         onMouseDown={handleSeekStart}
@@ -369,60 +352,78 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
                         }}
                         onMouseLeave={() => setHoverTime(null)}
                     >
-                        {/* Hover Time Tooltip */}
                         {hoverTime !== null && hoverTime >= 0 && (
                             <div className={styles.thumbnailTooltip} style={{ left: hoverPosition }}>
-                                <span className={styles.tooltipTime}>{formatTime(hoverTime)}</span>
+                                {formatTime(hoverTime)}
                             </div>
                         )}
-
+                        
                         <div className={styles.progressTrack}>
                             <div className={styles.progressBuffered} style={{ width: `${(buffered / duration) * 100}%` }} />
-                            <div className={styles.progressCurrent} style={{ width: `${(currentTime / duration) * 100}%` }}></div>
+                            <div className={styles.progressCurrent} style={{ width: `${(currentTime / duration) * 100}%` }} />
                             <div className={styles.scrubber} style={{ left: `${(currentTime / duration) * 100}%` }} />
                         </div>
                     </div>
 
                     <div className={styles.controlsRow}>
+                        {/* Left Side */}
                         <div className={styles.leftControls}>
                             <button onClick={togglePlay} className={styles.iconBtn}>
-                                {isPlaying ? <Pause size={24} fill="#fff" /> : <Play size={24} fill="#fff" />}
+                                {isPlaying ? <Pause size={22} fill="white" /> : <Play size={22} fill="white" />}
                             </button>
-
-                            <div className={styles.volumeContainer}>
+                            
+                            <div className={styles.volumeGroup}>
                                 <button onClick={toggleMute} className={styles.iconBtn}>
-                                    <VolumeIcon size={24} />
+                                    {isMuted || volume === 0 ? <VolumeX size={22} /> : <Volume2 size={22} />}
                                 </button>
-                                <div className={styles.volumeSliderContainer}>
-                                    <input
-                                        type="range"
-                                        min="0" max="1" step="0.05"
-                                        value={isMuted ? 0 : volume}
-                                        onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                                        className={styles.volumeSlider}
-                                    />
-                                </div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="1"
+                                    step="0.05"
+                                    value={isMuted ? 0 : volume}
+                                    onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                                    className={styles.volumeSlider}
+                                />
                             </div>
 
                             <div className={styles.timeDisplay}>
                                 <span>{formatTime(currentTime)}</span>
-                                <span style={{ opacity: 0.5, margin: '0 4px' }}>/</span>
+                                <span className={styles.separator}>/</span>
                                 <span>{formatTime(duration || 0)}</span>
                             </div>
                         </div>
 
+                        {/* Right Side */}
                         <div className={styles.rightControls}>
-                            <button
-                                className={`${styles.iconBtn} ${styles.pipBtn}`}
-                                onClick={() => {
-                                    if (document.pictureInPictureElement) document.exitPictureInPicture()
-                                    else videoRef.current?.requestPictureInPicture()
-                                }}
-                            >
+                            {/* Settings Menu */}
+                            <div className={styles.settingsContainer}>
+                                <button onClick={() => setShowSettings(!showSettings)} className={`${styles.iconBtn} ${showSettings ? styles.active : ''}`}>
+                                    <Settings size={20} />
+                                </button>
+                                {showSettings && (
+                                    <div className={styles.settingsMenu}>
+                                        <div className={styles.settingsHeader}>Speed</div>
+                                        {[0.5, 1, 1.5, 2].map(speed => (
+                                            <button 
+                                                key={speed} 
+                                                onClick={() => changeSpeed(speed)}
+                                                className={playbackSpeed === speed ? styles.activeOption : ''}
+                                            >
+                                                {speed}x
+                                                {playbackSpeed === speed && <Check size={14} />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <button onClick={() => document.pictureInPictureElement ? document.exitPictureInPicture() : videoRef.current?.requestPictureInPicture()} className={styles.iconBtn}>
                                 <PictureInPicture2 size={20} />
                             </button>
+                            
                             <button onClick={toggleFullscreen} className={styles.iconBtn}>
-                                {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
+                                {isFullscreen ? <Minimize size={22} /> : <Maximize size={22} />}
                             </button>
                         </div>
                     </div>
