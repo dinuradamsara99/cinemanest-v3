@@ -1,32 +1,28 @@
 /* VideoPlayer.module.css */
 
 .player {
-    --primary-color: #ffcc70;
-    --text-color: #ffffff;
-    --bg-overlay: rgba(0, 0, 0, 0.6);
-    --control-bg: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
-    --transition-ease: cubic-bezier(0.4, 0.0, 0.2, 1);
-
+    /* Theme Variables */
+    --primary-color: #E50914; /* Can be overridden */
+    --bg-overlay: rgba(0, 0, 0, 0.4);
+    --glass-bg: rgba(20, 20, 20, 0.7);
+    --text-color: #f5f5f5;
+    
     position: relative;
     width: 100%;
-    /* aspect-ratio removed - now set dynamically via inline style based on video dimensions */
     max-width: 100%;
     background: #000;
     overflow: hidden;
-    border-radius: 12px;
-    /* Modern rounded corners */
+    border-radius: 16px; /* Modern rounded look */
+    font-family: 'Inter', -apple-system, sans-serif;
     user-select: none;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    touch-action: manipulation;
-    z-index: 1;
-    isolation: isolate;
-    outline: none;
-    transition: all 0.3s var(--transition-ease);
+    group: video-player;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
 }
 
 .player.fullscreen {
-    width: 100vw;
-    height: 100vh;
+    width: 100vw !important;
+    height: 100vh !important;
     border-radius: 0;
     z-index: 9999;
 }
@@ -35,41 +31,18 @@
     cursor: none;
 }
 
-/* VIDEO WRAPPER */
-.videoWrapper {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-}
-
 .video {
     width: 100%;
     height: 100%;
     object-fit: contain;
 }
 
-.poster {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    /* Changed from 'cover' to 'contain' to match video behavior */
-    z-index: 2;
-    transition: opacity 0.5s ease;
-}
-
-/* OVERLAYS LAYER (Loading, Center Play, Skip) */
+/* --- OVERLAY LAYER --- */
 .overlayLayer {
     position: absolute;
     inset: 0;
     z-index: 10;
     pointer-events: none;
-    /* Let clicks pass through to container */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -78,141 +51,111 @@
 /* MODERN LOADING ANIMATION */
 .loader {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(4px);
-    padding: 30px;
-    border-radius: 20px;
-    animation: fadeIn 0.3s ease-out;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px); /* Glassmorphism */
+    border-radius: 50%;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
 }
 
 .spinner {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 3px solid rgba(255, 255, 255, 0.1);
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.1);
     border-top-color: var(--primary-color);
-    border-right-color: var(--primary-color);
+    border-radius: 50%;
     animation: spin 0.8s linear infinite;
-    box-shadow: 0 0 15px rgba(255, 204, 112, 0.2);
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/* SKIP ANIMATION (Double Tap) */
+/* ANIMATIONS (Skip, Pulse) */
 .skipOverlay {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
-    padding: 20px 30px;
-    border-radius: 50px;
+    backdrop-filter: blur(5px);
+    padding: 15px 25px;
+    border-radius: 30px;
     display: flex;
     flex-direction: column;
     align-items: center;
     color: #fff;
-    z-index: 20;
-    animation: skipPop 0.4s ease-out forwards;
-}
-
-.skipOverlay.left {
-    left: 15%;
-}
-
-.skipOverlay.right {
-    right: 15%;
-}
-
-.skipIcon {
-    margin-bottom: 5px;
-    color: var(--primary-color);
-}
-
-.skipText {
-    font-size: 14px;
     font-weight: 700;
+    font-size: 14px;
+    animation: popIn 0.4s ease-out forwards;
 }
+.skipOverlay.left { left: 10%; }
+.skipOverlay.right { right: 10%; }
 
-@keyframes skipPop {
-    0% {
-        opacity: 0;
-        transform: translateY(-50%) scale(0.5);
-    }
-
-    50% {
-        opacity: 1;
-        transform: translateY(-50%) scale(1.1);
-    }
-
-    100% {
-        opacity: 0;
-        transform: translateY(-50%) scale(1);
-    }
-}
-
-/* CENTER PLAY BUTTON */
 .centerPulse {
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.5);
     border-radius: 50%;
-    padding: 24px;
-    animation: pulsePop 0.5s ease-out forwards;
+    padding: 25px;
+    backdrop-filter: blur(4px);
+    animation: popFade 0.6s ease-out forwards;
 }
 
-@keyframes pulsePop {
-    0% {
-        transform: scale(0.8);
-        opacity: 0;
-    }
-
-    50% {
-        transform: scale(1.1);
-        opacity: 1;
-    }
-
-    100% {
-        transform: scale(1.0);
-        opacity: 0;
-    }
+.replayBtn {
+    pointer-events: auto;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
+}
+.replayBtn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+.replayBtn span {
+    font-size: 10px;
+    margin-top: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1px;
 }
 
-/* CONTROLS BAR */
+@keyframes popIn {
+    0% { opacity: 0; transform: translateY(-50%) scale(0.8); }
+    50% { opacity: 1; transform: translateY(-50%) scale(1.1); }
+    100% { opacity: 0; transform: translateY(-50%) scale(1); }
+}
+@keyframes popFade {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* --- CONTROLS BAR --- */
 .controlsOverlay {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 60px 20px 20px 20px;
-    /* High top padding for gradient fade */
-    background: var(--control-bg);
+    /* Gradient specifically tuned for readability */
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, transparent 100%);
+    padding: 40px 20px 15px;
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.3s ease, transform 0.3s ease;
     z-index: 20;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
-
 .controlsOverlay.visible {
     opacity: 1;
     transform: translateY(0);
@@ -221,27 +164,26 @@
 
 /* PROGRESS BAR */
 .progressBarContainer {
-    position: relative;
     width: 100%;
-    height: 20px;
-    /* Touch target height */
+    height: 16px; /* Hover area */
     display: flex;
     align-items: center;
     cursor: pointer;
-    touch-action: none;
+    position: relative;
+    transition: height 0.2s;
 }
 
 .progressTrack {
     width: 100%;
     height: 4px;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
+    border-radius: 4px;
     position: relative;
-    transition: height 0.2s;
-    overflow: hidden;
-    /* Keeps buffered/current inside rounded corners */
+    overflow: visible;
+    transition: height 0.2s ease;
 }
 
+/* Hover Effect: Thicker bar */
 .progressBarContainer:hover .progressTrack {
     height: 6px;
 }
@@ -250,42 +192,60 @@
     position: absolute;
     height: 100%;
     background: rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+    pointer-events: none;
 }
 
 .progressCurrent {
     position: absolute;
     height: 100%;
     background: var(--primary-color);
-    border-radius: 2px;
+    border-radius: 4px;
+    pointer-events: none;
 }
 
 .scrubber {
     position: absolute;
-    right: -6px;
     top: 50%;
-    transform: translateY(-50%) scale(0);
+    transform: translate(-50%, -50%) scale(0);
     width: 14px;
     height: 14px;
-    background: #fff;
+    background: var(--primary-color);
+    border: 2px solid #fff;
     border-radius: 50%;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    z-index: 2;
 }
 
-.progressBarContainer:hover .scrubber,
-.progressBarContainer:active .scrubber {
-    transform: translateY(-50%) scale(1);
+.progressBarContainer:hover .scrubber {
+    transform: translate(-50%, -50%) scale(1);
 }
 
-/* BUTTONS & ROW */
+.thumbnailTooltip {
+    position: absolute;
+    bottom: 25px;
+    transform: translateX(-50%);
+    background: rgba(20, 20, 20, 0.9);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    pointer-events: none;
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* CONTROLS ROW */
 .controlsRow {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-top: 4px;
 }
 
-.leftControls,
-.rightControls {
+.leftControls, .rightControls {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -294,187 +254,133 @@
 .iconBtn {
     background: transparent;
     border: none;
-    color: #fff;
+    color: #e0e0e0;
     cursor: pointer;
     padding: 8px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s, transform 0.1s;
+    transition: all 0.2s;
 }
-
 .iconBtn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
 }
-
-.iconBtn:active {
-    transform: scale(0.95);
+.iconBtn.active {
+    color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 /* VOLUME */
-.volumeContainer {
+.volumeGroup {
     display: flex;
     align-items: center;
-    gap: 8px;
-    /* Hover interaction for desktop */
-    position: relative;
+    gap: 0px;
+    transition: all 0.3s;
 }
-
-.volumeSliderContainer {
-    width: 0;
-    overflow: hidden;
-    transition: width 0.3s ease;
-    display: flex;
-    align-items: center;
-}
-
-.volumeContainer:hover .volumeSliderContainer {
-    width: 80px;
-}
-
 .volumeSlider {
-    width: 70px;
+    width: 0;
     height: 4px;
-    -webkit-appearance: none;
-    background: rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: rgba(255,255,255,0.3);
     border-radius: 2px;
-    outline: none;
+    -webkit-appearance: none;
 }
-
+.volumeGroup:hover .volumeSlider,
+.volumeSlider:hover {
+    width: 80px;
+    opacity: 1;
+    margin-left: 8px;
+}
 .volumeSlider::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 12px;
     height: 12px;
     border-radius: 50%;
     background: #fff;
-    cursor: pointer;
 }
 
-/* TIME DISPLAY */
+/* TIME */
 .timeDisplay {
     font-size: 13px;
-    font-family: 'Roboto Mono', monospace;
-    color: rgba(255, 255, 255, 0.9);
-    margin-left: 5px;
     font-weight: 500;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-variant-numeric: tabular-nums;
 }
+.separator { opacity: 0.5; }
 
-/* TOOLTIP */
-.thumbnailTooltip {
+/* SETTINGS MENU (ADVANCED) */
+.settingsContainer {
+    position: relative;
+}
+.settingsMenu {
     position: absolute;
-    bottom: 25px;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 4px 8px;
-    border-radius: 4px;
-    pointer-events: none;
-    z-index: 30;
+    bottom: 50px;
+    right: 0;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 8px;
+    border-radius: 12px;
+    width: 140px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    animation: slideUp 0.2s ease-out;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+}
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.tooltipTime {
-    color: #fff;
-    font-size: 12px;
+.settingsHeader {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #888;
+    padding: 4px 8px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.settingsMenu button {
+    background: transparent;
+    border: none;
+    color: #ddd;
+    padding: 8px 12px;
+    text-align: left;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.settingsMenu button:hover {
+    background: rgba(255,255,255,0.1);
+}
+.settingsMenu button.activeOption {
+    color: var(--primary-color);
     font-weight: 600;
 }
 
-/* ---------------------------------------------------- */
-/* RESPONSIVE DESIGN */
-/* ---------------------------------------------------- */
-
-/* Tablet & Mobile (Max width 768px) */
+/* RESPONSIVE */
 @media (max-width: 768px) {
-    .player {
-        border-radius: 0;
-        /* Full width usually on mobile */
-    }
-
-    .controlsOverlay {
-        padding: 40px 15px 15px;
-    }
-
-    .volumeSliderContainer {
-        display: none;
-        /* Hide volume slider on touch devices (use physical buttons) */
-    }
-
-    .volumeContainer:hover .volumeSliderContainer {
-        width: 0;
-        /* Disable hover expansion */
-    }
-
-    .iconBtn {
-        padding: 10px;
-        /* Larger touch targets */
-    }
+    .controlsOverlay { padding: 20px 15px 15px; }
+    .volumeSlider { display: none; } /* Hide volume slider on mobile */
+    .iconBtn { padding: 10px; }
+    .iconBtn svg { width: 24px; height: 24px; }
+    .settingsMenu { right: -50px; }
 }
-
-/* Mobile Portrait (Max width 480px) */
 @media (max-width: 480px) {
-    .controlsRow {
-        gap: 0;
-    }
-
-    .leftControls,
-    .rightControls {
-        gap: 4px;
-    }
-
-    /* Make progress bar taller for easier seeking */
-    .progressBarContainer {
-        height: 25px;
-    }
-
-    .progressTrack {
-        height: 4px;
-    }
-
-    /* Scrubber always visible on mobile for better UX */
-    .scrubber {
-        transform: translateY(-50%) scale(1);
-    }
-
-    /* Smaller Time Font */
-    .timeDisplay {
-        font-size: 11px;
-        margin-left: 2px;
-    }
-
-    /* Hide PiP button on very small screens to save space */
-    .pipBtn {
-        display: none;
-    }
-
-    /* Adjust Skip Overlay for mobile */
-    .skipOverlay {
-        padding: 15px 20px;
-    }
-
-    .skipIcon svg {
-        width: 30px;
-        height: 30px;
-    }
-}
-
-/* Ultra Small (Galaxy Fold outer screen etc. < 320px) */
-@media (max-width: 350px) {
-    .controlsOverlay {
-        padding: 30px 10px 10px;
-    }
-
-    .iconBtn {
-        padding: 6px;
-    }
-
-    .iconBtn svg {
-        width: 20px;
-        height: 20px;
-    }
-
-    /* Show only current time to save space */
-    .timeDisplay span:nth-child(2),
-    .timeDisplay span:nth-child(3) {
-        display: none;
-    }
+    .timeDisplay span:nth-child(3) { display: none; } /* Hide duration */
+    .separator { display: none; }
+    .skipOverlay { padding: 10px 15px; }
+    .replayBtn { width: 60px; height: 60px; }
 }
