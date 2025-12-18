@@ -2,11 +2,14 @@
     flex: 1;
     padding: var(--spacing-2xl);
     min-height: calc(100vh - 64px);
+
 }
 
 .header {
-    margin-bottom: var(--spacing-2xl);
-    padding: var(--spacing-xl) 0;
+    margin-bottom: 30px;
+    padding-left: 4%;
+    padding-top: 4%;
+    padding-bottom: 27px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 

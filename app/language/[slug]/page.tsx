@@ -57,7 +57,7 @@ async function LanguageMoviesSection({ slug }: { slug: string }) {
         );
     }
 
-    return <MovieRow title={`${language?.title} Movies`} movies={movies} />;
+    return <MovieRow title="" movies={movies} />;
 }
 
 export default async function LanguageMoviesPage({ params }: Props) {

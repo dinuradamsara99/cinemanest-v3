@@ -161,63 +161,41 @@ export async function getMovieBySlug(slug: string) {
 
 // Fetch movies by category
 export async function getMoviesByCategory(categorySlug: string) {
-  const query = `*[_type == "category" && slug.current == $categorySlug][0] {
+  // First get the category info
+  const categoryQuery = `*[_type == "category" && slug.current == $categorySlug][0] {
     title,
-    description,
-    "movies": movies[]-> {
-      _id,
-      _type,
+    description
+  }`;
+
+  // Then get all movies/tv shows that reference this category
+  const moviesQuery = `*[(_type == "movie" || _type == "tvshow") && references(*[_type == "category" && slug.current == $categorySlug][0]._id)] | order(_createdAt desc) {
+    ${BASE_FIELDS},
+    duration,
+    videoUrl,
+    seasons[] {
+      _key,
+      seasonNumber,
       title,
-      slug,
-      "posterImage": posterImage {
-        asset -> {
-          _id,
-          url
-        },
-        alt
-      },
-      "bannerImage": bannerImage {
-        asset -> {
-          _id,
-          url
-        },
-        alt
-      },
-      rating,
-      isFeatured,
-      isTrending,
-      description,
-      releaseYear,
-      duration,
-      genre,
-      videoUrl,
-      language-> {
-        _id,
-        title,
-        slug
-      },
-      categories[]-> {
-        _id,
-        title,
-        slug
-      },
-      seasons[] {
+      episodes[] {
         _key,
-        seasonNumber,
+        episodeNumber,
         title,
-        episodes[] {
-          _key,
-          episodeNumber,
-          title,
-          thumbnail { asset-> },
-          videoUrl,
-          duration
-        }
+        thumbnail { asset-> },
+        videoUrl,
+        duration
       }
     }
   }`;
 
-  return client.fetch(query, { categorySlug });
+  const [category, movies] = await Promise.all([
+    client.fetch(categoryQuery, { categorySlug }),
+    client.fetch(moviesQuery, { categorySlug })
+  ]);
+
+  return {
+    ...category,
+    movies
+  };
 }
 
 // Fetch all categories

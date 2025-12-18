@@ -17,12 +17,12 @@ async function TVShowsSection() {
         return (
             <div className={styles.emptyState}>
                 <h2>No TV shows available</h2>
-                <p>Check back later for updates!</p>
+
             </div>
         );
     }
 
-    return <MovieRow title="All TV Shows" movies={tvShows} />;
+    return <MovieRow title="" movies={tvShows} />;
 }
 
 export default function TVShowsPage() {

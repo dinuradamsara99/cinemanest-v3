@@ -53,7 +53,7 @@ async function CategoryMoviesSection({ slug }: { slug: string }) {
         );
     }
 
-    return <MovieRow title={`${categoryData.title}`} movies={categoryData.movies} />;
+    return <MovieRow title="" movies={categoryData.movies} />;
 }
 
 export default async function CategoryMoviesPage({ params }: Props) {
@@ -69,6 +69,13 @@ export default async function CategoryMoviesPage({ params }: Props) {
 
     return (
         <main className={styles.main}>
+            <div className={styles.header}>
+                <h1 className={styles.title}>{category.title}</h1>
+                {category.description && (
+                    <p className={styles.subtitle}>{category.description}</p>
+                )}
+            </div>
+
             <Suspense fallback={<SkeletonRow />}>
                 <CategoryMoviesSection slug={slug} />
             </Suspense>
