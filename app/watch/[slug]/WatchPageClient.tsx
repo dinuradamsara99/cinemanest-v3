@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { ArrowLeft, Play, Youtube } from 'lucide-react'
 import { urlFor } from '@/lib/sanity'
 import type { Movie, Category } from '@/types/movie'
-import VideoPlayer from '@/components/VideoPlayer/VideoPlayer'
+import VideoPlayerWithSubtitles from '@/components/VideoPlayer/VideoPlayerWithSubtitles'
+import { convertSanitySubtitlesToPlayerFormat } from '@/lib/subtitleConverter'
 import EpisodeList from '@/components/EpisodeList/EpisodeList'
 import TrailerModal from '@/components/TrailerModal/TrailerModal'
 import styles from './page.module.css'
@@ -42,12 +43,16 @@ export default function WatchPageClient({ movie }: Props) {
     // Determine if this is a TV Show (check both _type from schema and contentType)
     const isTVShow = (movie._type === 'tvshow' || movie.contentType === 'tvshow') && movie.seasons && movie.seasons.length > 0
 
-    // Calculate current video URL
+    // Calculate current video URL and subtitles
     let currentVideoUrl = movie.videoUrl || ''
+    let currentSubtitles = movie.subtitles // Default to movie level subtitles
+
     if (isTVShow && movie.seasons) {
         const currentSeason = movie.seasons[currentSeasonIndex]
         const currentEpisode = currentSeason?.episodes?.[currentEpisodeIndex]
         currentVideoUrl = currentEpisode?.videoUrl || ''
+        // For TV shows, only use episode-level subtitles (no show-level fallback)
+        currentSubtitles = currentEpisode?.subtitles
     }
 
 
@@ -128,14 +133,15 @@ export default function WatchPageClient({ movie }: Props) {
                                         frameBorder="0"
                                     />
                                 ) : (
-                                    <VideoPlayer
+                                    <VideoPlayerWithSubtitles
                                         key={isTVShow && movie.seasons
                                             ? `${movie._id}-s${currentSeasonIndex + 1}-e${currentEpisodeIndex + 1}`
                                             : movie._id
                                         }
-                                        src={currentVideoUrl}
+                                        videoUrl={currentVideoUrl}
                                         poster={movie.posterImage?.asset ? urlFor(movie.posterImage).width(1920).url() : undefined}
-
+                                        title={movie.title}
+                                        subtitles={convertSanitySubtitlesToPlayerFormat(currentSubtitles)}
                                     />
                                 )
                             ) : (

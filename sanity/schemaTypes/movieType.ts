@@ -150,6 +150,13 @@ export const movieType = defineType({
             rows: 3,
             description: 'Credit text for the video (e.g., "Video courtesy of...", "Special thanks to...")',
         }),
+        defineField({
+            name: 'subtitles',
+            title: 'Subtitles',
+            type: 'array',
+            of: [{ type: 'subtitleTrack' }],
+            description: 'Upload subtitle files in different languages (.vtt or .srt format)',
+        }),
     ],
     preview: {
         select: {

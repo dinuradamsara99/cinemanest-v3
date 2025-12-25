@@ -107,24 +107,20 @@
 .playerWrapper {
     position: relative;
     width: 100%;
-    /* aspect-ratio removed - now determined dynamically by VideoPlayer based on video dimensions */
-    max-height: auto;
-    background: #000;
-    border-radius: 16px;
+    /* aspect-ratio: 16 / 9;  <-- මේක මකන්න හෝ comment කරන්න */
+    height: auto;
+    /* මේක අලුතෙන් එකතු කරන්න */
+    background-color: #000;
+    /* Background එක කළු කරන්න */
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    /* Keep hidden for rounded corners, video fits with object-fit: contain */
-    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
-    border: 1px solid var(--glass-border);
-    transition: all var(--transition-smooth);
-    z-index: 1;
-    /* Lower z-index to ensure it doesn't cover other content */
-    isolation: isolate;
-    /* Create new stacking context */
-
-    /* New Changes: Center content */
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    font-family: var(--font-sans);
+    group-name: player;
     display: flex;
-    align-items: center;
+    /* වීඩියෝ එක මැදට ගන්න */
     justify-content: center;
+    align-items: center;
 }
 
 /* Theater Mode Styles */

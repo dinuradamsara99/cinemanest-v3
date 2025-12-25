@@ -206,6 +206,13 @@ export const tvShowType = defineType({
                                             validation: (Rule) => Rule.positive().integer(),
                                         },
                                         {
+                                            name: 'subtitles',
+                                            title: 'Episode Subtitles',
+                                            type: 'array',
+                                            of: [{ type: 'subtitleTrack' }],
+                                            description: 'Upload subtitle files for this episode (.vtt or .srt format)',
+                                        },
+                                        {
                                             name: 'credit',
                                             title: 'Episode Credit',
                                             type: 'text',

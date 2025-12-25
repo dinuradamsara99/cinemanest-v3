@@ -48,7 +48,20 @@ const BASE_FIELDS = `
     slug
   },
   trailerUrl,
-  credit
+  credit,
+  subtitles[] {
+    _key,
+    label,
+    language,
+    file {
+      asset-> {
+        _ref,
+        _type,
+        url
+      }
+    },
+    isDefault
+  }
 `;
 
 // Movie specific fields
@@ -73,7 +86,20 @@ const TVSHOW_FIELDS = `
         asset
       },
       videoUrl,
-      duration
+      duration,
+      subtitles[] {
+        _key,
+        label,
+        language,
+        file {
+          asset-> {
+            _ref,
+            _type,
+            url
+          }
+        },
+        isDefault
+      }
     }
   }
 `;

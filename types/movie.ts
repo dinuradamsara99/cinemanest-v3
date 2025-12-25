@@ -7,6 +7,21 @@ export interface Language {
     }
 }
 
+// Subtitle track type from Sanity
+export interface SubtitleTrack {
+    _key: string
+    label: string
+    language: string
+    file: {
+        asset: {
+            _ref: string
+            _type: string
+            url?: string
+        }
+    }
+    isDefault?: boolean
+}
+
 // Episode type for TV Shows
 export interface Episode {
     thumbnailSprite: string | undefined
@@ -21,6 +36,7 @@ export interface Episode {
     }
     videoUrl: string
     duration?: number
+    subtitles?: SubtitleTrack[]
 }
 
 // Season type for TV Shows
@@ -74,6 +90,7 @@ export interface Movie {
     seasons?: Season[]
     language?: Language
     categories?: Category[]
+    subtitles?: SubtitleTrack[]
 }
 
 // Category type from Sanity
