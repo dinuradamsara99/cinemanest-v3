@@ -9,10 +9,10 @@ interface CarouselSkeletonProps {
 export function CarouselSkeleton({ title, count = 5 }: CarouselSkeletonProps) {
     return (
         <section className="w-full py-8">
-            <div className="container px-4 md:px-6">
+            <div className="w-full px-4 md:px-8">
                 <Skeleton className="h-8 w-48 mb-6" />
 
-                <div className="flex gap-2 md:gap-4 overflow-x-auto pb-4 -mx-4 px-4 md:-mx-6 md:px-6">
+                <div className="flex gap-x-4 md:gap-x-6 overflow-x-auto pb-4 -mx-4 px-4 md:-mx-8 md:px-8">
                     {Array.from({ length: count }).map((_, i) => (
                         <div
                             key={i}

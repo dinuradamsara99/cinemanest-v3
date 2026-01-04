@@ -14,7 +14,7 @@ export function ContentGrid({ title, children }: ContentGridProps) {
                මෙතනත් px-4 md:px-8 දැම්මා. 
                දැන් උඩ Hero එකයි මේ Grid එකයි කෙලින්ම Align වෙනවා.
             */}
-            <div className="w-full px-4 md:px-8">
+            <div className="w-full px-4 pb-4 md:px-8 md:pb-8">
                 {/* Section Title */}
                 <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight mb-6">
                     {title}
