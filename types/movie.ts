@@ -1,4 +1,6 @@
 // Language type from Sanity
+import { SanityImage, SanitySlug } from './sanity';
+
 export interface Language {
     _id: string
     title: string
@@ -49,40 +51,30 @@ export interface Season {
     episodes: Episode[]
 }
 
-// Movie and TV Show types
-import { SanityImage, SanitySlug } from './sanity';
+// Movie type from Sanity (also used for TV Shows)
 export interface Movie {
     thumbnailSprite: string | undefined
     _id: string
     _type?: 'movie' | 'tvshow'
     title: string
     contentType?: 'movie' | 'tvshow'
-    alt?: string
-}
-bannerImage: {
-    asset: {
-        _ref: string
-        _type: string
-    } | {
-        _id: string
-            url: string
-    }
-    alt ?: string
-}
-rating: number
-isFeatured ?: boolean
-isTrending ?: boolean
-description ?: string
-releaseYear: number
-duration ?: number
-genre ?: string[]
-videoUrl ?: string
-trailerUrl ?: string
-credit ?: string
-seasons ?: Season[]
-language ?: Language
-categories ?: Category[]
-subtitles ?: SubtitleTrack[]
+    slug: SanitySlug
+    posterImage: SanityImage
+    bannerImage: SanityImage
+    rating?: number
+    isFeatured?: boolean
+    isTrending?: boolean
+    description?: string
+    releaseYear?: number
+    duration?: number
+    genre?: string[]
+    videoUrl?: string
+    trailerUrl?: string
+    credit?: string
+    seasons?: Season[]
+    language?: Language
+    categories?: Category[]
+    subtitles?: SubtitleTrack[]
 }
 
 // Category type from Sanity

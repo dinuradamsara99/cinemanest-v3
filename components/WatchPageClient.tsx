@@ -233,7 +233,7 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
                                 <div className="flex flex-wrap items-center gap-4 text-sm md:text-base text-zinc-400 font-medium">
                                     <div className="flex items-center gap-1.5 text-yellow-500">
                                         <Star className="h-4 w-4 fill-current" />
-                                        <span className="text-white font-bold">{movie.rating.toFixed(1)}</span>
+                                        <span className="text-white font-bold">{movie.rating?.toFixed(1)}</span>
                                     </div>
                                     <span className="w-1 h-1 rounded-full bg-zinc-600" />
                                     {movie.releaseYear && <span>{movie.releaseYear}</span>}
