@@ -1,5 +1,4 @@
 import { Movie } from '@/types/movie';
-import Script from 'next/script';
 
 interface MovieSchemaProps {
     movie: Movie;
@@ -57,12 +56,12 @@ export function MovieSchema({ movie }: MovieSchemaProps) {
 
     return (
         <>
-            <Script
+            <script
                 id="movie-schema"
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
             />
-            <Script
+            <script
                 id="breadcrumb-schema"
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
