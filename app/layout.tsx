@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: 'your-google-verification-code', // TODO: Add actual verification code
+    google: 'google98b062135c89cbb3',
   },
 };
 
