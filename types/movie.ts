@@ -24,10 +24,12 @@ export interface SubtitleTrack {
 
 // Episode type for TV Shows
 export interface Episode {
+
     thumbnailSprite: string | undefined
     _key: string
     episodeNumber: number
     title: string
+    overview?: string
     thumbnail?: {
         asset: {
             _ref: string

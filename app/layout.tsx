@@ -1,40 +1,82 @@
 import type { Metadata } from "next";
+// මෙතන DM_Sans වෙනුවට Poppins දාන්න
 import { Poppins, Noto_Sans_Sinhala } from "next/font/google";
 import "./globals.css";
-import ClientLayout from "@/components/ClientLayout";
+import { SessionProvider } from "@/components/SessionProvider";
 
 const poppins = Poppins({
-  variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-poppins',
 });
 
 const notoSansSinhala = Noto_Sans_Sinhala({
-  variable: "--font-noto-sans-sinhala",
-  subsets: ["sinhala"],
-  display: "swap",
+  subsets: ["sinhala", "latin"],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-sinhala',
 });
 
 export const metadata: Metadata = {
-  title: "CinemaNest - Your Home for Movies & TV Shows",
-  description:
-    "Stream the latest movies and TV shows on CinemaNest. Discover trending content, watch trailers, and enjoy unlimited entertainment.",
+  title: {
+    default: "CinemaNest - Stream Movies & TV Shows Online",
+    template: "%s | CinemaNest"
+  },
+  description: "Watch the latest movies and TV shows online in HD quality. Stream thousands of titles across all genres on CinemaNest - Your premium streaming platform.",
+  keywords: ["watch movies online", "stream tv shows", "online streaming", "HD movies", "TV series streaming", "CinemaNest"],
+  authors: [{ name: "CinemaNest" }],
+  creator: "CinemaNest",
+  publisher: "CinemaNest",
+  metadataBase: new URL('https://cinemanest.com'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://cinemanest.com',
+    siteName: 'CinemaNest',
+    title: 'CinemaNest - Stream Movies & TV Shows Online',
+    description: 'Watch the latest movies and TV shows online in HD quality. Stream thousands of titles across all genres.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'CinemaNest - Streaming Platform',
+      }
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'CinemaNest - Stream Movies & TV Shows Online',
+    description: 'Watch the latest movies and TV shows online in HD quality.',
+    creator: '@cinemanest',
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'your-google-verification-code', // TODO: Add actual verification code
+  },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning={true}>
-      <body
-        className={`${poppins.variable} ${notoSansSinhala.variable} antialiased`}
-      >
-        <ClientLayout>
+    <html lang="en" className="dark">
+      <body className={`${poppins.variable} ${notoSansSinhala.variable} font-sans antialiased`}>
+        <SessionProvider>
           {children}
-        </ClientLayout>
+        </SessionProvider>
       </body>
     </html>
   );

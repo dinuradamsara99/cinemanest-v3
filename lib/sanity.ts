@@ -17,6 +17,46 @@ export function urlFor(source: SanityImageSource) {
   return builder.image(source);
 }
 
+// Helper to get file URL from Sanity asset reference
+export function getFileUrl(source: any): string | null {
+  if (!source) return null;
+
+  // If it's already a full URL, return it
+  if (typeof source === 'string' && source.startsWith('http')) {
+    return source;
+  }
+
+  // Get the asset reference
+  let assetRef: string | undefined;
+
+  if (typeof source === 'string') {
+    assetRef = source;
+  } else if (source._ref) {
+    assetRef = source._ref;
+  } else if (source.asset?._ref) {
+    assetRef = source.asset._ref;
+  } else if (source.asset?.url) {
+    return source.asset.url;
+  }
+
+  if (!assetRef) return null;
+
+  // Parse the asset reference format: file-<id>-<extension>
+  if (!assetRef.startsWith('file-')) return null;
+
+  const parts = assetRef.split('-');
+  if (parts.length < 3) return null;
+
+  const extension = parts[parts.length - 1];
+  const id = parts.slice(1, -1).join('-'); // Handle IDs that might contain dashes
+
+  const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!;
+  const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET!;
+
+  return `https://cdn.sanity.io/files/${projectId}/${dataset}/${id}.${extension}`;
+}
+
+
 // GROQ Queries - Base fields for both movies and TV shows
 const BASE_FIELDS = `
   _id,
