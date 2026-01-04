@@ -144,6 +144,7 @@ export function SearchBar({ className }: { className?: string }) {
                             placeholder="Search movies..."
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
+                            aria-label="Search movies and TV shows"
                             className={cn(
                                 "w-full h-11 pl-10 pr-10",
                                 "bg-zinc-900/50 border-zinc-800",

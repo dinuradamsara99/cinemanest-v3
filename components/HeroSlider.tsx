@@ -15,17 +15,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { urlFor } from "@/lib/sanity";
 import { cn } from "@/lib/utils";
+import { SanityImage, SanitySlug } from "@/types/sanity";
 
 interface FeaturedItem {
     _id: string;
     _type: string;
     title: string;
-    slug: { current: string };
+    slug: SanitySlug;
     description?: string;
     releaseYear?: number;
-    rating?: number; // Rating එකක් තිබුණොත් ලස්සනයි
-    bannerImage?: any;
-    posterImage?: any;
+    rating?: number;
+    bannerImage?: SanityImage;
+    posterImage?: SanityImage;
 }
 
 interface HeroSliderProps {
@@ -113,8 +114,9 @@ export function HeroSlider({ items }: HeroSliderProps) {
                                                     <Button
                                                         size="lg"
                                                         className="w-full sm:w-auto h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-lg shadow-primary/20"
+                                                        aria-label={`Play ${item.title}`}
                                                     >
-                                                        <Play className="w-6 h-6 mr-3 fill-current" />
+                                                        <Play className="w-6 h-6 mr-3 fill-current" aria-hidden="true" />
                                                         Play Now
                                                     </Button>
                                                 </Link>
@@ -123,9 +125,9 @@ export function HeroSlider({ items }: HeroSliderProps) {
                                                         size="lg"
                                                         variant="outline"
                                                         className="w-full sm:w-auto h-12 px-8 bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 hover:border-white/40 font-semibold"
+                                                        aria-label={`More information about ${item.title}`}
                                                     >
-                                                        {/* මෙන්න මෙතන මාරු කරන්න */}
-                                                        <Info className="w-6 h-6 mr-3" />
+                                                        <Info className="w-6 h-6 mr-3" aria-hidden="true" />
                                                         More Info
                                                     </Button>
                                                 </Link>
@@ -139,8 +141,14 @@ export function HeroSlider({ items }: HeroSliderProps) {
                 </CarouselContent>
 
                 {/* Navigation Arrows - Hover කළාම විතරක් පේන විදිහට */}
-                <CarouselPrevious className="hidden md:flex h-12 w-12 left-4 border-white/10 bg-black/30 text-white hover:bg-black/50 hover:border-white/30 opacity-0 group-hover/carousel-container:opacity-100 transition-all duration-300" />
-                <CarouselNext className="hidden md:flex h-12 w-12 right-4 border-white/10 bg-black/30 text-white hover:bg-black/50 hover:border-white/30 opacity-0 group-hover/carousel-container:opacity-100 transition-all duration-300" />
+                <CarouselPrevious
+                    className="hidden md:flex h-12 w-12 left-4 border-white/10 bg-black/30 text-white hover:bg-black/50 hover:border-white/30 opacity-0 group-hover/carousel-container:opacity-100 transition-all duration-300"
+                    aria-label="Previous slide"
+                />
+                <CarouselNext
+                    className="hidden md:flex h-12 w-12 right-4 border-white/10 bg-black/30 text-white hover:bg-black/50 hover:border-white/30 opacity-0 group-hover/carousel-container:opacity-100 transition-all duration-300"
+                    aria-label="Next slide"
+                />
             </Carousel>
         </div>
     );

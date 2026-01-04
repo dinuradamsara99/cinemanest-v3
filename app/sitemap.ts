@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next'
 import { client } from '@/lib/sanity'
+import { SITE_URL } from '@/lib/constants'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = 'https://cinemanest.com'
+    const baseUrl = SITE_URL
 
     // Fetch all movies and shows from Sanity
     const movies = await client.fetch(`

@@ -1,4 +1,5 @@
 import { Movie } from '@/types/movie';
+import { SITE_URL } from '@/lib/constants';
 
 interface MovieSchemaProps {
     movie: Movie;
@@ -37,19 +38,19 @@ export function MovieSchema({ movie }: MovieSchemaProps) {
                 '@type': 'ListItem',
                 position: 1,
                 name: 'Home',
-                item: 'https://cinemanest.com'
+                item: SITE_URL
             },
             {
                 '@type': 'ListItem',
                 position: 2,
                 name: movie.contentType === 'tvshow' ? 'TV Shows' : 'Movies',
-                item: `https://cinemanest.com/${movie.contentType === 'tvshow' ? 'tv-shows' : 'movies'}`
+                item: `${SITE_URL}/${movie.contentType === 'tvshow' ? 'tv-shows' : 'movies'}`
             },
             {
                 '@type': 'ListItem',
                 position: 3,
                 name: movie.title,
-                item: `https://cinemanest.com/watch/${movie.slug?.current}`
+                item: `${SITE_URL}/watch/${movie.slug?.current}`
             }
         ]
     };

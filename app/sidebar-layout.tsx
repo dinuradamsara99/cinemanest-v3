@@ -7,26 +7,35 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteHeaderContent } from "@/components/SiteHeaderContent";
 
 
-export default async function SidebarLayout({
+export default function SidebarLayout({
   children,
 }: {
   children: ReactNode;
 }) {
   return (
-    <Suspense fallback={<LayoutSkeleton />}>
-      <SidebarProvider>
-        <DynamicSidebar />
+    <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded"
+      >
+        Skip to content
+      </a>
 
-        <SidebarInset>
-          <SiteHeader>
-            <SiteHeaderContent />
-          </SiteHeader>
+      <Suspense fallback={<LayoutSkeleton />}>
+        <SidebarProvider>
+          <DynamicSidebar />
 
-          <main className="flex-1">
-            {children}
-          </main>
-        </SidebarInset>
-      </SidebarProvider>
-    </Suspense>
+          <SidebarInset>
+            <SiteHeader>
+              <SiteHeaderContent />
+            </SiteHeader>
+
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
+          </SidebarInset>
+        </SidebarProvider>
+      </Suspense>
+    </>
   );
 }
