@@ -1,32 +1,22 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: '404 - Page Not Found | CinemaNest',
+    description: 'The page you are looking for does not exist.',
+};
 
 export default function NotFound() {
     return (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '100vh',
-            padding: '20px',
-            textAlign: 'center'
-        }}>
-            <h1 style={{ fontSize: '4rem', marginBottom: '1rem' }}>404</h1>
-            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Page Not Found</h2>
-            <p style={{ fontSize: '1.2rem', color: '#666' }}>
-                Sorry, the page you&#39;re looking for doesn&#39;t exist.
+        <div className="flex flex-col items-center justify-center min-h-screen p-5 text-center bg-[#121212] text-white">
+            <h1 className="text-6xl md:text-8xl font-bold mb-4">404</h1>
+            <h2 className="text-2xl md:text-4xl font-semibold mb-4">Page Not Found</h2>
+            <p className="text-lg md:text-xl text-zinc-400 mb-8">
+                Sorry, the page you're looking for doesn't exist.
             </p>
             <Link
                 href="/"
-                style={{
-                    marginTop: '2rem',
-                    padding: '10px 20px',
-                    backgroundColor: '#0070f3',
-                    color: 'white',
-                    textDecoration: 'none',
-                    borderRadius: '5px',
-                    display: 'inline-block'
-                }}
+                className="mt-8 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
             >
                 Go Home
             </Link>
