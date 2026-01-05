@@ -57,6 +57,7 @@ export interface SanitySubtitle {
         };
     };
     isDefault?: boolean;
+    downloadEnabled?: boolean;
 }
 
 /**
@@ -68,6 +69,7 @@ export interface PlayerSubtitle {
     language: string;
     kind: 'subtitles' | 'captions';
     default: boolean;
+    downloadEnabled?: boolean;
 }
 
 /**
@@ -104,6 +106,7 @@ export function convertSanitySubtitlesToPlayerFormat(
                 language: subtitle.language,
                 kind: 'subtitles',
                 default: subtitle.isDefault || false,
+                downloadEnabled: subtitle.downloadEnabled || false,
             };
         })
         .filter((subtitle): subtitle is PlayerSubtitle => subtitle !== null);

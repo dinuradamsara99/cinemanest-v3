@@ -22,6 +22,9 @@ interface MediaCardProps {
         duration: number;
         completed: boolean;
     };
+    hideRating?: boolean;
+    watchedAt?: string; // Time when watched
+    aspectRatio?: string; // Custom aspect ratio (default: 2/3)
 }
 
 export function MediaCard({
@@ -32,6 +35,9 @@ export function MediaCard({
     releaseYear,
     type,
     watchProgress,
+    hideRating = false,
+    watchedAt,
+    aspectRatio = "3/4",
 }: MediaCardProps) {
     const imageUrl = posterImage?.asset
         ? urlFor(posterImage).width(400).height(600).url()
@@ -46,7 +52,10 @@ export function MediaCard({
     return (
         <Link href={`/watch/${slug}`} className="group block w-full h-full" aria-label={`Watch ${title}`}>
             {/* Card Container */}
-            <div className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden bg-zinc-900 shadow-md  transition-all duration-300 ring-1 ring-white/5">
+            <div
+                className="relative w-full rounded-2xl overflow-hidden bg-zinc-900 shadow-md transition-all duration-300 ring-1 ring-white/5"
+                style={{ aspectRatio }}
+            >
 
                 {/* Poster Image */}
                 <Image
@@ -80,7 +89,7 @@ export function MediaCard({
                 </div>
 
                 {/* Rating Badge (Top Right) */}
-                {rating && (
+                {rating && !hideRating && (
                     <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg px-2 py-1 flex items-center gap-1.5 shadow-sm" aria-label={`Rating: ${rating.toFixed(1)} out of 10`}>
                         <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" aria-hidden="true" />
                         <span className="text-xs font-bold text-white tracking-wide">
@@ -89,11 +98,11 @@ export function MediaCard({
                     </div>
                 )}
 
-                {/* Continue Watching Badge */}
-                {showContinueWatching && (
-                    <div className="absolute top-3 left-3 bg-red-600/90 backdrop-blur-md border border-red-500/20 rounded-lg px-2.5 py-1 shadow-sm">
+                {/* Time Badge (instead of Continue Watching) */}
+                {watchedAt && (
+                    <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg px-2.5 py-1 shadow-sm">
                         <span className="text-xs font-semibold text-white tracking-wide">
-                            CONTINUE
+                            {getTimeAgo(new Date(watchedAt))}
                         </span>
                     </div>
                 )}
@@ -119,4 +128,15 @@ export function MediaCard({
             </div>
         </Link>
     );
+}
+
+function getTimeAgo(date: Date): string {
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (seconds < 60) return "Just now";
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+    return `${Math.floor(seconds / 604800)}w ago`;
 }

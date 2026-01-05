@@ -11,8 +11,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarSeparator,
+    useSidebar,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import Image from "next/image";
 import {
     Home,
     Tv,
@@ -20,10 +22,13 @@ import {
     Film,
     Globe,
     Clapperboard,
+    HistoryIcon,
+    X,
 } from "lucide-react";
 import { Category, Language } from "@/types/movie";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
 
 interface AppSidebarProps {
     categories: Category[];
@@ -32,23 +37,54 @@ interface AppSidebarProps {
 
 export function AppSidebar({ categories, languages }: AppSidebarProps) {
     const pathname = usePathname();
+    const { data: session } = useSession();
+    const { isMobile, setOpenMobile } = useSidebar();
 
     return (
         <Sidebar className="border-r border-zinc-800 bg-[#09090b]">
             {/* Header Section */}
-            <SidebarHeader className="h-16 flex justify-center px-4 border-b border-zinc-800/50">
-                <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-                        <Clapperboard className="h-5 w-5" />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                        <span className="text-sm font-bold text-white tracking-tight">
-                            CinemaNest
-                        </span>
-                        <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">
-                            Streaming v2.0
-                        </span>
-                    </div>
+            <SidebarHeader className="h-16 flex flex-row items-center w-full px-7 border-b border-zinc-800/50">
+                {/* Main Flex Container to control alignment */}
+                <div className="flex w-full items-center justify-between">
+
+                    {/* Left Side: Logo & Name */}
+                    <Link href="/" className="flex items-center gap-3 group">
+                        {/* Logo Icon */}
+                        <div className="flex h-11 w-11 items-center justify-center rounded-lg">
+                            <Image
+                                src="/logo.svg"
+                                alt="CinemaNest Logo"
+                                width={42}
+                                height={42}
+                                className="object-contain"
+                            />
+                        </div>
+
+                        {/* Text Details */}
+                        <div className="flex flex-col">
+                            <span className="text-sm font-bold text-white tracking-tight leading-none">
+                                CinemaNest
+                            </span>
+                            <span className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider mt-0.5 group-hover:text-zinc-400 transition-colors">
+                                Streaming v2.0
+                            </span>
+                        </div>
+                    </Link>
+
+                    {/* Right Side: Mobile Close Button */}
+                    {isMobile && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenMobile(false);
+                            }}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all"
+                            aria-label="Close menu"
+                            type="button"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                    )}
                 </div>
             </SidebarHeader>
 
@@ -78,6 +114,14 @@ export function AppSidebar({ categories, languages }: AppSidebarProps) {
                                 title="Trending"
                                 active={pathname?.startsWith("/trending") ?? false}
                             />
+                            {session?.user && (
+                                <NavItem
+                                    href="/account"
+                                    icon={HistoryIcon}
+                                    title="History"
+                                    active={pathname?.startsWith("/account") ?? false}
+                                />
+                            )}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

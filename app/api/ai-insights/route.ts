@@ -59,10 +59,31 @@ IMPORTANT RULES:
         const text = response.text();
 
         return NextResponse.json({ answer: text });
-    } catch (error) {
+    } catch (error: any) {
         console.error("AI Insights error:", error);
+
+        // Check if it's a quota exceeded error
+        if (error?.status === 429 || error?.message?.includes('quota') || error?.message?.includes('429')) {
+            return NextResponse.json(
+                {
+                    error: "AI සේවාව දැනට ලබා ගත නොහැක. කරුණාකර පසුව නැවත උත්සාහ කරන්න. (AI service quota exceeded. Please try again later.)",
+                    quotaExceeded: true
+                },
+                { status: 429 }
+            );
+        }
+
+        // Check for API key issues
+        if (error?.status === 401 || error?.status === 403 || error?.message?.includes('API key')) {
+            return NextResponse.json(
+                { error: "AI සේවාව වින්‍යාසනය කර නැත. (AI service not configured.)" },
+                { status: 503 }
+            );
+        }
+
+        // Generic error
         return NextResponse.json(
-            { error: "Failed to generate insights. Please try again." },
+            { error: "AI සේවාව ක්‍රියා කිරීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න. (Failed to generate insights. Please try again.)" },
             { status: 500 }
         );
     }

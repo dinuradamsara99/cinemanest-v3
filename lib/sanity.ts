@@ -100,7 +100,8 @@ const BASE_FIELDS = `
         url
       }
     },
-    isDefault
+    isDefault,
+    downloadEnabled
   }
 `;
 
@@ -138,7 +139,8 @@ const TVSHOW_FIELDS = `
             url
           }
         },
-        isDefault
+        isDefault,
+        downloadEnabled
       }
     }
   }

@@ -49,6 +49,13 @@ export const subtitleTrack = defineType({
             description: 'Enable this subtitle by default',
             initialValue: false,
         },
+        {
+            name: 'downloadEnabled',
+            title: 'Enable Download',
+            type: 'boolean',
+            description: 'Allow users to download this subtitle file',
+            initialValue: false,
+        },
     ],
     preview: {
         select: {

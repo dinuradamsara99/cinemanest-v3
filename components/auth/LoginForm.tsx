@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Mail } from "lucide-react";
 
 interface LoginFormProps {
     onSuccess?: () => void;
@@ -47,7 +47,7 @@ export function LoginForm({ onSuccess, onSwitchToRegister, onClose }: LoginFormP
                 if (onSuccess) {
                     onSuccess();
                 } else {
-                    router.push("/");
+                    router.push("/account");
                 }
             }
         } catch (error) {
@@ -163,6 +163,33 @@ export function LoginForm({ onSuccess, onSwitchToRegister, onClose }: LoginFormP
                     ) : (
                         "Sign In"
                     )}
+                </Button>
+
+                {/* Divider */}
+                <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-zinc-700"></div>
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-zinc-900 px-2 text-zinc-500">Or continue with</span>
+                    </div>
+                </div>
+
+                {/* Google Login Button */}
+                <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isLoading}
+                    onClick={() => signIn('google', { callbackUrl: '/account' })}
+                    className="w-full bg-white/5 border-zinc-700 text-white hover:bg-white/10 h-11 flex items-center justify-center gap-3"
+                >
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                        <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.88 16.79 15.71 17.57V20.34H19.28C21.36 18.42 22.56 15.6 22.56 12.25Z" fill="#4285F4" />
+                        <path d="M12 23C14.97 23 17.46 22.02 19.28 20.34L15.71 17.57C14.72 18.23 13.47 18.62 12 18.62C9.14 18.62 6.71 16.6 5.83 13.95H2.18V16.71C4 20.34 7.7 23 12 23Z" fill="#34A853" />
+                        <path d="M5.83 13.95C5.62 13.36 5.49 12.72 5.49 12C5.49 11.28 5.62 10.64 5.83 10.05V7.29H2.18C1.43 8.78 1 10.43 1 12.25C1 14.07 1.43 15.72 2.18 17.21L5.83 13.95Z" fill="#FBBC05" />
+                        <path d="M12 4.75C13.7 4.75 15.2 5.43 16.33 6.71L19.36 3.68C17.46 1.88 14.97 1 12 1C7.7 1 4 3.66 2.18 7.29L5.83 10.05C6.71 7.4 9.14 4.75 12 4.75Z" fill="#EA4335" />
+                    </svg>
+                    Continue with Google
                 </Button>
             </form>
 

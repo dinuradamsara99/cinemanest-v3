@@ -39,6 +39,8 @@ interface CustomVideoPlayerProps {
     onNextEpisode?: () => void;
     poster?: string;
     startTime?: number; // Resume from this time in seconds
+    mediaId?: string; // Movie/Episode ID for tracking
+    mediaType?: string; // "movie" or "episode"
 }
 
 export function CustomVideoPlayer({
@@ -49,6 +51,8 @@ export function CustomVideoPlayer({
     onNextEpisode,
     poster,
     startTime = 0,
+    mediaId,
+    mediaType = "movie",
 }: CustomVideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -402,6 +406,86 @@ export function CustomVideoPlayer({
         video.addEventListener("loadedmetadata", handleLoadedMetadata);
         return () => video.removeEventListener("loadedmetadata", handleLoadedMetadata);
     }, [subtitles]);
+
+    // Watch progress tracking - save every 10 seconds
+    useEffect(() => {
+        if (!mediaId || !videoRef.current) return;
+
+        console.log('[Watch Progress] Starting tracking for:', mediaId);
+
+        let hasWatchedFor10Seconds = false;
+        const video = videoRef.current;
+
+        const saveProgress = async () => {
+            if (!video || !mediaId) return;
+
+            const progress = video.currentTime;
+            const videoDuration = video.duration;
+
+            console.log('[Watch Progress] Attempting to save:', {
+                mediaId,
+                mediaType,
+                progress,
+                duration: videoDuration,
+                hasWatched10s: hasWatchedFor10Seconds
+            });
+
+            // Only save if we have valid data and video has been watched for at least 10 seconds
+            if (progress > 0 && videoDuration > 0 && progress >= 10) {
+                try {
+                    console.log('[Watch Progress] Sending API request...');
+                    const response = await fetch('/api/watch-progress', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            mediaId,
+                            mediaType,
+                            progress,
+                            duration: videoDuration
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('[Watch Progress] Successfully saved:', data);
+                    } else {
+                        console.error('[Watch Progress] API error:', response.status, await response.text());
+                    }
+                } catch (error) {
+                    console.error('[Watch Progress] Error saving:', error);
+                }
+            } else {
+                console.log('[Watch Progress] Skipped - not enough progress yet');
+            }
+        };
+
+        // Save progress every 10 seconds
+        const interval = setInterval(() => {
+            if (video.currentTime >= 10 && !hasWatchedFor10Seconds) {
+                hasWatchedFor10Seconds = true;
+                console.log('[Watch Progress] Reached 10 seconds, saving...');
+                saveProgress();
+            } else if (hasWatchedFor10Seconds) {
+                console.log('[Watch Progress] Periodic save...');
+                saveProgress();
+            }
+        }, 10000); // Every 10 seconds
+
+        // Save progress when video ends or component unmounts
+        const handleBeforeUnload = () => saveProgress();
+        const handleEnded = () => saveProgress();
+
+        video.addEventListener('ended', handleEnded);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            clearInterval(interval);
+            saveProgress(); // Save one last time before cleanup
+            video.removeEventListener('ended', handleEnded);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [mediaId, mediaType]);
+
 
     // Mouse move handler
     const handleMouseMove = () => {

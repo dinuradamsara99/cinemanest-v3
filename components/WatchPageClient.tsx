@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CustomVideoPlayer } from "@/components/CustomVideoPlayer";
 import { VideoAIInsights } from "@/components/VideoAIInsights";
 import { MovieSchema } from "@/components/MovieSchema";
+import { SubtitleDownload } from "@/components/SubtitleDownload";
 import type { Movie, SubtitleTrack } from "@/types/movie";
 import { urlFor } from "@/lib/sanity";
 import Image from "next/image";
@@ -209,6 +210,8 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
                                     isTVShow={isTVShow}
                                     onNextEpisode={isTVShow ? handleNextEpisode : undefined}
                                     poster={posterUrl}
+                                    mediaId={movie.slug?.current}
+                                    mediaType={isTVShow ? "episode" : "movie"}
                                 />
 
                             )
@@ -312,6 +315,17 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Subtitle Download Section */}
+                        {playerSubtitles && playerSubtitles.length > 0 && (
+                            <div className="mt-6">
+                                <SubtitleDownload
+                                    subtitles={playerSubtitles}
+                                    movieTitle={movie.title}
+                                    episodeName={episodeName}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     {/* Episodes Section (TV Only) */}
