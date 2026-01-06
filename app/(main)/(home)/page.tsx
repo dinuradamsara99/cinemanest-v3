@@ -10,11 +10,6 @@ export default async function HomePage() {
         getFeaturedMovies(),
     ]);
 
-    console.log('Movies fetched:', movies?.length || 0);
-    console.log('TV Shows fetched:', tvShows?.length || 0);
-    console.log('Featured fetched:', featured?.length || 0);
-    console.log('First movie:', movies?.[0]?.title);
-
     return (
         <main className="min-h-screen bg-background">
             {/* Hero Slider */}

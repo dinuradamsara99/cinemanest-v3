@@ -1,0 +1,15 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin and internal areas
+Disallow: /studio/
+Disallow: /api/
+Disallow: /reset-password
+Disallow: /_next/
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://cinemanestlk.vercel.app/sitemap.xml
