@@ -7,7 +7,7 @@ const baseConfig: ClientConfig = {
   projectId,
   dataset,
   apiVersion,
-  useCdn: true,
+  useCdn: false,
   perspective: "published",
   stega: {
     enabled: false,

@@ -5,6 +5,8 @@ import { User, Mail, Calendar, Shield } from "lucide-react";
 import Image from "next/image";
 import { WatchHistorySection } from "@/components/WatchHistorySection";
 
+import { UserRequestsList } from "@/components/dashboard/UserRequestsList";
+
 export const metadata = {
     title: "My Account - CinemaNest",
     description: "Manage your CinemaNest account",
@@ -89,6 +91,14 @@ export default async function AccountPage() {
 
                 {/* Watch History Section */}
                 <WatchHistorySection userId={session.user.id!} />
+
+                {/* Movie Requests Section */}
+                <div className="mt-8">
+                    <h3 className="text-xl font-semibold text-white mb-4">My Requests</h3>
+                    <div className="w-full">
+                        <UserRequestsList />
+                    </div>
+                </div>
 
                 {/* Quick Actions */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

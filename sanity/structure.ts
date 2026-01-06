@@ -109,4 +109,58 @@ export const structure: StructureResolver = (S) =>
           S.documentTypeList('category')
             .title('All Categories')
         ),
+
+      // Divider
+      S.divider(),
+
+      // Requests Section
+      S.listItem()
+        .title('Content Requests')
+        .icon(() => '🙋‍♂️')
+        .child(
+          S.list()
+            .title('Requests')
+            .items([
+              S.listItem()
+                .title('All Requests')
+                .icon(() => '📋')
+                .child(S.documentTypeList('movieRequest').title('All Requests')),
+
+              S.listItem()
+                .title('Pending Review')
+                .icon(() => '⏳')
+                .child(
+                  S.documentTypeList('movieRequest')
+                    .title('Pending Requests')
+                    .filter('_type == "movieRequest" && status == "pending"')
+                ),
+
+              S.listItem()
+                .title('Processing')
+                .icon(() => '⚙️')
+                .child(
+                  S.documentTypeList('movieRequest')
+                    .title('Processing')
+                    .filter('_type == "movieRequest" && status == "processing"')
+                ),
+
+              S.listItem()
+                .title('Completed')
+                .icon(() => '✅')
+                .child(
+                  S.documentTypeList('movieRequest')
+                    .title('Completed')
+                    .filter('_type == "movieRequest" && status == "completed"')
+                ),
+
+              S.listItem()
+                .title('Rejected')
+                .icon(() => '❌')
+                .child(
+                  S.documentTypeList('movieRequest')
+                    .title('Rejected')
+                    .filter('_type == "movieRequest" && status == "rejected"')
+                ),
+            ])
+        ),
     ])

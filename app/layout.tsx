@@ -5,6 +5,7 @@ import "./globals.css";
 import { SessionProvider } from "@/components/SessionProvider";
 import { CookieBanner } from "@/components/CookieBanner";
 import { ReactQueryProvider } from '@/components/ReactQueryProvider';
+import { GlobalRequestNotifications } from "@/components/GlobalRequestNotifications";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -79,6 +80,7 @@ export default function RootLayout({
         <ReactQueryProvider>
           <SessionProvider>
             {children}
+            <GlobalRequestNotifications />
             <CookieBanner />
           </SessionProvider>
         </ReactQueryProvider>

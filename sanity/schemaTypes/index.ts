@@ -5,6 +5,8 @@ import { categoryType } from './categoryType'
 import { languageType } from './languageType'
 import { subtitleTrack } from '../schemas/subtitleTrack'
 
+import { movieRequest } from './movieRequest'
+
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [movieType, tvShowType, categoryType, languageType, subtitleTrack],
+  types: [movieType, tvShowType, categoryType, languageType, subtitleTrack, movieRequest],
 }

@@ -22,15 +22,18 @@ import {
     Film,
     Globe,
     Clapperboard,
-    HistoryIcon,
+    Popcorn,
     X,
     ChevronDown,
+    Video,
+    User2Icon,
 } from "lucide-react";
 import { Category, Language } from "@/types/movie";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { RequestMovieDialog } from "@/components/dashboard/RequestMovieDialog";
 
 interface AppSidebarProps {
     categories: Category[];
@@ -123,11 +126,20 @@ export function AppSidebar({ categories, languages }: AppSidebarProps) {
                             {session?.user && (
                                 <NavItem
                                     href="/account"
-                                    icon={HistoryIcon}
-                                    title="History"
+                                    icon={User2Icon}
+                                    title="Account"
                                     active={pathname?.startsWith("/account") ?? false}
                                 />
                             )}
+                            <RequestMovieDialog>
+                                <SidebarMenuButton
+                                    tooltip="Request Movie"
+                                    className="h-10 text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-all rounded-md mb-1"
+                                >
+                                    <Popcorn className="h-4.5 w-4.5 text-zinc-500" />
+                                    <span>Movies Request & Find</span>
+                                </SidebarMenuButton>
+                            </RequestMovieDialog>
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

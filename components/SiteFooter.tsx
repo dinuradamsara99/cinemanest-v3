@@ -16,37 +16,30 @@ export function SiteFooter() {
                     </div>
 
                     {/* Right Side - Links */}
-                    <div className="flex items-center gap-6">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
                         <Link
                             href="/privacy"
                             className="group flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
                         >
-
                             <span>Privacy Policy</span>
                         </Link>
-                        <span className="text-zinc-700">•</span>
+                        <span className="hidden sm:inline text-zinc-700">•</span>
 
                         <Link
                             href="/terms"
                             className="group flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
                         >
-
-                            <span>
-                                Terms of Service</span>
+                            <span>Terms of Service</span>
                         </Link>
 
-                        <span className="text-zinc-700">•</span>
+                        <span className="hidden sm:inline text-zinc-700">•</span>
 
                         <Link
                             href="/contact"
                             className="group flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
                         >
-
-                            <span>
-                                Contact Us</span>
+                            <span>Contact Us</span>
                         </Link>
-
-
                     </div>
                 </div>
 
