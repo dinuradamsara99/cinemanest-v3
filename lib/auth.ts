@@ -79,13 +79,24 @@ export const authOptions: NextAuthOptions = {
                             }
                         });
                     }
+
+                    // Update user image if missing and Google provides one
+                    if (!existingUser.image && (profile as any)?.picture) {
+                        await prisma.user.update({
+                            where: { id: existingUser.id },
+                            data: { image: (profile as any).picture }
+                        });
+                    }
                 }
             }
             return true; // Allow all sign-ins
         },
         async redirect({ url, baseUrl }) {
-            // Always redirect to account page after successful login
-            return `${baseUrl}/account`;
+            // Allows relative callback URLs
+            if (url.startsWith("/")) return `${baseUrl}${url}`;
+            // Allows callback URLs on the same origin
+            else if (new URL(url).origin === baseUrl) return url;
+            return baseUrl;
         },
         async session({ token, session }) {
             if (token && session.user) {

@@ -27,8 +27,7 @@ export function UserNav({ user }: UserNavProps) {
 
     const handleSignOut = async () => {
         await signOut({ redirect: false });
-        router.push("/");
-        router.refresh();
+        window.location.reload();
     };
 
     const getInitials = (name?: string | null) => {

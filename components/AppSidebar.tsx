@@ -24,11 +24,13 @@ import {
     Clapperboard,
     HistoryIcon,
     X,
+    ChevronDown,
 } from "lucide-react";
 import { Category, Language } from "@/types/movie";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
+import { useState } from "react";
 
 interface AppSidebarProps {
     categories: Category[];
@@ -39,6 +41,10 @@ export function AppSidebar({ categories, languages }: AppSidebarProps) {
     const pathname = usePathname();
     const { data: session } = useSession();
     const { isMobile, setOpenMobile } = useSidebar();
+
+    // Collapsible states - default closed
+    const [isGenresOpen, setIsGenresOpen] = useState(false);
+    const [isLanguagesOpen, setIsLanguagesOpen] = useState(false);
 
     return (
         <Sidebar className="border-r border-zinc-800 bg-[#09090b]">
@@ -130,73 +136,101 @@ export function AppSidebar({ categories, languages }: AppSidebarProps) {
 
                 {/* Categories Group */}
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-2 mb-2 flex items-center gap-2">
-                        <Film className="h-3.5 w-3.5" />
-                        Genres
+                    <SidebarGroupLabel
+                        className="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-2 mb-2 flex items-center justify-between cursor-pointer hover:text-zinc-300 transition-colors"
+                        onClick={() => setIsGenresOpen(!isGenresOpen)}
+                    >
+                        <div className="flex items-center gap-2">
+                            <Film className="h-3.5 w-3.5" />
+                            Genres
+                        </div>
+                        <ChevronDown
+                            className={cn(
+                                "h-4 w-4 transition-transform duration-200",
+                                isGenresOpen ? "rotate-0" : "-rotate-90"
+                            )}
+                        />
                     </SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        {/* Tree View Line Adjustment */}
-                        <SidebarMenu className="space-y-0.5 border-l-2 border-zinc-800 ml-3.5 pl-3">
-                            {categories?.map((category) => {
-                                const isActive = pathname === `/category/${category.slug.current}`;
-                                return (
-                                    <SidebarMenuItem key={category._id}>
-                                        <SidebarMenuButton
-                                            asChild
-                                            className={cn(
-                                                "h-8 w-full justify-start text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all duration-200",
-                                                isActive && "text-white font-medium bg-zinc-800 shadow-sm"
-                                            )}
-                                        >
-                                            <Link href={`/category/${category.slug.current}`} className="flex items-center gap-3">
-                                                {/* Consistent Dot Alignment */}
-                                                <div className={cn(
-                                                    "h-1.5 w-1.5 rounded-full transition-all duration-300",
-                                                    isActive ? "bg-primary scale-125 shadow-[0_0_8px_rgba(220,38,38,0.5)]" : "bg-zinc-700 group-hover:bg-zinc-500"
-                                                )} />
-                                                <span className="line-clamp-1 text-sm">{category.title}</span>
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                )
-                            })}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
+
+                    {isGenresOpen && (
+                        <SidebarGroupContent>
+                            {/* Tree View Line Adjustment */}
+                            <SidebarMenu className="space-y-0.5 border-l-2 border-zinc-800 ml-3.5 pl-3 animate-in slide-in-from-top-2 duration-200">
+                                {categories?.map((category) => {
+                                    const isActive = pathname === `/category/${category.slug.current}`;
+                                    return (
+                                        <SidebarMenuItem key={category._id}>
+                                            <SidebarMenuButton
+                                                asChild
+                                                className={cn(
+                                                    "h-8 w-full justify-start text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all duration-200",
+                                                    isActive && "text-white font-medium bg-zinc-800 shadow-sm"
+                                                )}
+                                            >
+                                                <Link href={`/category/${category.slug.current}`} className="flex items-center gap-3">
+                                                    {/* Consistent Dot Alignment */}
+                                                    <div className={cn(
+                                                        "h-1.5 w-1.5 rounded-full transition-all duration-300",
+                                                        isActive ? "bg-primary scale-125 shadow-[0_0_8px_rgba(220,38,38,0.5)]" : "bg-zinc-700 group-hover:bg-zinc-500"
+                                                    )} />
+                                                    <span className="line-clamp-1 text-sm">{category.title}</span>
+                                                </Link>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    )
+                                })}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    )}
                 </SidebarGroup>
 
                 {/* Languages Group */}
-                <SidebarGroup className="mt-4">
-                    <SidebarGroupLabel className="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-2 mb-2 flex items-center gap-2">
-                        <Globe className="h-3.5 w-3.5" />
-                        Languages
+                <SidebarGroup>
+                    <SidebarGroupLabel
+                        className="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-2 mb-2 flex items-center justify-between cursor-pointer hover:text-zinc-300 transition-colors"
+                        onClick={() => setIsLanguagesOpen(!isLanguagesOpen)}
+                    >
+                        <div className="flex items-center gap-2">
+                            <Globe className="h-3.5 w-3.5" />
+                            Languages
+                        </div>
+                        <ChevronDown
+                            className={cn(
+                                "h-4 w-4 transition-transform duration-200",
+                                isLanguagesOpen ? "rotate-0" : "-rotate-90"
+                            )}
+                        />
                     </SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        {/* Tree View Line Adjustment */}
-                        <SidebarMenu className="space-y-0.5 border-l-2 border-zinc-800 ml-3.5 pl-3">
-                            {languages?.map((language) => {
-                                const isActive = pathname === `/language/${language.slug.current}`;
-                                return (
-                                    <SidebarMenuItem key={language._id}>
-                                        <SidebarMenuButton
-                                            asChild
-                                            className={cn(
-                                                "h-8 w-full justify-start text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all duration-200",
-                                                isActive && "text-white font-medium bg-zinc-800 shadow-sm"
-                                            )}
-                                        >
-                                            <Link href={`/language/${language.slug.current}`} className="flex items-center gap-3">
-                                                <div className={cn(
-                                                    "h-1.5 w-1.5 rounded-full transition-all duration-300",
-                                                    isActive ? "bg-primary scale-125 shadow-[0_0_8px_rgba(220,38,38,0.5)]" : "bg-zinc-700 group-hover:bg-zinc-500"
-                                                )} />
-                                                <span className="text-sm">{language.title}</span>
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                )
-                            })}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
+
+                    {isLanguagesOpen && (
+                        <SidebarGroupContent>
+                            {/* Tree View Line Adjustment */}
+                            <SidebarMenu className="space-y-0.5 border-l-2 border-zinc-800 ml-3.5 pl-3 animate-in slide-in-from-top-2 duration-200">
+                                {languages?.map((language) => {
+                                    const isActive = pathname === `/language/${language.slug.current}`;
+                                    return (
+                                        <SidebarMenuItem key={language._id}>
+                                            <SidebarMenuButton
+                                                asChild
+                                                className={cn(
+                                                    "h-8 w-full justify-start text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all duration-200",
+                                                    isActive && "text-white font-medium bg-zinc-800 shadow-sm"
+                                                )}
+                                            >
+                                                <Link href={`/language/${language.slug.current}`} className="flex items-center gap-3">
+                                                    <div className={cn(
+                                                        "h-1.5 w-1.5 rounded-full transition-all duration-300",
+                                                        isActive ? "bg-primary scale-125 shadow-[0_0_8px_rgba(220,38,38,0.5)]" : "bg-zinc-700 group-hover:bg-zinc-500"
+                                                    )} />
+                                                    <span className="text-sm">{language.title}</span>
+                                                </Link>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    )
+                                })}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    )}
                 </SidebarGroup>
             </SidebarContent>
         </Sidebar>

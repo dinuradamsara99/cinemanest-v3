@@ -11,15 +11,8 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 export function SiteHeaderContent() {
     const { data: session } = useSession();
     const [authDialogOpen, setAuthDialogOpen] = useState(false);
-    const [authMode, setAuthMode] = useState<"login" | "register">("login");
 
     const handleOpenLogin = () => {
-        setAuthMode("login");
-        setAuthDialogOpen(true);
-    };
-
-    const handleOpenRegister = () => {
-        setAuthMode("register");
         setAuthDialogOpen(true);
     };
 
@@ -38,21 +31,13 @@ export function SiteHeaderContent() {
                 {session?.user ? (
                     <UserNav user={session.user} />
                 ) : (
-                    <>
-                        <Button
-                            variant="ghost"
-                            className="text-zinc-300 hover:text-white hover:bg-zinc-800"
-                            onClick={handleOpenLogin}
-                        >
-                            Login
-                        </Button>
-                        <Button
-                            className="bg-gradient-to-r bg-white hover:bg-[#cccccc] text-black"
-                            onClick={handleOpenRegister}
-                        >
-                            Sign Up
-                        </Button>
-                    </>
+                    <Button
+                        variant="ghost"
+                        className="bg-gradient-to-r py-3 px-8 from-[#f5f5f5] to-[#cccccc] hover:bg-transparent text-black hover:text-black"
+                        onClick={handleOpenLogin}
+                    >
+                        Login
+                    </Button>
                 )}
             </div>
 
@@ -60,7 +45,6 @@ export function SiteHeaderContent() {
             <AuthDialog
                 open={authDialogOpen}
                 onOpenChange={setAuthDialogOpen}
-                defaultMode={authMode}
             />
         </>
     );

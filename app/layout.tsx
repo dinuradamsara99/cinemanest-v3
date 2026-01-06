@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Poppins, Noto_Sans_Sinhala } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "@/components/SessionProvider";
+import { CookieBanner } from "@/components/CookieBanner";
+import { ReactQueryProvider } from '@/components/ReactQueryProvider';
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -74,9 +76,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${poppins.variable} ${notoSansSinhala.variable} font-sans antialiased`}>
-        <SessionProvider>
-          {children}
-        </SessionProvider>
+        <ReactQueryProvider>
+          <SessionProvider>
+            {children}
+            <CookieBanner />
+          </SessionProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

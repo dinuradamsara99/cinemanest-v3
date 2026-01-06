@@ -5,6 +5,7 @@ import { DynamicSidebar } from "@/components/DynamicSidebar";
 import { LayoutSkeleton } from "@/components/LayoutSkeleton";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteHeaderContent } from "@/components/SiteHeaderContent";
+import { SiteFooter } from "@/components/SiteFooter";
 
 
 export default function SidebarLayout({
@@ -25,7 +26,7 @@ export default function SidebarLayout({
         <SidebarProvider>
           <DynamicSidebar />
 
-          <SidebarInset>
+          <SidebarInset className="flex flex-col min-h-screen">
             <SiteHeader>
               <SiteHeaderContent />
             </SiteHeader>
@@ -33,6 +34,8 @@ export default function SidebarLayout({
             <main id="main-content" className="flex-1">
               {children}
             </main>
+
+            <SiteFooter />
           </SidebarInset>
         </SidebarProvider>
       </Suspense>

@@ -13,6 +13,8 @@ import { CustomVideoPlayer } from "@/components/CustomVideoPlayer";
 import { VideoAIInsights } from "@/components/VideoAIInsights";
 import { MovieSchema } from "@/components/MovieSchema";
 import { SubtitleDownload } from "@/components/SubtitleDownload";
+import { CommentSection } from "@/components/CommentSection";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 import type { Movie, SubtitleTrack } from "@/types/movie";
 import { urlFor } from "@/lib/sanity";
 import Image from "next/image";
@@ -28,6 +30,7 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
     const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(0);
     const [episodeSearchQuery, setEpisodeSearchQuery] = useState("");
     const [trailerOpen, setTrailerOpen] = useState(false);
+    const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
     // Convert YouTube URL to embed format
     const getYouTubeEmbedUrl = (url: string): string => {
@@ -483,6 +486,16 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
                         </div>
                     )}
 
+                    {/* Comment Section */}
+                    <div className="mt-12 pt-12 border-t border-white/10">
+                        <CommentSection
+                            movieId={movie.slug?.current || movie._id}
+                            onLoginClick={() => {
+                                setAuthDialogOpen(true);
+                            }}
+                        />
+                    </div>
+
                 </div>
             </div>
 
@@ -504,6 +517,12 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {/* Auth Dialog */}
+            <AuthDialog
+                open={authDialogOpen}
+                onOpenChange={setAuthDialogOpen}
+            />
         </div>
     );
 }
