@@ -2,6 +2,7 @@ import { getMovies, getTVShows, getFeaturedMovies } from "@/lib/sanity";
 import { MediaCard } from "@/components/MediaCard";
 import { ContentGrid } from "@/components/ContentGrid";
 import { HeroSlider } from "@/components/HeroSlider";
+import { Movie } from "@/types/movie";
 
 export default async function HomePage() {
     const [movies, tvShows, featured] = await Promise.all([
@@ -18,7 +19,7 @@ export default async function HomePage() {
             {/* Movies Grid */}
             <div id="movies">
                 <ContentGrid title="Popular Movies">
-                    {movies.map((movie: any) => (
+                    {movies.map((movie: Movie) => (
                         <MediaCard
                             key={movie._id}
                             id={movie._id}
@@ -36,7 +37,7 @@ export default async function HomePage() {
             {/* TV Shows Grid */}
             <div id="tv-shows">
                 <ContentGrid title="Popular TV Shows">
-                    {tvShows.map((show: any) => (
+                    {tvShows.map((show: Movie) => (
                         <MediaCard
                             key={show._id}
                             id={show._id}
