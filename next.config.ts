@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Fix isomorphic-dompurify ESM/CJS compatibility on Vercel
+  serverExternalPackages: ['isomorphic-dompurify', 'jsdom'],
+
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'cdn.sanity.io', pathname: '/**' },
@@ -18,21 +21,21 @@ const nextConfig: NextConfig = {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https: http:",
-      
+
       // SECURITY FIX: ඔයාගේ Video Source domains මෙතනට අනිවාර්යයෙන්ම ඇතුළත් කළ යුතුයි
       "media-src 'self' https: blob: https://video.cinemanest-watch.workers.dev",
-      
+
       // SECURITY FIX: API සහ WebSocket ආරක්ෂාව
       "connect-src 'self' https://*.googleapis.com https://*.sanity.io https://*.vercel.app https://accounts.google.com wss: https://*.video.cinemanest-watch.workers.dev",
-      
+
       "frame-src 'self' https://accounts.google.com https://www.google.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self' https://accounts.google.com",
-      
+
       // SECURITY FIX: Clickjacking වැළැක්වීමට (X-Frame-Options හා සමානයි)
-      "frame-ancestors 'self'", 
-      
+      "frame-ancestors 'self'",
+
       "upgrade-insecure-requests", // Production වලදී HTTPS අනිවාර්ය කරයි
     ];
 
