@@ -21,7 +21,7 @@ export function SiteHeaderContent() {
             <SidebarTrigger
                 className="h-8 w-8 [&_svg]:size-5 text-zinc-400 hover:text-white hover:bg-zinc-800"
             />
-            <h1 className="text-sm font-medium text-zinc-200"></h1>
+
 
             {/* Search Bar */}
             <SearchBar className="ml-auto w-full max-w-xs md:max-w-sm" />

@@ -97,9 +97,9 @@ export function HeroSlider({ items }: HeroSliderProps) {
                                             </div>
 
                                             {/* Title */}
-                                            <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold text-white mb-4 leading-tight drop-shadow-xl">
+                                            <h2 className="text-3xl md:text-5xl lg:text-7xl font-bold text-white mb-4 leading-tight drop-shadow-xl">
                                                 {item.title}
-                                            </h1>
+                                            </h2>
 
                                             {/* Description */}
                                             {item.description && (

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/constants";
 // මෙතන DM_Sans වෙනුවට Poppins දාන්න
 import { Poppins, Noto_Sans_Sinhala } from "next/font/google";
 import "./globals.css";
@@ -29,29 +30,20 @@ export const metadata: Metadata = {
   authors: [{ name: "CinemaNest" }],
   creator: "CinemaNest",
   publisher: "CinemaNest",
-  metadataBase: new URL('https://cinemanest.com'),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://cinemanest.com',
+    url: SITE_URL,
     siteName: 'CinemaNest',
     title: 'CinemaNest - Stream Movies & TV Shows Online',
     description: 'Watch the latest movies and TV shows online in HD quality. Stream thousands of titles across all genres.',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'CinemaNest - Streaming Platform',
-      }
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'CinemaNest - Stream Movies & TV Shows Online',
     description: 'Watch the latest movies and TV shows online in HD quality.',
     creator: '@cinemanest',
-    images: ['/og-image.png'],
   },
   robots: {
     index: true,

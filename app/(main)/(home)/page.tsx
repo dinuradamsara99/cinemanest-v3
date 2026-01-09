@@ -13,6 +13,7 @@ export default async function HomePage() {
 
     return (
         <main className="min-h-screen bg-background">
+            <h1 className="sr-only">CinemaNest - Watch Movies & TV Shows Online</h1>
             {/* Hero Slider */}
             <HeroSlider items={featured} />
 
