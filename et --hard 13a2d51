@@ -1,0 +1,62 @@
+[33m35dbd12[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fixed broken internal links and meta tags
+[33m6929cbc[m Fixed broken internal links and duplicata tags
+[33mabf1fc7[m Fixed broken internal links and duplicate meta tags
+[33mca67714[m Fixed broken internal links and duplicate meta tags
+[33m13a2d51[m Broken Internal Links
+[33mb5891ba[m Removed Startup Crash.
+[33m3f76d44[m Added Error Boundary.
+[33m1772d00[m fixed the Open Graph image issue.
+[33m6d54fcf[m fixed security issues and performance
+[33mf12fc0d[m feat: Add final accessibility and code quality enhancements
+[33m877fc4a[m feat: Add comprehensive Schema.org structured data for SEO
+[33m50b6588[m fix: Implement critical audit recommendations
+[33m3af788d[m Delete lib/resend.ts
+[33mfb0c6d0[m fix: Remove unused resend API files causing build error
+[33m1c85bd4[m feat: Add global request notifications and improve mobile responsiveness
+[33m165b809[m feat: Redesign search bar UI and fix build errors
+[33m6a2588d[m feat: Enhance comment system, fix auth redirects, and update sidebar
+[33ma33961c[m feat: Add subtitle download feature with premium UI and animations
+[33madf5890[m Fix: Build errors and cleanup
+[33m7c5d2f7[m feat: add Google Search Console verification code
+[33m2b4e21e[m feat: implement critical accessibility and production fixes
+[33me70f92c[m Fix: Build errors and cleanup
+[33m233b13f[m fix: Add metadata to not-found page for build
+[33mf93be4d[m fix: .user null check and fix JSON-LD rendering
+[33m9a96896[m fix: Add session.user null check and fix JSON-LD rendering
+[33m82b548e[m fix: Change ZodError.errors to issues for Vercel build
+[33mf2cca74[m Initial commit for the new version
+[33m945e7df[m Updated something
+[33medbf502[m Fix category page movies display and enhance video player UI
+[33m082ab43[m Enhance VideoPlayer with primaryColor and settings
+[33mdb98284[m Refactor VideoPlayer styles and theme variables
+[33m072a6c9[m Update type definitions
+[33m1446cfe[m Fix: Add hidden credit field to episode schema to resolve Sanity warning
+[33mce7a387[m Fix: Add credit field to episode schema to resolve Sanity unknown field warning
+[33m5d47f7a[m Trigger Vercel deployment
+[33me41deac[m Fix: Implement dynamic video aspect ratio preservation in WatchPage
+[33m57bd4f3[m Fix build errors: remove unused functions and variables
+[33mf1e0c1d[m Add trailer feature, fix language/category pages, improve episode list scrolling
+[33m504e87c[m fix: resolve ESLint build errors - Remove unused Star import from lucide-react - Replace any type with proper Category type annotation - Fix TypeScript strict type checking errors
+[33me9ff2ec[m feat: add categories support and UI improvements - Added categories field to movie and tvshow schemas - Display categories in Details section on watch page - Added categories to Movie type and Sanity queries - Changed IMDb rating label and added /10 suffix - Fixed description line breaks with pre-wrap CSS - Updated responsive font sizes for mobile - Added white-space preservation for descriptions
+[33m96bf78d[m refactor: remove theater mode and clean up episode list UI - Removed theater mode feature (state, toggle, backdrop, button) - Simplified season selector to show only season title - Updated episode title truncation to 3 lines - Cleaned up EpisodeList CSS responsive styles - Removed unused Maximize2 icon import
+[33m5725711[m fix: remove unused imports and props, update UI elements - Fixed ESLint errors by removing unused Image import and title prop - Updated episode thumbnail height for better display - Added margin to episodes section - Hidden mobile play button in movie cards
+[33m93aa51c[m feat: improve mobile responsive design and update watch page layout - Added comprehensive responsive styles for mobile devices (390px, 320px, 200px breakpoints) - Enhanced video player with modern UI and double-tap skip functionality - Moved back button to right side of navigation - Reordered TV show page sections (Episodes before About) - Fixed spacing issues in About section
+[33m2179488[m fix: Resolve build errors - fix Movie type mismatch, remove unused imports, replace img with Next.js Image
+[33m86f6b06[m feat: Enhanced video player with auto-hide controls, mobile volume slider, beautiful overlays, and Theater Mode fix
+[33m0409375[m Redesign Watch page UI, VideoPlayer, EpisodeList, and add redesign docs
+[33m9da8b9f[m fix: Movie type compatibility for asset references
+[33mf0397f9[m fix: Resolve all ESLint and TypeScript errors
+[33mc4c8c46[m feat: Enhanced UI/UX - Sidebar improvements, video player redesign, and logo animations
+[33m45e7ec8[m Refactor categories & language routes + update components
+[33m0a79e9a[m Refactor WatchPageClient component: remove wishlist functionality, enhance layout and styling, and improve responsiveness. Update CSS for better visual hierarchy and user experience.
+[33m1b8fcdc[m Refactor Sidebar styles and add mobile open state
+[33mbc41504[m Remove duplicate SidebarWrapper component
+[33m16b7000[m Add mobile open styles to Sidebar.module.css
+[33md55b04d[m Add Sanity Studio route for local development
+[33meb95f25[m Clean up config formatting
+[33m73ca820[m Fix asset type mismatch in GROQ queries
+[33m1623f05[m Fix Vercel build errors: downgrade to Next.js 15.1.9, fix TypeScript types, add 404 page
+[33m2a539fc[m Add favicon and custom _document to fix build errors
+[33m592bb95[m Disable no-explicit-any rule for sanity lib
+[33mc2ba597[m Initial Next.js project upload
+[33mdf3ff10[m Initial commit from Create Next App
