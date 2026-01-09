@@ -2,13 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { query } from '@/lib/db';
+import { rateLimit, createRateLimitResponse, addRateLimitHeaders, RateLimitPresets } from '@/lib/rate-limiter';
+import { sanitizeInput, validateLength, logSecurityEvent, SecurityEventType, verifyCSRFFromRequest, clampNumber } from '@/lib/security';
 
 // GET - Fetch comments for a movie with pagination
 export async function GET(request: NextRequest) {
     try {
+        // SECURITY FIX: Add rate limiting for GET requests
+        const rateLimitResult = await rateLimit(request, RateLimitPresets.READ);
+
+        if (!rateLimitResult.success) {
+            return createRateLimitResponse(rateLimitResult);
+        }
+
         const movieId = request.nextUrl.searchParams.get('movieId');
         const cursor = request.nextUrl.searchParams.get('cursor');
-        const limit = parseInt(request.nextUrl.searchParams.get('limit') || '20');
+        // SECURITY FIX: Clamp limit to prevent DoS via excessive data requests
+        const rawLimit = parseInt(request.nextUrl.searchParams.get('limit') || '20');
+        const limit = clampNumber(rawLimit, 1, 100);
 
         if (!movieId) {
             return NextResponse.json({ error: 'Movie ID is required' }, { status: 400 });
@@ -133,11 +144,43 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // SECURITY FIX: Verify CSRF token for state-changing operations
+        const csrfCheck = verifyCSRFFromRequest(request, session.user.id);
+        if (!csrfCheck.valid) {
+            return csrfCheck.errorResponse;
+        }
+
+        // SECURITY: Rate limit comment posting to prevent spam
+        const rateLimitResult = await rateLimit(request, {
+            ...RateLimitPresets.MUTATION,
+            identifier: session.user.id,
+        });
+
+        if (!rateLimitResult.success) {
+            logSecurityEvent(SecurityEventType.RATE_LIMIT_EXCEEDED, {
+                userId: session.user.id,
+                endpoint: '/api/comments',
+                action: 'POST',
+            });
+            return createRateLimitResponse(rateLimitResult);
+        }
+
+        // SECURITY: Sanitize input to prevent XSS
+        const sanitizedContent = sanitizeInput(content);
+
+        // Validate content length
+        if (!validateLength(sanitizedContent, 1, 5000)) {
+            return NextResponse.json(
+                { error: 'Comment must be between 1 and 5000 characters' },
+                { status: 400 }
+            );
+        }
+
         const result = await query(`
       INSERT INTO comments (movie_id, user_id, content, parent_id)
       VALUES ($1, $2, $3, $4)
       RETURNING *
-    `, [movieId, session.user.id, content, parentId || null]);
+    `, [movieId, session.user.id, sanitizedContent, parentId || null]);
 
         const newComment = result.rows[0];
 

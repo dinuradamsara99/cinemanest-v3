@@ -364,6 +364,21 @@ export async function getRecentlyAddedMovies(limit = 12) {
 
 // Search movies and TV shows by title
 export async function searchMovies(searchQuery: string) {
+  // Validate and sanitize search query
+  const trimmed = searchQuery?.trim() || '';
+
+  // Return empty for invalid queries
+  if (trimmed.length < 2 || trimmed.length > 100) {
+    return [];
+  }
+
+  // Remove GROQ special characters to prevent query manipulation
+  const sanitized = trimmed.replace(/[*?[\]{}|\\^$()]/g, '');
+
+  if (sanitized.length < 2) {
+    return [];
+  }
+
   const query = `*[(_type == "movie" || _type == "tvshow") && title match $searchQuery + "*"] | order(isFeatured desc, _createdAt desc) [0...8] {
     _id,
     _type,
@@ -380,5 +395,6 @@ export async function searchMovies(searchQuery: string) {
     releaseYear
   }`;
 
-  return client.fetch(query, { searchQuery });
+  return client.fetch(query, { searchQuery: sanitized });
 }
+

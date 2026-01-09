@@ -1,3 +1,6 @@
+// SECURITY FIX: Prevent this module from being imported in client components
+import 'server-only';
+
 import { createClient, type ClientConfig } from "next-sanity";
 
 import { apiVersion, dataset, projectId } from "../env";

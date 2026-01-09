@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, createRateLimitResponse, RateLimitPresets } from "@/lib/rate-limiter";
+import { verifyCSRFFromRequest, clampNumber } from "@/lib/security";
 
 // POST - Save/Update watch progress
 export async function POST(request: NextRequest) {
@@ -23,6 +25,23 @@ export async function POST(request: NextRequest) {
                 { error: "Missing required fields" },
                 { status: 400 }
             );
+        }
+
+        // Rate limiting for watch progress updates
+        const rateLimitResult = await rateLimit(request, {
+            limit: 60, // 60 updates per minute should be enough for video playback
+            windowInSeconds: 60,
+            identifier: session.user.id,
+        });
+
+        if (!rateLimitResult.success) {
+            return createRateLimitResponse(rateLimitResult);
+        }
+
+        // SECURITY FIX: Verify CSRF token
+        const csrfCheck = verifyCSRFFromRequest(request, session.user.id);
+        if (!csrfCheck.valid) {
+            return csrfCheck.errorResponse;
         }
 
         // Calculate if video is completed (90% watched)
@@ -75,8 +94,20 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        // SECURITY FIX: Add rate limiting for GET requests
+        const rateLimitResult = await rateLimit(request, {
+            ...RateLimitPresets.READ,
+            identifier: session.user.id,
+        });
+
+        if (!rateLimitResult.success) {
+            return createRateLimitResponse(rateLimitResult);
+        }
+
         const { searchParams } = new URL(request.url);
-        const limit = parseInt(searchParams.get("limit") || "10");
+        // SECURITY FIX: Clamp limit to prevent excessive data requests
+        const rawLimit = parseInt(searchParams.get("limit") || "10");
+        const limit = clampNumber(rawLimit, 1, 50);
 
         // Fetch watch progress ordered by last watched
         const watchHistory = await prisma.watchProgress.findMany({

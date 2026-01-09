@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles, ArrowUp, Info, Bot, X, PlayCircle, Film } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
 import { AnimatePresence, motion } from "framer-motion";
+import { useCSRF } from "@/hooks/useCSRF";
 
 interface Episode {
     episodeNumber: number;
@@ -37,6 +38,7 @@ export function VideoAIInsights({ movieTitle, movieDescription, isTVShow = false
     const [answer, setAnswer] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const { fetchWithCSRF } = useCSRF();
 
     // Mention system state
     const [showMentions, setShowMentions] = useState(false);
@@ -103,9 +105,8 @@ export function VideoAIInsights({ movieTitle, movieDescription, isTVShow = false
         setAnswer("");
 
         try {
-            const response = await fetch("/api/ai-insights", {
+            const response = await fetchWithCSRF("/api/ai-insights", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     question: userQuestion,
                     movieTitle,

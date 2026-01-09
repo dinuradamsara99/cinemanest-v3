@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { client, writeClient } from "@/sanity/lib/client"
 import { revalidatePath } from "next/cache"
+import { sanitizeInput, sanitizeURL, validateLength, logSecurityEvent, SecurityEventType } from "@/lib/security"
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY2 || "")
@@ -16,7 +17,8 @@ export async function processYoutubeLink(url: string) {
         }
 
         // Extract Video ID
-        const videoIdMatch = url.match(/(?:youtu\.be\/|youtube\.com\/.*v=)([^&?]+)/)
+        // Extract Video ID (Supports Normal, Shorts, and Mobile app URLs)
+        const videoIdMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|shorts\/|embed\/))([^&?]+)/);
         const videoId = videoIdMatch ? videoIdMatch[1] : null
 
         if (!videoId) {
@@ -41,7 +43,13 @@ export async function processYoutubeLink(url: string) {
         const rawTitle = ytData.items[0].snippet.title
 
         // Clean Title using Gemini
-        const prompt = `Extract only the official movie or TV show title from this YouTube video title: "${rawTitle}". Remove words like "Official Trailer", "Teaser", "4K", "Release Date", "Review", etc. Return JUST the clean title and year. only english name`
+        const prompt = `Analyze this YouTube title: "${rawTitle}". 
+        
+1. Extract the official English title and release year.
+2. If it is a TV Show, you MUST include the Season number if mentioned in the text.
+3. Remove extra words like "Official Trailer", "Teaser", "4K", "Release Date", "Review", "Hashtags", etc.
+4. Format: "Title Season X (Year)" or "Title (Year)".
+5. Return ONLY the final cleaned string.`
 
         try {
             // Try with the user's preferred model first
@@ -83,6 +91,10 @@ export async function submitRequest(prevState: any, formData: FormData) {
     const session = await getServerSession(authOptions)
 
     if (!session || !session.user || !session.user.id) {
+        logSecurityEvent(SecurityEventType.UNAUTHORIZED_ACCESS, {
+            action: 'submitRequest',
+            timestamp: new Date().toISOString(),
+        })
         return { success: false, error: "Unauthorized" }
     }
 
@@ -103,15 +115,43 @@ export async function submitRequest(prevState: any, formData: FormData) {
         return { success: false, error: "Movie name is required" }
     }
 
+    // SECURITY: Sanitize all inputs
+    const sanitizedMovieName = sanitizeInput(movieName)
+    const sanitizedNotes = notes ? sanitizeInput(notes) : ""
+    let sanitizedYoutubeLink = ""
+
+    if (youtubeLink) {
+        const validatedURL = sanitizeURL(youtubeLink)
+        if (validatedURL && (validatedURL.includes('youtube.com') || validatedURL.includes('youtu.be'))) {
+            sanitizedYoutubeLink = validatedURL
+        } else {
+            logSecurityEvent(SecurityEventType.INVALID_INPUT, {
+                userId,
+                field: 'youtubeLink',
+                value: youtubeLink.substring(0, 50),
+            })
+            return { success: false, error: "Invalid YouTube URL" }
+        }
+    }
+
+    // Validate input lengths
+    if (!validateLength(sanitizedMovieName, 1, 200)) {
+        return { success: false, error: "Movie name must be between 1 and 200 characters" }
+    }
+
+    if (sanitizedNotes && !validateLength(sanitizedNotes, 0, 1000)) {
+        return { success: false, error: "Notes must not exceed 1000 characters" }
+    }
+
     try {
-        console.log("Submitting request to Sanity...", { movieName, userId })
+        console.log("Submitting request to Sanity...", { movieName: sanitizedMovieName, userId })
 
         // Use the configured writeClient which should have the token
         const result = await writeClient.create({
             _type: "movieRequest",
-            movieName,
-            youtubeLink,
-            notes,
+            movieName: sanitizedMovieName,
+            youtubeLink: sanitizedYoutubeLink,
+            notes: sanitizedNotes,
             userId,
             userEmail,
             status: "pending",
@@ -129,7 +169,7 @@ export async function submitRequest(prevState: any, formData: FormData) {
             body: error.body,
             stack: error.stack
         })
-        return { success: false, error: `Failed to submit request: ${error.message}` }
+        return { success: false, error: "Failed to submit request. Please try again." }
     }
 }
 

@@ -9,7 +9,6 @@ import {
     Maximize,
     Minimize,
     Loader2,
-    SkipForward,
     RotateCcw,
     RotateCw,
     ChevronsRight,
@@ -35,20 +34,17 @@ interface CustomVideoPlayerProps {
     videoUrl: string;
     subtitles?: PlayerSubtitle[];
     title?: string;
-    isTVShow?: boolean;
-    onNextEpisode?: () => void;
     poster?: string;
     startTime?: number; // Resume from this time in seconds
     mediaId?: string; // Movie/Episode ID for tracking
     mediaType?: string; // "movie" or "episode"
+    isTVShow?: boolean; // Whether this is a TV show
 }
 
 export function CustomVideoPlayer({
     videoUrl,
     subtitles = [],
     title = "Video",
-    isTVShow = false,
-    onNextEpisode,
     poster,
     startTime = 0,
     mediaId,
@@ -302,9 +298,6 @@ export function CustomVideoPlayer({
         };
         const handleEnded = () => {
             setIsPlaying(false);
-            if (onNextEpisode) {
-                // Optional: Auto-play next episode after delay
-            }
         };
 
         video.addEventListener("play", handlePlay);
@@ -328,7 +321,7 @@ export function CustomVideoPlayer({
             video.removeEventListener("progress", handleProgress);
             video.removeEventListener("ended", handleEnded);
         };
-    }, [videoUrl, onNextEpisode]);
+    }, [videoUrl]);
 
     // ... rest of the component ...
 
@@ -580,9 +573,7 @@ export function CustomVideoPlayer({
                     className="absolute inset-0 bg-black flex flex-col items-center justify-center z-50 pointer-events-none"
                 >
                     <Loader2 className="h-12 w-12 text-white animate-spin mb-4" />
-                    <p className="text-white text-lg font-semibold">
-                        {isTVShow ? "Loading Episode..." : "Loading Video..."}
-                    </p>
+                    <p className="text-white text-lg font-semibold">Loading Video...</p>
                 </motion.div>
             )}
 
@@ -727,17 +718,6 @@ export function CustomVideoPlayer({
 
                     {/* Right Controls */}
                     <div className="flex items-center gap-1 md:gap-2">
-                        {/* Next Episode (Fullscreen + TV Show) */}
-                        {isFullscreen && isTVShow && onNextEpisode && (
-                            <Button
-                                onClick={onNextEpisode}
-                                className="bg-white text-black hover:bg-zinc-200 h-7 md:h-8 gap-1 md:gap-2 px-2 md:px-3 mr-1"
-                            >
-                                <SkipForward className="h-3 w-3 md:h-4 md:w-4" />
-                                <span className="text-[10px] md:text-xs font-bold">Next</span>
-                            </Button>
-                        )}
-
                         {/* Fullscreen Toggle */}
                         <Button
                             variant="ghost"

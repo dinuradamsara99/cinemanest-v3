@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { getMovieBySlug } from "@/lib/sanity";
 import { WatchPageClient } from "@/components/WatchPageClient";
+import { Suspense } from "react";
+import { WatchPageSkeleton } from "@/components/WatchPageSkeleton";
+import { sanitizeForJsonLd } from "@/lib/security";
 
 interface WatchPageProps {
     params: Promise<{
@@ -22,7 +25,11 @@ export default async function WatchPage(props: WatchPageProps) {
     }
 
     // Render the client component with the movie data
-    return <WatchPageClient movie={movie} />;
+    return (
+        <Suspense fallback={<WatchPageSkeleton />}>
+            <WatchPageClient movie={movie} />
+        </Suspense>
+    );
 }
 
 // Optional: Generate metadata for SEO with Structured Data
@@ -45,12 +52,15 @@ export async function generateMetadata(props: WatchPageProps) {
     // Determine content type
     const isMovie = movie.contentType === 'movie' || movie._type === 'movie';
 
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cinemanest.com';
+
     // Create Schema.org structured data
     const structuredData = {
         "@context": "https://schema.org",
         "@type": isMovie ? "Movie" : "TVSeries",
-        "name": movie.title,
-        "description": movie.description || `Watch ${movie.title} on CinemaNest - Stream in HD quality`,
+        // SECURITY FIX: Sanitize input for JSON-LD to prevent XSS
+        "name": sanitizeForJsonLd(movie.title),
+        "description": sanitizeForJsonLd(movie.description || `Watch ${movie.title} on CinemaNest - Stream in HD quality`),
         "image": imageUrl,
         "datePublished": movie.releaseYear ? `${movie.releaseYear}-01-01` : undefined,
         "aggregateRating": movie.rating ? {
@@ -60,16 +70,16 @@ export async function generateMetadata(props: WatchPageProps) {
             "worstRating": 0,
             "ratingCount": Math.floor(movie.rating * 100) // Estimated
         } : undefined,
-        "genre": movie.categories?.map((cat: any) => cat.title) || [],
-        "inLanguage": movie.languages?.map((lang: any) => lang.title) || ["English"],
-        "contentRating": movie.contentRating || "Not Rated",
+        "genre": movie.categories?.map((cat: any) => sanitizeForJsonLd(cat.title)) || [],
+        "inLanguage": movie.languages?.map((lang: any) => sanitizeForJsonLd(lang.title)) || ["English"],
+        "contentRating": sanitizeForJsonLd(movie.contentRating || "Not Rated"),
         "duration": movie.duration ? `PT${movie.duration}M` : undefined,
-        "url": `https://cinemanestlk.vercel.app/watch/${slug}`,
+        "url": `${baseUrl}/watch/${sanitizeForJsonLd(slug)}`,
         "potentialAction": {
             "@type": "WatchAction",
             "target": {
                 "@type": "EntryPoint",
-                "urlTemplate": `https://cinemanestlk.vercel.app/watch/${slug}`,
+                "urlTemplate": `${baseUrl}/watch/${sanitizeForJsonLd(slug)}`,
                 "actionPlatform": [
                     "http://schema.org/DesktopWebPlatform",
                     "http://schema.org/MobileWebPlatform"
@@ -98,7 +108,7 @@ export async function generateMetadata(props: WatchPageProps) {
             title: `${movie.title} - Watch on CinemaNest`,
             description: movie.description || `Watch ${movie.title} online in HD quality`,
             type: 'video.movie',
-            url: `https://cinemanestlk.vercel.app/watch/${slug}`,
+            url: `${baseUrl}/watch/${slug}`,
             images: [{
                 url: imageUrl,
                 width: 1200,

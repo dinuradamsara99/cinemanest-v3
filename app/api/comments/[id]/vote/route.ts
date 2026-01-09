@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { query } from '@/lib/db';
+import { rateLimit, createRateLimitResponse, addRateLimitHeaders, RateLimitPresets } from '@/lib/rate-limiter';
 
 // POST - Vote on comment (like/dislike)
 export async function POST(
@@ -11,8 +12,18 @@ export async function POST(
     try {
         const session = await getServerSession(authOptions);
 
-        if (!session?.user) {
+        if (!session?.user || !session.user.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Rate limiting
+        const rateLimitResult = await rateLimit(request, {
+            ...RateLimitPresets.MUTATION, // 30 requests per hour
+            identifier: session.user.id,
+        });
+
+        if (!rateLimitResult.success) {
+            return createRateLimitResponse(rateLimitResult);
         }
 
         const { voteType } = await request.json(); // 'like' or 'dislike'
@@ -64,7 +75,8 @@ export async function POST(
       WHERE comment_id = $1
     `, [commentId, session.user.id]);
 
-        return NextResponse.json(voteCounts.rows[0]);
+        const response = NextResponse.json(voteCounts.rows[0]);
+        return addRateLimitHeaders(response, rateLimitResult);
     } catch (error: any) {
         console.error('Vote comment error:', error);
         return NextResponse.json(

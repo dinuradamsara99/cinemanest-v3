@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { query } from '@/lib/db';
+import { rateLimit, createRateLimitResponse, addRateLimitHeaders, RateLimitPresets } from '@/lib/rate-limiter';
 
 // PUT - Update comment
 export async function PUT(
@@ -11,8 +12,18 @@ export async function PUT(
     try {
         const session = await getServerSession(authOptions);
 
-        if (!session?.user) {
+        if (!session?.user || !session.user.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Rate limiting
+        const rateLimitResult = await rateLimit(request, {
+            ...RateLimitPresets.MUTATION,
+            identifier: session.user.id,
+        });
+
+        if (!rateLimitResult.success) {
+            return createRateLimitResponse(rateLimitResult);
         }
 
         const { content } = await request.json();
@@ -45,7 +56,7 @@ export async function PUT(
     `, [content, commentId]);
 
         const updatedComment = result.rows[0];
-        return NextResponse.json({
+        const response = NextResponse.json({
             id: updatedComment.id,
             movieId: updatedComment.movie_id,
             userId: updatedComment.user_id,
@@ -54,6 +65,7 @@ export async function PUT(
             createdAt: updatedComment.created_at,
             updatedAt: updatedComment.updated_at,
         });
+        return addRateLimitHeaders(response, rateLimitResult);
     } catch (error: any) {
         console.error('Update comment error:', error);
         return NextResponse.json(
@@ -71,8 +83,18 @@ export async function DELETE(
     try {
         const session = await getServerSession(authOptions);
 
-        if (!session?.user) {
+        if (!session?.user || !session.user.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Rate limiting
+        const rateLimitResult = await rateLimit(request, {
+            ...RateLimitPresets.MUTATION,
+            identifier: session.user.id,
+        });
+
+        if (!rateLimitResult.success) {
+            return createRateLimitResponse(rateLimitResult);
         }
 
         const { id: commentId } = await params;
@@ -94,7 +116,8 @@ export async function DELETE(
         // Delete comment (cascade will delete votes and replies)
         await query('DELETE FROM comments WHERE id = $1', [commentId]);
 
-        return NextResponse.json({ success: true });
+        const response = NextResponse.json({ success: true });
+        return addRateLimitHeaders(response, rateLimitResult);
     } catch (error: any) {
         console.error('Delete comment error:', error);
         return NextResponse.json(

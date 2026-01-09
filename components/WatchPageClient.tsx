@@ -136,23 +136,7 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Handle next episode for TV shows
-    const handleNextEpisode = () => {
-        if (!isTVShow || !movie.seasons) return;
 
-        const currentSeason = movie.seasons[currentSeasonIndex];
-        if (!currentSeason?.episodes) return;
-
-        // Check if there's a next episode in current season
-        if (currentEpisodeIndex < currentSeason.episodes.length - 1) {
-            handleEpisodeClick(currentSeasonIndex, currentEpisodeIndex + 1);
-        }
-        // Check if there's a next season
-        else if (currentSeasonIndex < movie.seasons.length - 1) {
-            handleEpisodeClick(currentSeasonIndex + 1, 0);
-        }
-        // No more episodes - could show a message or do nothing
-    };
 
     // Helper Function: Check if an episode matches the search query
     const checkMatch = (ep: any, query: string) => {
@@ -211,7 +195,6 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
                                     subtitles={playerSubtitles}
                                     title={isTVShow ? episodeName : currentTitle}
                                     isTVShow={isTVShow}
-                                    onNextEpisode={isTVShow ? handleNextEpisode : undefined}
                                     poster={posterUrl}
                                     mediaId={movie.slug?.current}
                                     mediaType={isTVShow ? "episode" : "movie"}

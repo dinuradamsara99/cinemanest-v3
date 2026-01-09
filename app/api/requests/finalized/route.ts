@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { client } from "@/sanity/lib/client"
+import { rateLimit, createRateLimitResponse, RateLimitPresets } from "@/lib/rate-limiter"
 
 export async function GET(request: Request) {
     const session = await getServerSession(authOptions)
@@ -16,6 +17,16 @@ export async function GET(request: Request) {
     // Verify the userId matches the session user
     if (userId !== session.user.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Rate limiting (Added during Security Hardening)
+    const rateLimitResult = await rateLimit(request, {
+        ...RateLimitPresets.READ,
+        identifier: session.user.id,
+    });
+
+    if (!rateLimitResult.success) {
+        return createRateLimitResponse(rateLimitResult);
     }
 
     try {

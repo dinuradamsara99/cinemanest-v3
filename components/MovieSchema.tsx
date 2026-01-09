@@ -1,25 +1,40 @@
 import { Movie } from '@/types/movie';
 import { SITE_URL } from '@/lib/constants';
+import { sanitizeForJsonLd } from '@/lib/security';
 
 interface MovieSchemaProps {
     movie: Movie;
 }
 
+/**
+ * Safe JSON-LD Schema component
+ * Uses sanitization to prevent XSS in structured data
+ */
 export function MovieSchema({ movie }: MovieSchemaProps) {
     const posterUrl = movie.posterImage?.asset ?
         (typeof movie.posterImage.asset === 'object' && '_ref' in movie.posterImage.asset
-            ? `https://cinemanest.com/api/poster/${movie.posterImage.asset._ref}`
+            ? `https://cinemanestlk.vercel.app/api/poster/${movie.posterImage.asset._ref}`
             : movie.posterImage.asset.url)
         : undefined;
+
+    // Sanitize all user-controlled content
+    const safeTitle = sanitizeForJsonLd(movie.title || '');
+    const safeDescription = sanitizeForJsonLd(movie.description || '');
+    const safeGenre = movie.genre
+        ? (Array.isArray(movie.genre)
+            ? movie.genre.map(g => sanitizeForJsonLd(g))
+            : sanitizeForJsonLd(movie.genre as string))
+        : undefined;
+    const safeSlug = movie.slug?.current ? sanitizeForJsonLd(movie.slug.current) : '';
 
     const schema = {
         '@context': 'https://schema.org',
         '@type': movie.contentType === 'tvshow' ? 'TVSeries' : 'Movie',
-        name: movie.title,
-        description: movie.description,
+        name: safeTitle,
+        description: safeDescription,
         image: posterUrl,
         datePublished: movie.releaseYear?.toString(),
-        genre: movie.genre,
+        genre: safeGenre,
         aggregateRating: movie.rating ? {
             '@type': 'AggregateRating',
             ratingValue: movie.rating,
@@ -49,12 +64,14 @@ export function MovieSchema({ movie }: MovieSchemaProps) {
             {
                 '@type': 'ListItem',
                 position: 3,
-                name: movie.title,
-                item: `${SITE_URL}/watch/${movie.slug?.current}`
+                name: safeTitle,
+                item: `${SITE_URL}/watch/${safeSlug}`
             }
         ]
     };
 
+    // Render using a safe method - the schema objects are now sanitized
+    // JSON.stringify handles escaping, combined with our sanitizeForJsonLd
     return (
         <>
             <script

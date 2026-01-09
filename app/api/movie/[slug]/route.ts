@@ -1,16 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/lib/sanity";
+import { rateLimit, createRateLimitResponse, addRateLimitHeaders, RateLimitPresets } from "@/lib/rate-limiter";
+import { sanitizeInput, createSafeErrorResponse, logger } from "@/lib/security";
 
 export async function GET(
     request: NextRequest,
     context: { params: Promise<{ slug: string }> }
 ) {
     try {
-        const params = await context.params;
-        const slug = params.slug;
-        console.log('[Movie API] Fetching movie:', slug);
+        // ====================================================================
+        // 1. RATE LIMITING
+        // ====================================================================
+        const rateLimitResult = await rateLimit(request, RateLimitPresets.READ);
 
-        // Fetch movie or TV show by slug
+        if (!rateLimitResult.success) {
+            logger.warn('Movie API rate limit exceeded', {
+                ip: request.headers.get('x-forwarded-for') || 'unknown',
+            });
+            return createRateLimitResponse(rateLimitResult);
+        }
+
+        // ====================================================================
+        // 2. VALIDATE INPUT
+        // ====================================================================
+        const params = await context.params;
+        const rawSlug = params.slug;
+
+        // Sanitize and validate slug
+        const slug = sanitizeInput(rawSlug);
+
+        if (!slug || slug.length > 200) {
+            return NextResponse.json(
+                { error: "Invalid movie identifier" },
+                { status: 400 }
+            );
+        }
+
+        logger.debug('Movie API request', { slug });
+
+        // ====================================================================
+        // 3. FETCH MOVIE DATA
+        // ====================================================================
         const query = `*[(_type == "movie" || _type == "tvshow") && slug.current == $slug][0] {
             _id,
             _type,
@@ -24,16 +54,18 @@ export async function GET(
         }`;
 
         const movie = await client.fetch(query, { slug });
-        console.log('[Movie API] Query result:', movie);
 
         if (!movie) {
-            console.log('[Movie API] Movie not found');
+            logger.debug('Movie not found', { slug });
             return NextResponse.json(
                 { error: "Movie not found" },
                 { status: 404 }
             );
         }
 
+        // ====================================================================
+        // 4. RETURN WITH RATE LIMIT HEADERS
+        // ====================================================================
         const result = {
             _id: movie._id,
             title: movie.title,
@@ -44,16 +76,11 @@ export async function GET(
             type: movie._type === "tvshow" ? "tv" : "movie",
         };
 
-        console.log('[Movie API] Returning:', result);
-        return NextResponse.json(result);
+        const response = NextResponse.json(result);
+        return addRateLimitHeaders(response, rateLimitResult);
+
     } catch (error) {
-        console.error("[Movie API] Error fetching movie:", error);
-        return NextResponse.json(
-            {
-                error: "Internal server error",
-                details: error instanceof Error ? error.message : String(error)
-            },
-            { status: 500 }
-        );
+        logger.error('Movie API error', { error: String(error) });
+        return createSafeErrorResponse("Failed to fetch movie", 500);
     }
 }
