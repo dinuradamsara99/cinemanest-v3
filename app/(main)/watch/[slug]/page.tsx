@@ -27,9 +27,7 @@ export default async function WatchPage(props: WatchPageProps) {
 
         // Render the client component with the movie data
         return (
-            <Suspense fallback={<WatchPageSkeleton />}>
-                <WatchPageClient movie={movie} />
-            </Suspense>
+            <WatchPageClient movie={movie} />
         );
     } catch (error) {
         console.error(`Error loading watch page for slug:`, error);
