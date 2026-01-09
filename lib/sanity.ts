@@ -2,6 +2,14 @@ import { createClient } from "next-sanity";
 import imageUrlBuilder from "@sanity/image-url";
 import { SanityImageSource } from "@sanity/image-url/lib/types/types";
 
+// Validate environment variables
+if (!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
+  throw new Error("Missing NEXT_PUBLIC_SANITY_PROJECT_ID environment variable");
+}
+if (!process.env.NEXT_PUBLIC_SANITY_DATASET) {
+  throw new Error("Missing NEXT_PUBLIC_SANITY_DATASET environment variable");
+}
+
 // Sanity client configuration
 export const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
