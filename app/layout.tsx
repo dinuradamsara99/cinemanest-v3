@@ -12,12 +12,14 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-poppins',
+  display: 'swap', // Prevents Flash of Invisible Text (FOIT)
 });
 
 const notoSansSinhala = Noto_Sans_Sinhala({
   subsets: ["sinhala", "latin"],
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-sinhala',
+  display: 'swap', // Prevents Flash of Invisible Text (FOIT)
 });
 
 export const metadata: Metadata = {
@@ -68,6 +70,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
+      <head>
+        {/* Preconnect to critical third-party origins for faster loading */}
+        <link rel="preconnect" href="https://cdn.sanity.io" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://image.tmdb.org" />
+        <link rel="preconnect" href="https://lh3.googleusercontent.com" />
+        {/* DNS prefetch for additional speed optimization */}
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://accounts.google.com" />
+      </head>
       <body className={`${poppins.variable} ${notoSansSinhala.variable} font-sans antialiased`}>
         {/* Skip to Content Link for Accessibility */}
         <a

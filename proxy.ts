@@ -30,10 +30,10 @@ const PUBLIC_API_ROUTES = [
 
 /**
  * Page routes that require authentication
+ * NOTE: /studio is NOT here because Sanity Studio handles its own authentication
  */
 const PROTECTED_PAGE_ROUTES = [
     '/account',
-    '/studio', // Protected: CMS Access
 ];
 
 // ============================================================================

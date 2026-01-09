@@ -3,7 +3,8 @@ import { getLanguages } from "@/lib/sanity";
 import { rateLimit, createRateLimitResponse, addRateLimitHeaders, RateLimitPresets } from "@/lib/rate-limiter";
 import { createSafeErrorResponse, logger } from "@/lib/security";
 
-export const dynamic = "force-dynamic";
+// ISR: Revalidate languages every hour (static data)
+export const revalidate = 3600;
 
 export async function GET(request: NextRequest) {
     try {

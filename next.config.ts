@@ -1,13 +1,36 @@
 import type { NextConfig } from "next";
 
+// Bundle analyzer for production optimization (run with ANALYZE=true npm run build)
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig: NextConfig = {
+  // ============================================================================
+  // IMAGE OPTIMIZATION (Enhanced for Performance)
+  // ============================================================================
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'cdn.sanity.io', pathname: '/**' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com', pathname: '/**' },
-      { protocol: 'https', hostname: 'image.tmdb.org', pathname: '/**' }, // TMDB Posters සඳහා
+      { protocol: 'https', hostname: 'image.tmdb.org', pathname: '/**' },
     ],
     formats: ['image/avif', 'image/webp'],
+    // Device responsive breakpoints for optimal image sizes
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+    // Smaller image sizes for icons, thumbnails
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Cache optimized images for 30 days
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+  },
+  // ============================================================================
+  // PRODUCTION COMPILER OPTIMIZATIONS
+  // ============================================================================
+  compiler: {
+    // Remove console.log in production for smaller bundle
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
   },
 
   async headers() {
@@ -43,7 +66,6 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: [
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
-          // HSTS: වසර 2ක් පුරා HTTPS අනිවාර්ය කරයි
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -70,4 +92,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Export wrapped with bundle analyzer
+export default withBundleAnalyzer(nextConfig);

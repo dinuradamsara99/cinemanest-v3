@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "sanity": "sanity dev",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@auth/core": "^0.41.1",
@@ -64,6 +65,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.1.0",
     "@tanstack/react-query-devtools": "^5.91.2",
     "@types/cheerio": "^0.22.35",
     "@types/node": "^20",
