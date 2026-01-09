@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
-import DOMPurify from 'isomorphic-dompurify';
+import sanitizeHtml from 'sanitize-html';
 
 /**
  * Security Utilities and Helpers
@@ -102,7 +102,7 @@ export const logger = {
 
 /**
  * Sanitize string input to prevent XSS attacks
- * Uses DOMPurify for robust protection
+ * Uses sanitize-html for robust protection
  */
 export function sanitizeInput(input: string): string {
     if (!input) return '';
@@ -110,11 +110,10 @@ export function sanitizeInput(input: string): string {
     // First, limit length to prevent DoS
     const trimmed = input.trim().substring(0, 10000);
 
-    // Use DOMPurify to strip all HTML
-    const sanitized = DOMPurify.sanitize(trimmed, {
-        ALLOWED_TAGS: [], // No HTML allowed
-        ALLOWED_ATTR: [],
-        KEEP_CONTENT: true,
+    // Use sanitize-html to strip all HTML
+    const sanitized = sanitizeHtml(trimmed, {
+        allowedTags: [], // No HTML allowed
+        allowedAttributes: {},
     });
 
     // Additional protection against non-HTML vectors
@@ -132,13 +131,13 @@ export function sanitizeInput(input: string): string {
 export function sanitizeHTML(input: string): string {
     if (!input) return '';
 
-    return DOMPurify.sanitize(input.substring(0, 50000), {
-        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li', 'span'],
-        ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
-        ALLOW_DATA_ATTR: false,
-        ADD_ATTR: ['rel'],
-        FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form'],
-        FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
+    return sanitizeHtml(input.substring(0, 50000), {
+        allowedTags: ['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li', 'span'],
+        allowedAttributes: {
+            'a': ['href', 'target', 'rel', 'class'],
+            '*': ['class']
+        },
+        disallowedTagsMode: 'discard',
     });
 }
 

@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Fix isomorphic-dompurify ESM/CJS compatibility on Vercel
-  serverExternalPackages: ['isomorphic-dompurify', 'jsdom'],
-
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'cdn.sanity.io', pathname: '/**' },
