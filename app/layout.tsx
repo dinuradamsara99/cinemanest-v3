@@ -33,9 +33,19 @@ export const metadata: Metadata = {
   creator: "CinemaNest",
   publisher: "CinemaNest",
   metadataBase: new URL(SITE_URL),
+  // Language/Locale alternates for multilingual SEO
+  alternates: {
+    canonical: SITE_URL,
+    languages: {
+      'en': SITE_URL,
+      'si': `${SITE_URL}/si`, // Sinhala alternate (future-ready)
+      'x-default': SITE_URL,
+    },
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
+    alternateLocale: ['si_LK'],
     url: SITE_URL,
     siteName: 'CinemaNest',
     title: 'CinemaNest - Stream Movies & TV Shows Online',

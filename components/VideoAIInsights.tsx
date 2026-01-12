@@ -11,6 +11,16 @@ import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCSRF } from "@/hooks/useCSRF";
 
+const cleanTitle = (rawTitle: string) => {
+    if (!rawTitle) return "";
+    // 1. '|' ලකුණෙන් වෙන් කරලා මුල් කොටස ගන්නවා
+    let title = rawTitle.split('|')[0];
+    // 2. 'S01' වගේ Season නම් හෝ '2023' වගේ අවුරුදු අයින් කරන්න (Optional)
+    title = title.replace(/\sS\d{2}.*/i, '') // Remove S01, S02...
+        .replace(/\s\d{4}.*/, '');  // Remove Year (e.g. 2023) if at the end
+    return title.trim();
+};
+
 interface Episode {
     episodeNumber: number;
     title: string;
@@ -22,25 +32,25 @@ interface VideoAIInsightsProps {
     movieDescription?: string;
     isTVShow?: boolean;
     episodes?: Episode[];
+    onLoginClick?: () => void;
 }
 
 const SUGGESTED_QUESTIONS = [
-    "කතාව කෙටියෙන් කියන්න",
+    "Genre එක මොකක්ද?",
+    "Action වැඩියිද?",
     "Cast එකේ ඉන්නේ කවුද?",
-    "IMDb Rating එක කීයද?",
     "Director කවුද?",
     "Main Villain කවුද?",
     "බලන්න වටිනවද?",
 ];
 
-export function VideoAIInsights({ movieTitle, movieDescription, isTVShow = false, episodes = [] }: VideoAIInsightsProps) {
+export function VideoAIInsights({ movieTitle, movieDescription, isTVShow = false, episodes = [], onLoginClick }: VideoAIInsightsProps) {
     const [question, setQuestion] = useState("");
     const [answer, setAnswer] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const { fetchWithCSRF } = useCSRF();
+    const { fetchWithCSRF, isAuthenticated, isLoading: csrfLoading } = useCSRF();
 
-    // Mention system state
     const [showMentions, setShowMentions] = useState(false);
     const [mentionSearch, setMentionSearch] = useState("");
     const [cursorPosition, setCursorPosition] = useState(0);
@@ -100,6 +110,14 @@ export function VideoAIInsights({ movieTitle, movieDescription, isTVShow = false
     const handleAskQuestion = async (userQuestion: string) => {
         if (!userQuestion.trim()) return;
 
+        // Check if user is authenticated - open login dialog if not
+        if (!isAuthenticated) {
+            if (onLoginClick) {
+                onLoginClick();
+            }
+            return;
+        }
+
         setIsLoading(true);
         setError("");
         setAnswer("");
@@ -117,6 +135,14 @@ export function VideoAIInsights({ movieTitle, movieDescription, isTVShow = false
 
             const data = await response.json();
 
+            // Check for rate limit error
+            if (response.status === 429) {
+                // අර function එක පාවිච්චි කරලා නම clean කරගන්නවා
+                const shortTitle = cleanTitle(movieTitle);
+                setError(`Daily AI search limit for ${shortTitle} reached.`);
+                return;
+            }
+
             if (!response.ok) {
                 throw new Error(data.error || "Failed to get insights");
             }
@@ -124,7 +150,9 @@ export function VideoAIInsights({ movieTitle, movieDescription, isTVShow = false
             setAnswer(data.answer);
             setQuestion("");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Something went wrong");
+            if (!error) { // Don't override rate limit error
+                setError(err instanceof Error ? err.message : "Something went wrong");
+            }
         } finally {
             setIsLoading(false);
         }

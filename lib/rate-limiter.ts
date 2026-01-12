@@ -54,8 +54,9 @@ const upstashLimiters = {
     MUTATION: redis ? createUpstashLimiter(30, '1 h') : null,   // 30 requests per hour
     SENSITIVE: redis ? createUpstashLimiter(3, '5 m') : null,   // 3 requests per 5 minutes
     READ: redis ? createUpstashLimiter(300, '5 m') : null,      // 300 requests per 5 minutes
-    AI: redis ? createUpstashLimiter(30, '5 m') : null,         // 30 requests per 5 minutes
+    // AI: redis ? createUpstashLimiter(10, '24 h') : null,        // 10 requests per 24 hours (per user)
     SEARCH: redis ? createUpstashLimiter(60, '1 m') : null,     // 60 searches per minute
+    // REQUEST: redis ? createUpstashLimiter(5, '24 h') : null,     // 5 movie requests per 24 hours
 };
 
 // ============================================================================
@@ -141,11 +142,14 @@ export const RateLimitPresets = {
     /** Lenient for read-only operations - 300 requests per 5 minutes */
     READ: { limit: 300, windowInSeconds: 5 * 60 },
 
-    /** For AI endpoints - 30 requests per 5 minutes (approx 1 every 10s is safe) */
-    AI: { limit: 30, windowInSeconds: 5 * 60 },
+    /** For AI endpoints - 10 requests per 24 hours (maximum usage limit) */
+    AI: { limit: 10, windowInSeconds: 24 * 60 * 60 },
 
     /** For search endpoints - 60 requests per minute */
     SEARCH: { limit: 60, windowInSeconds: 60 },
+
+    /** For movie request endpoints - 5 requests per 24 hours */
+    REQUEST: { limit: 5, windowInSeconds: 24 * 60 * 60 },
 } as const;
 
 // ============================================================================

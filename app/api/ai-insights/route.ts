@@ -28,25 +28,7 @@ export async function POST(req: NextRequest) {
         }
 
         // ====================================================================
-        // 2. RATE LIMITING (STRICT FOR AI ENDPOINTS)
-        // ====================================================================
-        const rateLimitResult = await rateLimit(req, {
-            ...RateLimitPresets.AI,  // 10 requests per 5 minutes
-            identifier: session.user.id,
-        });
-
-        if (!rateLimitResult.success) {
-            logSecurityEvent(SecurityEventType.RATE_LIMIT_EXCEEDED, {
-                userId: session.user.id,
-                endpoint: '/api/ai-insights',
-                limit: rateLimitResult.limit,
-            });
-
-            return createRateLimitResponse(rateLimitResult);
-        }
-
-        // ====================================================================
-        // 3. CSRF VERIFICATION (Prevent cross-site request forgery)
+        // 2. CSRF VERIFICATION (Prevent cross-site request forgery)
         // ====================================================================
         const csrfCheck = verifyCSRFFromRequest(req, session.user.id);
         if (!csrfCheck.valid) {
@@ -54,7 +36,11 @@ export async function POST(req: NextRequest) {
         }
 
         // ====================================================================
-        // 4. PARSE AND VALIDATE INPUT
+        // 3. PARSE AND VALIDATE INPUT
+        // ====================================================================
+
+        // ====================================================================
+        // 5. SANITIZE AND VALIDATE INPUTS
         // ====================================================================
         const body = await req.json();
         const { question, movieTitle, movieDescription, isTVShow } = body;
@@ -64,6 +50,25 @@ export async function POST(req: NextRequest) {
                 { error: "Question and movie title are required" },
                 { status: 400 }
             );
+        }
+
+        // ====================================================================
+        // 4. RATE LIMITING (Per Movie/Show - 10 requests per movie per user)
+        // ====================================================================
+        const rateLimitResult = await rateLimit(req, {
+            ...RateLimitPresets.AI,  // 10 requests per movie per 24 hours
+            identifier: `${session.user.id}:${movieTitle}`,  // User + Movie specific
+        });
+
+        if (!rateLimitResult.success) {
+            logSecurityEvent(SecurityEventType.RATE_LIMIT_EXCEEDED, {
+                userId: session.user.id,
+                endpoint: '/api/ai-insights',
+                movieTitle: movieTitle,
+                limit: rateLimitResult.limit,
+            });
+
+            return createRateLimitResponse(rateLimitResult);
         }
 
         // Sanitize inputs

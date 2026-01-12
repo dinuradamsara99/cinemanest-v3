@@ -6,12 +6,36 @@ import { GoogleGenerativeAI } from "@google/generative-ai"
 import { client, writeClient } from "@/sanity/lib/client"
 import { revalidatePath } from "next/cache"
 import { sanitizeInput, sanitizeURL, validateLength, logSecurityEvent, SecurityEventType } from "@/lib/security"
+import { rateLimit, RateLimitPresets } from "@/lib/rate-limiter"
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY2 || "")
 
 export async function processYoutubeLink(url: string) {
     try {
+        // Check authentication
+        const session = await getServerSession(authOptions)
+        if (!session?.user?.id) {
+            return { success: false, error: "Login required", rateLimited: false }
+        }
+
+        // Rate limiting - 5 uses per day
+        const mockRequest = new Request('http://localhost', {
+            headers: { 'x-forwarded-for': 'server-action' }
+        })
+        const rateLimitResult = await rateLimit(mockRequest, {
+            ...RateLimitPresets.REQUEST,  // 5 per 24 hours
+            identifier: `yt-ai:${session.user.id}`,
+        })
+
+        if (!rateLimitResult.success) {
+            return {
+                success: false,
+                error: "You have reached your daily YouTube AI limit (Limit: 5 times per day). Please try again tomorrow.",
+                rateLimited: true
+            }
+        }
+
         if (!process.env.YOUTUBE_API_KEY) {
             throw new Error("Missing YouTube API Key")
         }

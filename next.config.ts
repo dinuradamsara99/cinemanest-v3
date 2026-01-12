@@ -36,8 +36,11 @@ const nextConfig: NextConfig = {
   async headers() {
     const cspDirectives = [
       "default-src 'self'",
-      // SECURITY FIX: 'unsafe-eval' ඉවත් කර ඇත. අවශ්‍ය නම් පමණක් එක් කරන්න
+      // SECURITY: CSP protects against XSS while maintaining Next.js compatibility
+      // Note: 'unsafe-inline' is required for Next.js hydration scripts
+      // For stricter CSP, implement nonce-based approach with middleware
       "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://accounts.google.com https://www.google.com",
+      // Note: 'unsafe-inline' for styles is required by Tailwind CSS and styled-components
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https: http:",

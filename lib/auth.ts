@@ -148,7 +148,7 @@ export const authOptions: NextAuthOptions = {
                     email: user.email,
                     picture: user.image,
                     iat: Math.floor(Date.now() / 1000),
-                    exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // Explicit expiration (24h)
+                    exp: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // Explicit expiration (30 days)
                 };
             }
 
@@ -162,15 +162,15 @@ export const authOptions: NextAuthOptions = {
     // ========================================================================
     session: {
         strategy: "jwt",
-        maxAge: 24 * 60 * 60,      // 24 hours - session expires after this
-        updateAge: 60 * 60,        // 1 hour - session is refreshed if older than this
+        maxAge: 30 * 24 * 60 * 60,  // 30 days - session expires after this
+        updateAge: 24 * 60 * 60,   // 24 hours - session is refreshed if older than this
     },
 
     // ========================================================================
     // JWT CONFIGURATION
     // ========================================================================
     jwt: {
-        maxAge: 24 * 60 * 60,      // 24 hours - matches session maxAge
+        maxAge: 30 * 24 * 60 * 60,  // 30 days - matches session maxAge
     },
 
     // ========================================================================

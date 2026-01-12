@@ -66,12 +66,33 @@ export function useCSRF() {
     // Helper function to make fetch requests with CSRF token
     const fetchWithCSRF = useCallback(
         async (url: string, options: RequestInit = {}): Promise<Response> => {
-            if (!token) {
-                throw new Error('CSRF token not available');
+            // Auto-fetch token if not available yet
+            let currentToken = token;
+            if (!currentToken) {
+                // Try to fetch token on-demand
+                try {
+                    const response = await fetch('/api/csrf-token');
+                    if (response.ok) {
+                        const data = await response.json();
+                        currentToken = data.token;
+                        setToken(data.token);
+                    } else if (response.status === 401) {
+                        throw new Error('Please sign in to use this feature');
+                    } else {
+                        const errorData = await response.json().catch(() => ({}));
+                        console.error('CSRF fetch failed:', response.status, errorData);
+                        throw new Error(errorData.error || 'Failed to fetch security token');
+                    }
+                } catch (err) {
+                    if (err instanceof Error) {
+                        throw err;
+                    }
+                    throw new Error('Unable to verify session. Please refresh the page.');
+                }
             }
 
             const headers = new Headers(options.headers);
-            headers.set('X-CSRF-Token', token);
+            headers.set('X-CSRF-Token', currentToken);
 
             if (!headers.has('Content-Type') && options.body) {
                 headers.set('Content-Type', 'application/json');
@@ -88,8 +109,12 @@ export function useCSRF() {
                 if (errorData.error?.includes('CSRF')) {
                     await refreshToken();
                     // Retry with new token
-                    headers.set('X-CSRF-Token', token);
-                    return fetch(url, { ...options, headers });
+                    const retryHeaders = new Headers(options.headers);
+                    retryHeaders.set('X-CSRF-Token', token);
+                    if (!retryHeaders.has('Content-Type') && options.body) {
+                        retryHeaders.set('Content-Type', 'application/json');
+                    }
+                    return fetch(url, { ...options, headers: retryHeaders });
                 }
             }
 

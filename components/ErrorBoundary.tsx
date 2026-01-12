@@ -14,6 +14,16 @@ interface ErrorBoundaryState {
     error: Error | null;
 }
 
+/**
+ * ErrorBoundary Component
+ * 
+ * NOTE: This is intentionally a Class Component, not a Functional Component.
+ * React Error Boundaries REQUIRE class components with getDerivedStateFromError
+ * and componentDidCatch lifecycle methods. There is no hooks equivalent in React 18/19.
+ * 
+ * @see https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary
+ */
+
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     constructor(props: ErrorBoundaryProps) {
         super(props);

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, createRateLimitResponse, RateLimitPresets } from "@/lib/rate-limiter";
-import { verifyCSRFFromRequest, clampNumber } from "@/lib/security";
+import { verifyCSRFFromRequest, clampNumber, logger } from "@/lib/security";
 
 // POST - Save/Update watch progress
 export async function POST(request: NextRequest) {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(watchProgress);
     } catch (error) {
-        console.error("Error saving watch progress:", error);
+        logger.error('Error saving watch progress', { error: String(error) });
         return NextResponse.json(
             { error: "Internal server error" },
             { status: 500 }
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json(watchHistory);
     } catch (error) {
-        console.error("Error fetching watch history:", error);
+        logger.error('Error fetching watch history', { error: String(error) });
         return NextResponse.json(
             { error: "Internal server error" },
             { status: 500 }

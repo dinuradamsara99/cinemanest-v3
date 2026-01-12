@@ -264,6 +264,7 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
                                             }))
                                             : []
                                     }
+                                    onLoginClick={() => setAuthDialogOpen(true)}
                                 />
 
                                 {/* Description */}

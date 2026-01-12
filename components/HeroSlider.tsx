@@ -69,7 +69,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
                                     {/* Background Image with Rounded Corners */}
                                     <Image
                                         src={imageUrl}
-                                        alt={item.title}
+                                        alt={item.title || 'Featured content banner'}
                                         fill
                                         className="object-cover"
                                         priority

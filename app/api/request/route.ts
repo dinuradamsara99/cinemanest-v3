@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { writeClient } from "@/sanity/lib/client";
 import { rateLimit, createRateLimitResponse, addRateLimitHeaders, RateLimitPresets } from "@/lib/rate-limiter";
-import { sanitizeInput, validateLength, createSafeErrorResponse, logSecurityEvent, SecurityEventType, verifyCSRFFromRequest } from "@/lib/security";
+import { sanitizeInput, validateLength, createSafeErrorResponse, logSecurityEvent, SecurityEventType, verifyCSRFFromRequest, logger } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
@@ -25,9 +25,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. RATE LIMITING (Prevent abuse)
+    // 2. RATE LIMITING (5 requests per day)
     const rateLimitResult = await rateLimit(request, {
-      ...RateLimitPresets.MUTATION,
+      ...RateLimitPresets.REQUEST,  // 5 requests per 24 hours
       identifier: session.user.id, // User-based rate limiting
     });
 
@@ -90,9 +90,9 @@ export async function POST(request: NextRequest) {
 
     // 5. CHECK SANITY CONFIGURATION
     if (!process.env.SANITY_API_WRITE_TOKEN) {
-      console.error(
-        "SANITY_API_WRITE_TOKEN is not configured. Please add SANITY_API_WRITE_TOKEN to your .env.local file with a valid Sanity write token."
-      );
+      logger.error('SANITY_API_WRITE_TOKEN is not configured', {
+        endpoint: '/api/request'
+      });
       return createSafeErrorResponse(
         "Service temporarily unavailable",
         503,
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
     return addRateLimitHeaders(response, rateLimitResult);
 
   } catch (error) {
-    console.error("Error submitting request:", error);
+    logger.error('Error submitting request', { error: String(error) });
 
     // Handle Sanity-specific errors without exposing internal details
     if (error instanceof Error) {
