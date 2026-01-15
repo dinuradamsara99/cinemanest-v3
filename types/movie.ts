@@ -39,6 +39,7 @@ export interface Episode {
         }
     }
     videoUrl: string
+    iframeUrl?: string
     duration?: number
     subtitles?: SubtitleTrack[]
 }
