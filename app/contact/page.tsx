@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Mail, MessageSquare, MapPin, Phone, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, Mail, MessageSquare, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
 export default function ContactPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -91,35 +91,7 @@ export default function ContactPage() {
 
                     {/* Contact Information */}
                     <div className="space-y-8">
-                        <div className="bg-zinc-900 backdrop-blur-xl rounded-2xl border border-zinc-800/50 ring-1 ring-white/5 p-6 sm:p-8">
-                            <h2 className="text-2xl font-bold text-white mb-6">Get in Touch</h2>
-                            <div className="space-y-6">
 
-                                {/* Email */}
-                                <ContactItem
-                                    icon={<Mail className="w-5 h-5" />}
-                                    title="Email"
-                                    content="support@cinemanest.com"
-                                    link="mailto:support@cinemanest.com"
-                                />
-
-                                {/* Phone */}
-                                <ContactItem
-                                    icon={<Phone className="w-5 h-5" />}
-                                    title="Phone"
-                                    content="+1 (555) 123-4567"
-                                    link="tel:+15551234567"
-                                />
-
-                                {/* Address */}
-                                <ContactItem
-                                    icon={<MapPin className="w-5 h-5" />}
-                                    title="Address"
-                                    content="123 Streaming Ave, Los Angeles, CA 90001"
-                                />
-
-                            </div>
-                        </div>
 
                         {/* Quick Links */}
                         <div className="bg-zinc-900 backdrop-blur-xl rounded-2xl border border-zinc-800/50 ring-1 ring-white/5 p-6 sm:p-8">
@@ -277,39 +249,7 @@ export default function ContactPage() {
     );
 }
 
-// Reusable Components
-function ContactItem({
-    icon,
-    title,
-    content,
-    link
-}: {
-    icon: React.ReactNode;
-    title: string;
-    content: string;
-    link?: string;
-}) {
-    return (
-        <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-950 border border-zinc-700/50 flex items-center justify-center text-zinc-400">
-                {icon}
-            </div>
-            <div>
-                <h4 className="text-sm font-semibold text-zinc-400 mb-1">{title}</h4>
-                {link ? (
-                    <a
-                        href={link}
-                        className="text-white hover:text-zinc-300 transition-colors"
-                    >
-                        {content}
-                    </a>
-                ) : (
-                    <p className="text-white">{content}</p>
-                )}
-            </div>
-        </div>
-    );
-}
+
 
 function QuickLink({ href, text }: { href: string; text: string }) {
     return (
