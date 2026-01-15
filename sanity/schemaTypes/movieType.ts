@@ -55,11 +55,11 @@ export const movieType = defineType({
             validation: (Rule) => Rule.required(),
         }),
         defineField({
-            name: 'rating',
-            title: 'Rating',
+            name: 'tmdbId',
+            title: 'TMDB ID',
             type: 'number',
-            validation: (Rule) => Rule.required().min(0).max(10),
-            description: 'Rating from 0 to 10',
+            description: 'The ID of the movie on The Movie Database (TMDB). Used to fetch metadata automatically.',
+            validation: (Rule) => Rule.required().integer(),
         }),
         defineField({
             name: 'isFeatured',
@@ -80,12 +80,6 @@ export const movieType = defineType({
             title: 'Description',
             type: 'text',
             rows: 4,
-        }),
-        defineField({
-            name: 'releaseYear',
-            title: 'Release Year',
-            type: 'number',
-            validation: (Rule) => Rule.required().integer().positive(),
         }),
         defineField({
             name: 'duration',
@@ -132,16 +126,6 @@ export const movieType = defineType({
             title: 'Video URL',
             type: 'url',
             description: 'Link to the video (YouTube, Vimeo, etc.)',
-        }),
-        defineField({
-            name: 'trailerUrl',
-            title: 'Trailer URL',
-            type: 'url',
-            description: 'Optional trailer video URL (YouTube, Vimeo, etc.)',
-            validation: Rule => Rule.uri({
-                allowRelative: false,
-                scheme: ['http', 'https']
-            })
         }),
         defineField({
             name: 'credit',

@@ -24,6 +24,41 @@ model User {
   accounts      Account[]
   sessions      Session[]
   watchProgress WatchProgress[]
+  comments      Comment[]
+  commentVotes  CommentVote[]
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  movieId   String    @map("movie_id")
+  userId    String    @map("user_id")
+  parentId  Int?      @map("parent_id")
+  content   String
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+  votes     CommentVote[]
+
+  @@index([movieId])
+  @@index([createdAt(sort: Desc)])
+  @@map("comments")
+}
+
+model CommentVote {
+  id        Int      @id @default(autoincrement())
+  commentId Int      @map("comment_id")
+  userId    String   @map("user_id")
+  voteType  String   @map("vote_type")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+  @@map("comment_votes")
 }
 
 model WatchProgress {

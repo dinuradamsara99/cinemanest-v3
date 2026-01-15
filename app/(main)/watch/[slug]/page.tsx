@@ -11,6 +11,100 @@ interface WatchPageProps {
     }>;
 }
 
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+
+async function fetchTMDBMetadata(tmdbId: number, contentType: 'movie' | 'tvshow' = 'movie') {
+    if (!TMDB_API_KEY) {
+        console.warn('TMDB_API_KEY is not set');
+        return null;
+    }
+
+    // Determine the correct endpoint based on content type
+    const mediaType = contentType === 'tvshow' ? 'tv' : 'movie';
+
+    try {
+        const [detailsRes, creditsRes, videosRes] = await Promise.all([
+            fetch(`${TMDB_BASE_URL}/${mediaType}/${tmdbId}?api_key=${TMDB_API_KEY}`),
+            fetch(`${TMDB_BASE_URL}/${mediaType}/${tmdbId}/credits?api_key=${TMDB_API_KEY}`),
+            fetch(`${TMDB_BASE_URL}/${mediaType}/${tmdbId}/videos?api_key=${TMDB_API_KEY}`),
+        ]);
+
+        if (!detailsRes.ok || !creditsRes.ok || !videosRes.ok) {
+            console.error(`Failed to fetch ${mediaType} data from TMDB`, {
+                details: detailsRes.status,
+                credits: creditsRes.status,
+                videos: videosRes.status
+            });
+            return null;
+        }
+
+        const details = await detailsRes.json();
+        const credits = await creditsRes.json();
+        const videos = await videosRes.json();
+
+        console.log(`[TMDB] Fetched ${mediaType} metadata for ID ${tmdbId}:`, {
+            title: details.title || details.name,
+            videosCount: videos.results?.length || 0
+        });
+
+        // Extract Release Year (different field for TV shows)
+        const releaseYear = contentType === 'tvshow'
+            ? (details.first_air_date ? new Date(details.first_air_date).getFullYear() : undefined)
+            : (details.release_date ? new Date(details.release_date).getFullYear() : undefined);
+
+        // Extract Rating
+        const rating = details.vote_average;
+
+        // Extract Director (movies) or Creator (TV shows)
+        let director: string | undefined;
+        if (contentType === 'tvshow') {
+            director = details.created_by?.[0]?.name;
+        } else {
+            director = credits.crew?.find((member: any) => member.job === 'Director')?.name;
+        }
+
+        // Extract Cast
+        const cast = (credits.cast || []).slice(0, 10).map((member: any) => ({
+            name: member.name,
+            character: member.character,
+            profilePath: member.profile_path ? `${TMDB_IMAGE_BASE_URL}${member.profile_path}` : null,
+        }));
+
+        // Extract Trailer
+        let trailer = videos.results?.find(
+            (video: any) => video.type === 'Trailer' && video.site === 'YouTube'
+        );
+
+        // Fallback to Teaser if no Trailer found
+        if (!trailer) {
+            trailer = videos.results?.find(
+                (video: any) => video.type === 'Teaser' && video.site === 'YouTube'
+            );
+        }
+
+        if (!trailer) {
+            console.warn(`[TMDB] No trailer or teaser found for ${mediaType} ID ${tmdbId}.`);
+        }
+
+        const trailerUrl = trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : undefined;
+
+        console.log(`[TMDB] Final Trailer URL: ${trailerUrl}`);
+
+        return {
+            releaseYear,
+            rating,
+            director,
+            cast,
+            trailerUrl,
+        };
+    } catch (error) {
+        console.error('Error fetching TMDB metadata:', error);
+        return null;
+    }
+}
+
 export default async function WatchPage(props: WatchPageProps) {
     try {
         // Await params in Next.js 15+
@@ -18,11 +112,29 @@ export default async function WatchPage(props: WatchPageProps) {
         const { slug } = params;
 
         // Fetch movie/TV show data from Sanity
-        const movie = await getMovieBySlug(slug);
+        let movie = await getMovieBySlug(slug);
 
         // If no movie found, show 404
         if (!movie) {
             notFound();
+        }
+
+        // Determine content type (movie or tvshow)
+        const contentType: 'movie' | 'tvshow' =
+            (movie._type === 'tvshow' || movie.contentType === 'tvshow') ? 'tvshow' : 'movie';
+
+        console.log(`[DEBUG] Content: "${movie.title}", _type: "${movie._type}", contentType field: "${movie.contentType}", detected as: "${contentType}"`);
+
+        // Fetch TMDB Metadata if tmdbId exists
+        if (movie.tmdbId) {
+            const tmdbData = await fetchTMDBMetadata(movie.tmdbId, contentType);
+            if (tmdbData) {
+                movie = {
+                    ...movie,
+                    ...tmdbData,
+                    // Prefer TMDB data, but fallback to Sanity if needed
+                };
+            }
         }
 
         // Render the client component with the movie data

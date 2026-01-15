@@ -1,4 +1,10 @@
-import { Pool } from 'pg';
+import { Pool, types } from 'pg';
+
+// SECURITY FIX: Force pg to parse TIMESTAMP without time zone (OID 1114) as UTC
+// This prevents the driver from interpreting DB times as local system time
+types.setTypeParser(1114, (str) => {
+    return str.replace(' ', 'T') + 'Z';
+});
 
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL is not defined in environment variables');

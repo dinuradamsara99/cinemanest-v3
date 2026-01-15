@@ -55,11 +55,11 @@ export const tvShowType = defineType({
             validation: (Rule) => Rule.required(),
         }),
         defineField({
-            name: 'rating',
-            title: 'Rating',
+            name: 'tmdbId',
+            title: 'TMDB ID',
             type: 'number',
-            validation: (Rule) => Rule.required().min(0).max(10),
-            description: 'Rating from 0 to 10',
+            description: 'The ID of the TV show on The Movie Database (TMDB). Used to fetch metadata automatically.',
+            validation: (Rule) => Rule.required().integer(),
         }),
         defineField({
             name: 'isFeatured',
@@ -80,12 +80,6 @@ export const tvShowType = defineType({
             title: 'Description',
             type: 'text',
             rows: 4,
-        }),
-        defineField({
-            name: 'releaseYear',
-            title: 'Release Year',
-            type: 'number',
-            validation: (Rule) => Rule.required().integer().positive(),
         }),
         defineField({
             name: 'genre',
@@ -123,16 +117,6 @@ export const tvShowType = defineType({
             type: 'array',
             of: [{ type: 'reference', to: [{ type: 'category' }] }],
             description: 'Select categories/playlists for this TV Show',
-        }),
-        defineField({
-            name: 'trailerUrl',
-            title: 'Trailer URL',
-            type: 'url',
-            description: 'Optional trailer video URL (YouTube, Vimeo, etc.)',
-            validation: Rule => Rule.uri({
-                allowRelative: false,
-                scheme: ['http', 'https']
-            })
         }),
         defineField({
             name: 'credit',

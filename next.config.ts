@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
   // PRODUCTION COMPILER OPTIMIZATIONS
   // ============================================================================
   compiler: {
+    styledComponents: true,
     // Remove console.log in production for smaller bundle
     removeConsole: process.env.NODE_ENV === 'production' ? {
       exclude: ['error', 'warn'],
@@ -49,9 +50,9 @@ const nextConfig: NextConfig = {
       "media-src 'self' https: blob: https://video.cinemanest-watch.workers.dev",
 
       // SECURITY FIX: API සහ WebSocket ආරක්ෂාව
-      "connect-src 'self' https://*.googleapis.com https://*.sanity.io https://*.vercel.app https://accounts.google.com wss: https://*.video.cinemanest-watch.workers.dev",
+      "connect-src 'self' https://*.googleapis.com https://*.sanity.io https://*.vercel.app https://accounts.google.com wss: https://*.video.cinemanest-watch.workers.dev https://registry.npmjs.org https://api.themoviedb.org https://image.tmdb.org https://raw.githubusercontent.com",
 
-      "frame-src 'self' https://accounts.google.com https://www.google.com",
+      "frame-src 'self' https://accounts.google.com https://www.google.com https://www.youtube.com https://www.youtube-nocookie.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self' https://accounts.google.com",

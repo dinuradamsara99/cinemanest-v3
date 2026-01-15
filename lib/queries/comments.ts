@@ -39,13 +39,21 @@ export async function postComment(data: {
     content: string;
     parentId?: string;
 }): Promise<Comment> {
+    // Fetch CSRF token first
+    const csrfRes = await fetch('/api/csrf-token');
+    const { token } = await csrfRes.json();
+
     const res = await fetch('/api/comments', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': token,
+        },
         body: JSON.stringify(data),
     });
     if (!res.ok) {
-        throw new Error('Failed to post comment');
+        const error = await res.json().catch(() => ({ error: 'Failed to post comment' }));
+        throw new Error(error.error || 'Failed to post comment');
     }
     return res.json();
 }

@@ -109,7 +109,8 @@ function CommentItem({
     const formatDate = (date: string | Date) => {
         try {
             const d = new Date(date);
-            return !isNaN(d.getTime()) ? formatDistanceToNow(d, { addSuffix: true }) : 'Just now';
+            if (isNaN(d.getTime())) return 'Just now';
+            return formatDistanceToNow(d, { addSuffix: true });
         } catch {
             return 'Just now';
         }
@@ -132,7 +133,7 @@ function CommentItem({
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <span className="font-semibold text-white truncate">{comment.userName}</span>
-                            <span className="text-sm text-zinc-500 shrink-0">
+                            <span className="text-sm text-zinc-500 shrink-0" suppressHydrationWarning>
                                 {formatDate(comment.createdAt)}
                             </span>
                         </div>
@@ -145,7 +146,7 @@ function CommentItem({
                                         <MoreVertical className="h-4 w-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-800">
+                                <DropdownMenuContent align="end" className="bg-zinc-900 rounded-[10px] border-zinc-800">
                                     <DropdownMenuItem
                                         onClick={() => setIsEditing(true)}
                                         className="text-zinc-300 hover:text-white hover:bg-zinc-800 cursor-pointer"

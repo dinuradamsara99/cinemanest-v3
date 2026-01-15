@@ -7,7 +7,7 @@ export function HeroSliderSkeleton() {
             <div className="relative w-full h-[60vh] md:h-[75vh] rounded-3xl overflow-hidden bg-zinc-900/50 ring-1 ring-white/5">
 
                 {/* Background Skeleton */}
-                <Skeleton className="w-full h-full bg-zinc-800" />
+                <Skeleton className="w-full h-full bg-zinc-800 rounded-3xl" />
 
                 {/* Content Overlay Area */}
                 <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 lg:p-16">

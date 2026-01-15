@@ -62,14 +62,17 @@ export interface Movie {
     posterImage: SanityImage
     bannerImage: SanityImage
     rating?: number
+    tmdbId?: number
     isFeatured?: boolean
     isTrending?: boolean
     description?: string
-    releaseYear?: number
+    releaseYear?: number // Fetched from TMDB
     duration?: number
     genre?: string[]
     videoUrl?: string
-    trailerUrl?: string
+    trailerUrl?: string // Fetched from TMDB
+    director?: string // Fetched from TMDB
+    cast?: { name: string; character: string; profilePath: string | null }[] // Fetched from TMDB
     credit?: string
     seasons?: Season[]
     language?: Language

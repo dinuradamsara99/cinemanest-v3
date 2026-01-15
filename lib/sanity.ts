@@ -68,6 +68,7 @@ export function getFileUrl(source: any): string | null {
 
 // GROQ Queries - Base fields for both movies and TV shows
 const BASE_FIELDS = `
+  tmdbId,
   _id,
   _type,
   title,
