@@ -26,7 +26,16 @@ export function SubtitleDownload({ subtitles, movieTitle, episodeName }: Subtitl
         setDownloading(subtitle.language);
 
         try {
-            const response = await fetch(subtitle.url);
+            // Try fetching with no-cors mode first, then fall back to regular fetch
+            const response = await fetch(subtitle.url, {
+                mode: 'cors',
+                credentials: 'omit',
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -40,7 +49,7 @@ export function SubtitleDownload({ subtitles, movieTitle, episodeName }: Subtitl
             link.download = fileName;
 
             // Artificial delay to show off the premium animation
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 1500));
 
             document.body.appendChild(link);
             link.click();
@@ -49,7 +58,33 @@ export function SubtitleDownload({ subtitles, movieTitle, episodeName }: Subtitl
 
             setDownloaded(prev => [...prev, subtitle.language]);
         } catch (error) {
-            console.error('Download failed:', error);
+            console.error('Download failed, trying direct link:', error);
+
+            // Fallback: Open in new tab or use direct anchor approach
+            // This works even when CORS blocks the fetch
+            try {
+                const link = document.createElement('a');
+                link.href = subtitle.url;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+
+                // Some browsers support download attribute for cross-origin
+                const ext = subtitle.url.endsWith('.srt') ? 'srt' : 'vtt';
+                const fileName = episodeName
+                    ? `${movieTitle} - ${episodeName} - ${subtitle.label}.${ext}`
+                    : `${movieTitle} - ${subtitle.label}.${ext}`;
+                link.download = fileName;
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                setDownloaded(prev => [...prev, subtitle.language]);
+            } catch (fallbackError) {
+                console.error('Fallback download also failed:', fallbackError);
+                // Last resort: open URL directly
+                window.open(subtitle.url, '_blank');
+            }
         } finally {
             setDownloading(null);
         }

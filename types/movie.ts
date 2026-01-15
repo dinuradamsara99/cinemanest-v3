@@ -78,6 +78,12 @@ export interface Movie {
     language?: Language
     categories?: Category[]
     subtitles?: SubtitleTrack[]
+    // TMDB-fetched display fields (separate from CMS fields used for filtering)
+    tmdbGenres?: string[]; // Fetched from TMDB
+    tmdbOriginalLanguage?: string; // Fetched from TMDB
+    tmdbPosterPath?: string; // Fetched from TMDB
+    tmdbBackdropPath?: string; // Fetched from TMDB
+    tmdbKeywords?: string[]; // Fetched from TMDB
 }
 
 // Category type from Sanity

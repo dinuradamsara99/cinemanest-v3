@@ -74,11 +74,16 @@ export function CustomVideoPlayer({
     const [showForwardAnim, setShowForwardAnim] = useState(false);
     const [showBackwardAnim, setShowBackwardAnim] = useState(false);
 
-    // Format time to MM:SS
+    // Format time to MM:SS or H:MM:SS for longer videos
     const formatTime = (seconds: number) => {
         if (!isFinite(seconds)) return "0:00";
-        const mins = Math.floor(seconds / 60);
+        const hours = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
         const secs = Math.floor(seconds % 60);
+
+        if (hours > 0) {
+            return `${hours}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+        }
         return `${mins}:${secs.toString().padStart(2, "0")}`;
     };
 
@@ -381,7 +386,7 @@ export function CustomVideoPlayer({
         }, 2000);
 
         return () => clearTimeout(timer);
-    }, [videoUrl, isFullscreen, startTime]);
+    }, [videoUrl, startTime]);
 
     // Enable first subtitle by default
     useEffect(() => {
@@ -493,41 +498,29 @@ export function CustomVideoPlayer({
             onMouseLeave={() => isPlaying && setShowControls(false)}
             onClick={handleOverlayClick}
         >
-            {/* Video Element with Transition */}
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={videoUrl}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-full h-full flex items-center justify-center bg-black"
-                >
-                    <video
-                        ref={videoRef}
-                        className="w-full h-full max-h-screen object-contain"
-                        // onClick removed here to let parent div handle double taps
-                        onDoubleClick={toggleFullscreen}
-                        preload="metadata"
-                        playsInline
-                        crossOrigin="anonymous"
-                        title={title}
-                        poster={poster}
-                    >
-                        <source src={videoUrl} type="video/mp4" />
-                        {subtitles.map((subtitle, index) => (
-                            <track
-                                key={`subtitle-${index}`}
-                                kind={subtitle.kind || "subtitles"}
-                                src={subtitle.url}
-                                srcLang={subtitle.language}
-                                label={subtitle.label}
-                                default={subtitle.default}
-                            />
-                        ))}
-                    </video>
-                </motion.div>
-            </AnimatePresence>
+            {/* Video Element */}
+            <video
+                ref={videoRef}
+                className="absolute inset-0 w-full h-full object-contain z-10"
+                onDoubleClick={toggleFullscreen}
+                preload="auto"
+                playsInline
+                crossOrigin="anonymous"
+                title={title}
+                poster={poster}
+                src={videoUrl}
+            >
+                {subtitles.map((subtitle, index) => (
+                    <track
+                        key={`subtitle-${index}`}
+                        kind={subtitle.kind || "subtitles"}
+                        src={subtitle.url}
+                        srcLang={subtitle.language}
+                        label={subtitle.label}
+                        default={subtitle.default}
+                    />
+                ))}
+            </video>
 
             {/* Double Tap Animations - Left */}
             <AnimatePresence>
@@ -579,8 +572,8 @@ export function CustomVideoPlayer({
 
             {/* Loading Overlay */}
             {isLoading && !isTransitioning && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 pointer-events-none z-40">
-                    <Loader2 className="h-12 w-12 text-white animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40">
+                    <Loader2 className="h-12 w-12 text-white animate-spin drop-shadow-lg" />
                 </div>
             )}
 

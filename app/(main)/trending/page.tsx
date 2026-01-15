@@ -26,6 +26,7 @@ export default async function TrendingPage() {
                             title={item.title}
                             slug={item.slug.current}
                             posterImage={item.posterImage}
+                            tmdbId={item.tmdbId}
                             rating={item.rating}
                             releaseYear={item.releaseYear}
                             type={item._type === "tvshow" ? "tv" : "movie"}

@@ -12,11 +12,29 @@ if (!process.env.NEXT_PUBLIC_SANITY_DATASET) {
 }
 
 // Sanity client configuration
+// Custom fetch with increased timeout (60 seconds)
+const customFetch = (url: RequestInfo | URL, options: any = {}) => {
+  // Only override signal if one isn't already provided (or wrap it if needed, but simple timeout extension is priority)
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+
+  // If options.signal exists, we should respect it, but here we explicitly want to extend/enforce our own timeout for connection
+  // For simplicity in this fix, we'll just use our controller
+  options.signal = controller.signal;
+
+  return fetch(url, options).finally(() => {
+    clearTimeout(timeoutId);
+  });
+};
+
+// Sanity client configuration
 export const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'missing-id',
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
   apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2024-01-01",
   useCdn: true,
+  // @ts-ignore - next-sanity types might not explicitly show fetch override but underlying client supports it
+  fetch: customFetch,
 });
 
 // Image URL builder

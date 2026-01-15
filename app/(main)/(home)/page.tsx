@@ -1,56 +1,33 @@
-import { getMovies, getTVShows, getFeaturedMovies } from "@/lib/sanity";
-import { MediaCard } from "@/components/MediaCard";
-import { ContentGrid } from "@/components/ContentGrid";
-import { HeroSlider } from "@/components/HeroSlider";
-import { Movie } from "@/types/movie";
 
-export default async function HomePage() {
-    const [movies, tvShows, featured] = await Promise.all([
-        getMovies(15),
-        getTVShows(15),
-        getFeaturedMovies(),
-    ]);
+import { Suspense } from "react";
+import { FeaturedSection } from "@/components/home/FeaturedSection";
+import { MoviesSection } from "@/components/home/MoviesSection";
+import { TVShowsSection } from "@/components/home/TVShowsSection";
+import { HeroSliderSkeleton } from "@/components/HeroSliderSkeleton";
+import { SectionSkeleton } from "@/components/home/SectionSkeleton";
 
+export default function HomePage() {
     return (
         <main className="min-h-screen bg-background">
             <h1 className="sr-only">CinemaNest - Watch Movies & TV Shows Online</h1>
-            {/* Hero Slider */}
-            <HeroSlider items={featured} />
 
-            {/* Movies Grid */}
+            {/* Hero Slider with Suspense */}
+            <Suspense fallback={<HeroSliderSkeleton />}>
+                <FeaturedSection />
+            </Suspense>
+
+            {/* Movies Grid with Suspense */}
             <div id="movies">
-                <ContentGrid title="Popular Movies">
-                    {movies.map((movie: Movie) => (
-                        <MediaCard
-                            key={movie._id}
-                            id={movie._id}
-                            title={movie.title}
-                            slug={movie.slug.current}
-                            posterImage={movie.posterImage}
-                            rating={movie.rating}
-                            releaseYear={movie.releaseYear}
-                            type="movie"
-                        />
-                    ))}
-                </ContentGrid>
+                <Suspense fallback={<SectionSkeleton title="Popular Movies" />}>
+                    <MoviesSection />
+                </Suspense>
             </div>
 
-            {/* TV Shows Grid */}
+            {/* TV Shows Grid with Suspense */}
             <div id="tv-shows">
-                <ContentGrid title="Popular TV Shows">
-                    {tvShows.map((show: Movie) => (
-                        <MediaCard
-                            key={show._id}
-                            id={show._id}
-                            title={show.title}
-                            slug={show.slug.current}
-                            posterImage={show.posterImage}
-                            rating={show.rating}
-                            releaseYear={show.releaseYear}
-                            type="tv"
-                        />
-                    ))}
-                </ContentGrid>
+                <Suspense fallback={<SectionSkeleton title="Popular TV Shows" />}>
+                    <TVShowsSection />
+                </Suspense>
             </div>
 
             {/* Additional Sections can be added here */}

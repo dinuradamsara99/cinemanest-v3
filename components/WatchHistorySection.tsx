@@ -142,6 +142,7 @@ export function WatchHistorySection({ userId }: WatchHistorySectionProps) {
                                     title={movie.title}
                                     slug={movie.slug?.current || movie._id}
                                     posterImage={movie.posterImage}
+                                    tmdbId={movie.tmdbId}
                                     rating={movie.rating}
                                     releaseYear={movie.releaseYear}
                                     type={movie.type || "movie"}

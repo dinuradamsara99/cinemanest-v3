@@ -9,11 +9,16 @@ import { cn } from "@/lib/utils";
 import { ProgressBar } from "./ProgressBar";
 import { SanityImage } from "@/types/sanity";
 
+import { getTMDBPosterPath } from "@/app/actions/tmdb";
+import { useEffect, useState } from "react";
+
 interface MediaCardProps {
     id: string;
     title: string;
     slug: string;
     posterImage: SanityImage;
+    tmdbId?: number; // Added for TMDB fallback
+    tmdbPosterUrl?: string; // Direct URL override (optional)
     rating?: number;
     releaseYear?: number;
     type: "movie" | "tv";
@@ -31,6 +36,8 @@ export function MediaCard({
     title,
     slug,
     posterImage,
+    tmdbId,
+    tmdbPosterUrl,
     rating,
     releaseYear,
     type,
@@ -39,9 +46,21 @@ export function MediaCard({
     watchedAt,
     aspectRatio = "3/4",
 }: MediaCardProps) {
+    const [fetchedPoster, setFetchedPoster] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Only fetch if no Sanity poster, no direct override, and we have a TMDB ID
+        if (!posterImage?.asset && !tmdbPosterUrl && tmdbId) {
+            getTMDBPosterPath(tmdbId, type === 'tv' ? 'tv' : 'movie')
+                .then(setFetchedPoster)
+                .catch(console.error);
+        }
+    }, [posterImage, tmdbId, type, tmdbPosterUrl]);
+
+    // Priority: Sanity poster > Direct TMDB URL > Fetched TMDB Poster > Placeholder
     const imageUrl = posterImage?.asset
         ? urlFor(posterImage).width(400).height(600).url()
-        : "/placeholder.jpg";
+        : (tmdbPosterUrl || fetchedPoster || "/placeholder.jpg");
 
     const progressPercentage = watchProgress
         ? (watchProgress.progress / watchProgress.duration) * 100

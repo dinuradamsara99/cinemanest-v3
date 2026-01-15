@@ -47,6 +47,7 @@ export default async function CategoryPage(props: CategoryPageProps) {
               title={movie.title}
               slug={movie.slug.current}
               posterImage={movie.posterImage}
+              tmdbId={movie.tmdbId}
               rating={movie.rating}
               releaseYear={movie.releaseYear}
               type={movie._type === 'tvshow' ? 'tv' : 'movie'}

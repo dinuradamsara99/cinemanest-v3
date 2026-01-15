@@ -27,6 +27,7 @@ export default async function TVShowsPage() {
                             title={show.title}
                             slug={show.slug.current}
                             posterImage={show.posterImage}
+                            tmdbId={show.tmdbId}
                             rating={show.rating}
                             releaseYear={show.releaseYear}
                             type="tv"

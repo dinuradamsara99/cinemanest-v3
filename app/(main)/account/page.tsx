@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { User, Mail, Calendar, Shield } from "lucide-react";
 import Image from "next/image";
-import { WatchHistorySection } from "@/components/WatchHistorySection";
+
 
 import { UserRequestsList } from "@/components/dashboard/UserRequestsList";
 
@@ -89,8 +89,7 @@ export default async function AccountPage() {
                     </p>
                 </div>
 
-                {/* Watch History Section */}
-                <WatchHistorySection userId={session.user.id!} />
+
 
                 {/* Movie Requests Section */}
                 <div className="mt-8">

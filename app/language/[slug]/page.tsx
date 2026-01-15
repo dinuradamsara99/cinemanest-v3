@@ -46,6 +46,7 @@ export default async function LanguagePage(props: LanguagePageProps) {
               title={movie.title}
               slug={movie.slug.current}
               posterImage={movie.posterImage}
+              tmdbId={movie.tmdbId}
               rating={movie.rating}
               releaseYear={movie.releaseYear}
               type={movie._type === 'tvshow' ? 'tv' : 'movie'}

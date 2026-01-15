@@ -85,7 +85,7 @@ export const movieType = defineType({
             name: 'duration',
             title: 'Duration (minutes)',
             type: 'number',
-            validation: (Rule) => Rule.required().integer().positive(),
+            validation: (Rule) => Rule.integer().positive(),
         }),
         defineField({
             name: 'genre',

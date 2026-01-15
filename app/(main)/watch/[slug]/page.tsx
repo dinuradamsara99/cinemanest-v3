@@ -14,6 +14,18 @@ interface WatchPageProps {
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+const TMDB_POSTER_BASE_URL = 'https://image.tmdb.org/t/p/original';
+
+// ISO 639-1 language code to full name mapping
+const LANGUAGE_NAMES: Record<string, string> = {
+    'en': 'English', 'ko': 'Korean', 'ja': 'Japanese', 'zh': 'Chinese',
+    'es': 'Spanish', 'fr': 'French', 'de': 'German', 'it': 'Italian',
+    'pt': 'Portuguese', 'ru': 'Russian', 'hi': 'Hindi', 'ta': 'Tamil',
+    'te': 'Telugu', 'th': 'Thai', 'vi': 'Vietnamese', 'id': 'Indonesian',
+    'tr': 'Turkish', 'ar': 'Arabic', 'pl': 'Polish', 'nl': 'Dutch',
+    'sv': 'Swedish', 'da': 'Danish', 'no': 'Norwegian', 'fi': 'Finnish',
+    'si': 'Sinhala', 'ml': 'Malayalam', 'bn': 'Bengali', 'ur': 'Urdu',
+};
 
 async function fetchTMDBMetadata(tmdbId: number, contentType: 'movie' | 'tvshow' = 'movie') {
     if (!TMDB_API_KEY) {
@@ -25,10 +37,11 @@ async function fetchTMDBMetadata(tmdbId: number, contentType: 'movie' | 'tvshow'
     const mediaType = contentType === 'tvshow' ? 'tv' : 'movie';
 
     try {
-        const [detailsRes, creditsRes, videosRes] = await Promise.all([
+        const [detailsRes, creditsRes, videosRes, keywordsRes] = await Promise.all([
             fetch(`${TMDB_BASE_URL}/${mediaType}/${tmdbId}?api_key=${TMDB_API_KEY}`),
             fetch(`${TMDB_BASE_URL}/${mediaType}/${tmdbId}/credits?api_key=${TMDB_API_KEY}`),
             fetch(`${TMDB_BASE_URL}/${mediaType}/${tmdbId}/videos?api_key=${TMDB_API_KEY}`),
+            fetch(`${TMDB_BASE_URL}/${mediaType}/${tmdbId}/keywords?api_key=${TMDB_API_KEY}`),
         ]);
 
         if (!detailsRes.ok || !creditsRes.ok || !videosRes.ok) {
@@ -90,7 +103,44 @@ async function fetchTMDBMetadata(tmdbId: number, contentType: 'movie' | 'tvshow'
 
         const trailerUrl = trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : undefined;
 
-        console.log(`[TMDB] Final Trailer URL: ${trailerUrl}`);
+        // Extract Genres from TMDB
+        const tmdbGenres = details.genres?.map((g: any) => g.name) || [];
+
+        // Extract Original Language with full name lookup
+        const langCode = details.original_language || 'en';
+        const tmdbOriginalLanguage = LANGUAGE_NAMES[langCode] || langCode.toUpperCase();
+
+        // Extract Poster Path
+        const tmdbPosterPath = details.poster_path
+            ? `${TMDB_POSTER_BASE_URL}${details.poster_path}`
+            : undefined;
+
+        // Extract Backdrop Path (for banners)
+        const tmdbBackdropPath = details.backdrop_path
+            ? `https://image.tmdb.org/t/p/original${details.backdrop_path}`
+            : undefined;
+
+        // Extract Keywords
+        let tmdbKeywords: string[] = [];
+        if (keywordsRes.ok) {
+            const keywordsData = await keywordsRes.json();
+            // Movie endpoint returns 'keywords', TV endpoint returns 'results'
+            tmdbKeywords = (keywordsData.keywords || keywordsData.results || []).map((k: any) => k.name);
+        }
+
+        // Extract Runtime/Duration
+        let duration: number | undefined;
+        if (contentType === 'tvshow') {
+            // Calculate average runtime for TV shows if available
+            if (details.episode_run_time && details.episode_run_time.length > 0) {
+                const sum = details.episode_run_time.reduce((a: number, b: number) => a + b, 0);
+                duration = Math.round(sum / details.episode_run_time.length);
+            }
+        } else {
+            duration = details.runtime;
+        }
+
+        console.log(`[TMDB] Final Trailer URL: ${trailerUrl}, Genres: ${tmdbGenres.join(', ')}, Language: ${tmdbOriginalLanguage}, Duration: ${duration}`);
 
         return {
             releaseYear,
@@ -98,6 +148,12 @@ async function fetchTMDBMetadata(tmdbId: number, contentType: 'movie' | 'tvshow'
             director,
             cast,
             trailerUrl,
+            tmdbGenres,
+            tmdbOriginalLanguage,
+            tmdbPosterPath,
+            tmdbBackdropPath,
+            tmdbKeywords,
+            duration,
         };
     } catch (error) {
         console.error('Error fetching TMDB metadata:', error);
@@ -133,6 +189,8 @@ export default async function WatchPage(props: WatchPageProps) {
                     ...movie,
                     ...tmdbData,
                     // Prefer TMDB data, but fallback to Sanity if needed
+                    // Ensure duration is set (prioritize TMDB if found, else keep Sanity)
+                    duration: tmdbData.duration || movie.duration,
                 };
             }
         }

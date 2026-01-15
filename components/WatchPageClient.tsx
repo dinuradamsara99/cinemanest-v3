@@ -32,6 +32,23 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
     const [episodeSearchQuery, setEpisodeSearchQuery] = useState("");
     const [trailerOpen, setTrailerOpen] = useState(false);
     const [authDialogOpen, setAuthDialogOpen] = useState(false);
+    const [showCastArrows, setShowCastArrows] = useState(false);
+
+    // Check if cast list is scrollable
+    useEffect(() => {
+        const checkScroll = () => {
+            if (castContainerRef.current) {
+                const { scrollWidth, clientWidth } = castContainerRef.current;
+                setShowCastArrows(scrollWidth > clientWidth);
+            }
+        };
+
+        // Check initially and on resize
+        checkScroll();
+        window.addEventListener('resize', checkScroll);
+
+        return () => window.removeEventListener('resize', checkScroll);
+    }, [movie.cast]);
 
     // Cast Scroll Handler
     const scrollCast = (direction: 'left' | 'right') => {
@@ -80,6 +97,7 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
 
     // Get current video URL and subtitles
     let currentVideoUrl: string | undefined;
+    let currentIframeUrl: string | undefined;
     let currentSubtitles: SubtitleTrack[] | undefined;
     let currentTitle = movie.title;
     let episodeName: string | undefined;
@@ -90,24 +108,30 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
         if (currentSeason && currentSeason.episodes && currentSeason.episodes.length > 0) {
             const currentEpisode = currentSeason.episodes[currentEpisodeIndex];
             currentVideoUrl = currentEpisode.videoUrl;
+            currentIframeUrl = currentEpisode.iframeUrl;
             currentSubtitles = currentEpisode.subtitles;
             currentTitle = `${movie.title} - S${currentSeason.seasonNumber}E${currentEpisode.episodeNumber}: ${currentEpisode.title}`;
             episodeName = `S${currentSeason.seasonNumber}E${currentEpisode.episodeNumber}: ${currentEpisode.title}`;
 
-            // Use episode thumbnail if available, fallback to movie poster
+            // Use episode thumbnail if available, fallback to movie poster or TMDB backdrop
             if (currentEpisode.thumbnail?.asset) {
                 posterUrl = urlFor(currentEpisode.thumbnail).width(1280).height(720).url();
             } else if (movie.posterImage?.asset) {
                 posterUrl = urlFor(movie.posterImage).width(1280).height(720).url();
+            } else if (movie.tmdbBackdropPath) {
+                posterUrl = movie.tmdbBackdropPath;
             }
         }
     } else {
         currentVideoUrl = movie.videoUrl;
+        currentIframeUrl = movie.iframeUrl;
         currentSubtitles = movie.subtitles;
 
-        // Use movie poster for movies
+        // Use movie poster or TMDB backdrop for movies
         if (movie.posterImage?.asset) {
             posterUrl = urlFor(movie.posterImage).width(1280).height(720).url();
+        } else if (movie.tmdbBackdropPath) {
+            posterUrl = movie.tmdbBackdropPath;
         }
     }
 
@@ -132,12 +156,14 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
     const isEmbedUrl = (url: string) => {
         const embedDomains = [
             "youtube.com", "youtu.be", "vimeo.com", "streamwish", "filemoon",
-            "doodstream", "streamtape", "mixdrop", "voe.sx"
+            "doodstream", "streamtape", "mixdrop", "voe.sx", "bysesukior.com"
         ];
         return embedDomains.some((domain) => url.toLowerCase().includes(domain));
     };
 
-    const isEmbed = currentVideoUrl ? isEmbedUrl(currentVideoUrl) : false;
+    // Check if URL is an embed or if iframe URL is provided
+    const shouldUseIframe = currentIframeUrl || (currentVideoUrl ? isEmbedUrl(currentVideoUrl) : false);
+    const displayIframeUrl = currentIframeUrl || currentVideoUrl;
 
     // Handle episode click
     const handleEpisodeClick = (seasonIdx: number, episodeIdx: number) => {
@@ -202,11 +228,11 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
             <MovieSchema movie={movie} />
 
             {/* Ambient Background Glow */}
-            {movie.posterImage?.asset && (
+            {(movie.posterImage?.asset || movie.tmdbBackdropPath) && (
                 <div className="absolute top-0 left-0 w-full h-[80vh] overflow-hidden pointer-events-none z-0">
                     <div className="absolute inset-0 bg-[#121212] z-10" />
                     <Image
-                        src={urlFor(movie.posterImage).width(1200).url()}
+                        src={movie.posterImage?.asset ? urlFor(movie.posterImage).width(1200).url() : movie.tmdbBackdropPath!}
                         alt=""
                         fill
                         className="object-cover opacity-20 blur-3xl scale-110"
@@ -224,19 +250,22 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
 
                     {/* Video Player Container */}
                     <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10">
-                        {currentVideoUrl ? (
-                            isEmbed ? (
+                        {(currentVideoUrl || currentIframeUrl) ? (
+                            shouldUseIframe ? (
                                 <iframe
-                                    src={currentVideoUrl}
+                                    src={displayIframeUrl}
                                     className="w-full h-full"
+                                    // පහත Sandbox කොටස එකතු කරන්න. එමගින් Ads සහ Redirects පාලනය වේ.
+                                    sandbox="allow-forms allow-scripts allow-same-origin allow-presentation"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     allowFullScreen
                                     title={currentTitle}
+                                    referrerPolicy="no-referrer" // මෙයත් වැදගත් (Referrer සැඟවීමට)
                                 />
                             ) : (
                                 <CustomVideoPlayer
                                     key={currentVideoUrl}
-                                    videoUrl={currentVideoUrl}
+                                    videoUrl={currentVideoUrl!}
                                     subtitles={playerSubtitles}
                                     title={isTVShow ? episodeName : currentTitle}
                                     isTVShow={isTVShow}
@@ -271,10 +300,15 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
                                     </div>
                                     <span className="w-1 h-1 rounded-full bg-zinc-600" />
                                     {movie.releaseYear && <span>{movie.releaseYear}</span>}
-                                    {movie.duration && !isTVShow && (
+                                    {movie.duration && (
                                         <>
                                             <span className="w-1 h-1 rounded-full bg-zinc-600" />
-                                            <span>{movie.duration}m</span>
+                                            <span>
+                                                {movie.duration >= 60
+                                                    ? `${Math.floor(movie.duration / 60)}h ${movie.duration % 60}m`
+                                                    : `${movie.duration}m`
+                                                }
+                                            </span>
                                         </>
                                     )}
                                     <span className="w-1 h-1 rounded-full bg-zinc-600" />
@@ -333,29 +367,55 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
 
                                         <div className="flex flex-col gap-2">
                                             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Original Language</h3>
-                                            <p className="text-zinc-100 font-medium text-lg">{movie.language?.title || "English"}</p>
+                                            <p className="text-zinc-100 font-medium text-lg">{movie.tmdbOriginalLanguage || movie.language?.title || "English"}</p>
                                         </div>
+
+                                        {movie.credit && (
+                                            <div className="col-span-full flex flex-col gap-2">
+                                                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Credits</h3>
+                                                <p className="text-zinc-400 text-sm leading-relaxed">{movie.credit}</p>
+                                            </div>
+                                        )}
 
                                         <div className="col-span-full flex flex-col gap-3">
                                             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Genres</h3>
                                             <div className="flex flex-wrap gap-2">
-                                                {movie.genre?.map((g) => (
-                                                    <Badge key={g} variant="outline" className="px-3 py-1 bg-white/5 hover:bg-white/10 text-zinc-300 border-zinc-700/50 transition-colors cursor-default">
-                                                        {g}
-                                                    </Badge>
-                                                ))}
-                                                {movie.categories?.map((cat) => (
-                                                    <Badge key={cat._id} variant="outline" className="px-3 py-1 bg-white/5 hover:bg-white/10 text-zinc-300 border-zinc-700/50 transition-colors cursor-default">
-                                                        {cat.title}
-                                                    </Badge>
-                                                ))}
+                                                {/* Prefer TMDB genres, fallback to CMS genres/categories */}
+                                                {(movie.tmdbGenres && movie.tmdbGenres.length > 0) ? (
+                                                    movie.tmdbGenres.map((g) => (
+                                                        <Badge key={g} variant="outline" className="px-3 py-1 bg-white/5 hover:bg-white/10 text-zinc-300 border-zinc-700/50 transition-colors cursor-default">
+                                                            {g}
+                                                        </Badge>
+                                                    ))
+                                                ) : (
+                                                    <>
+                                                        {movie.genre?.map((g) => (
+                                                            <Badge key={g} variant="outline" className="px-3 py-1 bg-white/5 hover:bg-white/10 text-zinc-300 border-zinc-700/50 transition-colors cursor-default">
+                                                                {g}
+                                                            </Badge>
+                                                        ))}
+                                                        {movie.categories?.map((cat) => (
+                                                            <Badge key={cat._id} variant="outline" className="px-3 py-1 bg-white/5 hover:bg-white/10 text-zinc-300 border-zinc-700/50 transition-colors cursor-default">
+                                                                {cat.title}
+                                                            </Badge>
+                                                        ))}
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
 
-                                        <div className="col-span-full flex flex-col gap-2">
-                                            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Credits</h3>
-                                            <p className="text-zinc-400 text-sm leading-relaxed">{movie.credit || "Production credits not listed."}</p>
-                                        </div>
+                                        {(movie.tmdbKeywords && movie.tmdbKeywords.length > 0) && (
+                                            <div className="col-span-full flex flex-col gap-3">
+                                                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Tags</h3>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {movie.tmdbKeywords.map((keyword) => (
+                                                        <Badge key={keyword} variant="secondary" className="px-2 py-0.5 bg-zinc-800 text-zinc-400 border-zinc-700/50 text-[10px] hover:bg-zinc-700 hover:text-zinc-200 transition-colors cursor-default">
+                                                            {keyword}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Cast Section */}
@@ -363,14 +423,16 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
                                         <div className="p-6 sm:p-8 bg-black/20">
                                             <div className="flex items-center justify-between mb-6 px-1">
                                                 <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Top Cast</h3>
-                                                <div className="flex items-center gap-2">
-                                                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-full bg-zinc-800/50 border-white/5 hover:bg-white/10 hover:border-white/20" onClick={() => scrollCast('left')}>
-                                                        <ChevronLeft className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-full bg-zinc-800/50 border-white/5 hover:bg-white/10 hover:border-white/20" onClick={() => scrollCast('right')}>
-                                                        <ChevronRight className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
+                                                {showCastArrows && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Button variant="outline" size="icon" className="h-8 w-8 rounded-full bg-zinc-800/50 border-white/5 hover:bg-white/10 hover:border-white/20" onClick={() => scrollCast('left')}>
+                                                            <ChevronLeft className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button variant="outline" size="icon" className="h-8 w-8 rounded-full bg-zinc-800/50 border-white/5 hover:bg-white/10 hover:border-white/20" onClick={() => scrollCast('right')}>
+                                                            <ChevronRight className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </div>
                                             <div
                                                 ref={castContainerRef}

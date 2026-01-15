@@ -26,7 +26,8 @@ import {
     X,
     ChevronDown,
     Video,
-    User2Icon,
+    FileQuestion,
+    PlusCircle,
 } from "lucide-react";
 import { Category, Language } from "@/types/movie";
 import { usePathname } from "next/navigation";
@@ -126,8 +127,8 @@ export function AppSidebar({ categories, languages }: AppSidebarProps) {
                             {session?.user && (
                                 <NavItem
                                     href="/account"
-                                    icon={User2Icon}
-                                    title="Account"
+                                    icon={Popcorn}
+                                    title="My Requests"
                                     active={pathname?.startsWith("/account") ?? false}
                                 />
                             )}
@@ -136,7 +137,7 @@ export function AppSidebar({ categories, languages }: AppSidebarProps) {
                                     tooltip="Request Movie"
                                     className="h-10 text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-all rounded-md mb-1"
                                 >
-                                    <Popcorn className="h-4.5 w-4.5 text-zinc-500" />
+                                    <PlusCircle className="h-4.5 w-4.5 text-zinc-500" />
                                     <span>Movies Request & Find</span>
                                 </SidebarMenuButton>
                             </RequestMovieDialog>
