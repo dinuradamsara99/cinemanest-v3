@@ -71,6 +71,7 @@ export interface Movie {
     duration?: number
     genre?: string[]
     videoUrl?: string
+    iframeUrl?: string
     trailerUrl?: string // Fetched from TMDB
     director?: string // Fetched from TMDB
     cast?: { name: string; character: string; profilePath: string | null }[] // Fetched from TMDB
