@@ -13,6 +13,7 @@ import {
     RotateCw,
     ChevronsRight,
     ChevronsLeft,
+    Volume1,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -20,8 +21,7 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 
-
-// Interface for subtitles (Assuming this structure based on previous code)
+// Interface for Subtitles
 export interface PlayerSubtitle {
     url: string;
     language: string;
@@ -30,15 +30,16 @@ export interface PlayerSubtitle {
     default?: boolean;
 }
 
+// Interface for Props
 interface CustomVideoPlayerProps {
     videoUrl: string;
     subtitles?: PlayerSubtitle[];
     title?: string;
     poster?: string;
-    startTime?: number; // Resume from this time in seconds
-    mediaId?: string; // Movie/Episode ID for tracking
-    mediaType?: string; // "movie" or "episode"
-    isTVShow?: boolean; // Whether this is a TV show
+    startTime?: number;
+    mediaId?: string;
+    mediaType?: string;
+    isTVShow?: boolean;
 }
 
 export function CustomVideoPlayer({
@@ -49,14 +50,16 @@ export function CustomVideoPlayer({
     startTime = 0,
     mediaId,
     mediaType = "movie",
+    isTVShow = false,
 }: CustomVideoPlayerProps) {
+    // Typed Refs
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const controlsTimeoutRef = useRef<NodeJS.Timeout>();
+    const controlsTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+    const tapTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined); // New ref for debouncing taps
     const isFirstRender = useRef(true);
     const wasFullscreenBeforeChange = useRef(false);
     const lastTapRef = useRef<number>(0);
-
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -73,8 +76,9 @@ export function CustomVideoPlayer({
     // States for Double Tap Animations
     const [showForwardAnim, setShowForwardAnim] = useState(false);
     const [showBackwardAnim, setShowBackwardAnim] = useState(false);
+    const [skipAmount, setSkipAmount] = useState(10);
 
-    // Format time to MM:SS or H:MM:SS for longer videos
+    // Format time helper
     const formatTime = (seconds: number) => {
         if (!isFinite(seconds)) return "0:00";
         const hours = Math.floor(seconds / 3600);
@@ -90,16 +94,14 @@ export function CustomVideoPlayer({
     // Play/Pause toggle
     const togglePlay = useCallback(() => {
         if (!videoRef.current) return;
-
         if (isPlaying) {
             videoRef.current.pause();
         } else {
             const playPromise = videoRef.current.play();
             if (playPromise !== undefined) {
-                playPromise.catch((error) => {
-                    if (error.name !== "AbortError") {
-                        console.error("Error playing video:", error);
-                    }
+                playPromise.catch((error: unknown) => {
+                    const err = error as Error;
+                    if (err.name !== "AbortError") console.error("Error playing video:", error);
                 });
             }
         }
@@ -112,11 +114,7 @@ export function CustomVideoPlayer({
         if (videoRef.current) {
             videoRef.current.volume = newVolume;
         }
-        if (newVolume === 0) {
-            setIsMuted(true);
-        } else if (isMuted) {
-            setIsMuted(false);
-        }
+        setIsMuted(newVolume === 0);
     };
 
     // Mute toggle
@@ -124,8 +122,12 @@ export function CustomVideoPlayer({
         if (videoRef.current) {
             videoRef.current.muted = !isMuted;
             setIsMuted(!isMuted);
+            if (!isMuted && volume === 0) {
+                setVolume(0.5);
+                videoRef.current.volume = 0.5;
+            }
         }
-    }, [isMuted]);
+    }, [isMuted, volume]);
 
     // Seek control
     const handleSeek = (value: number[]) => {
@@ -136,30 +138,30 @@ export function CustomVideoPlayer({
         }
     };
 
-    // Skip backward 10 seconds
-    const skipBackward = useCallback(() => {
+    // Skip backward/forward
+    const skipBackward = useCallback((skipSeconds: number = 10) => {
         if (!videoRef.current) return;
-        videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
-
-        // Trigger Animation
+        videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - skipSeconds);
+        setSkipAmount(skipSeconds);
         setShowBackwardAnim(true);
-        setTimeout(() => setShowBackwardAnim(false), 500);
+        setTimeout(() => setShowBackwardAnim(false), 600);
     }, []);
 
-    // Skip forward 10 seconds
-    const skipForward = useCallback(() => {
+    const skipForward = useCallback((skipSeconds: number = 10) => {
         if (!videoRef.current) return;
-        videoRef.current.currentTime = Math.min(duration, videoRef.current.currentTime + 10);
-
-        // Trigger Animation
+        if (duration > 0) { // Check if duration exists
+            videoRef.current.currentTime = Math.min(duration, videoRef.current.currentTime + skipSeconds);
+        } else {
+            videoRef.current.currentTime += skipSeconds;
+        }
+        setSkipAmount(skipSeconds);
         setShowForwardAnim(true);
-        setTimeout(() => setShowForwardAnim(false), 500);
+        setTimeout(() => setShowForwardAnim(false), 600);
     }, [duration]);
 
     // Fullscreen toggle
     const toggleFullscreen = useCallback(() => {
         if (!containerRef.current) return;
-
         if (!isFullscreen) {
             if (containerRef.current.requestFullscreen) {
                 containerRef.current.requestFullscreen();
@@ -174,117 +176,90 @@ export function CustomVideoPlayer({
     // Auto-hide controls
     const resetControlsTimeout = useCallback(() => {
         setShowControls(true);
-        if (controlsTimeoutRef.current) {
-            clearTimeout(controlsTimeoutRef.current);
-        }
+        if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
         if (isPlaying) {
-            controlsTimeoutRef.current = setTimeout(() => {
-                setShowControls(false);
-            }, 3000);
+            controlsTimeoutRef.current = setTimeout(() => setShowControls(false), 3000);
         }
     }, [isPlaying]);
 
-    // Handle Touch/Click on Video Overlay
-    const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-        // Handle Double Tap Logic
+    // Handle interactions (Updated for Debouncing)
+    const handleOverlayInteraction = useCallback((clientX: number) => {
         const now = Date.now();
         const DOUBLE_TAP_DELAY = 300;
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        const x = clientX - rect.left;
+        const width = rect.width;
+        const relativeX = x / width;
 
         if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
-            // Double tap detected
-            const rect = containerRef.current?.getBoundingClientRect();
-            if (!rect) return;
+            // Double tap detected!
 
-            // Determine click X position relative to container
-            let clientX;
-            if ('touches' in e) {
-                // For touch events
-                clientX = e.touches[0].clientX;
-            } else {
-                // For mouse events
-                clientX = (e as React.MouseEvent).clientX;
+            // Cancel the single tap action (showing controls)
+            if (tapTimeoutRef.current) {
+                clearTimeout(tapTimeoutRef.current);
+                tapTimeoutRef.current = undefined;
             }
 
-            const x = clientX - rect.left;
-            const width = rect.width;
+            // Perform Skip or Play Toggle
+            if (relativeX < 0.40) skipBackward(10);
+            else if (relativeX > 0.60) skipForward(10);
+            else togglePlay();
 
-            if (x < width * 0.35) {
-                // Left 35% -> Skip Backward
-                skipBackward();
-            } else if (x > width * 0.65) {
-                // Right 35% -> Skip Forward
-                skipForward();
-            } else {
-                // Center -> Toggle Fullscreen or just Play/Pause (Optional)
-                togglePlay();
-            }
+            lastTapRef.current = 0; // Reset
         } else {
-            // Single tap -> Toggle Controls visibility
-            if (showControls) {
-                setShowControls(false);
-            } else {
-                setShowControls(true);
-                resetControlsTimeout();
-            }
-        }
+            // Single tap detected - wait to confirm it's not a double tap
+            lastTapRef.current = now;
 
-        lastTapRef.current = now;
+            tapTimeoutRef.current = setTimeout(() => {
+                // If this code runs, it means no second tap happened
+                if (showControls) {
+                    setShowControls(false);
+                } else {
+                    setShowControls(true);
+                    resetControlsTimeout();
+                }
+                tapTimeoutRef.current = undefined;
+            }, DOUBLE_TAP_DELAY);
+        }
+    }, [skipBackward, skipForward, togglePlay, showControls, resetControlsTimeout]);
+
+    // Mouse/Touch handlers
+    const handleMouseClick = (e: React.MouseEvent<HTMLDivElement>) => handleOverlayInteraction(e.clientX);
+    const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+        if (e.changedTouches.length > 0) handleOverlayInteraction(e.changedTouches[0].clientX);
     };
 
+    // Cleanup tap timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+        };
+    }, []);
 
     // Keyboard shortcuts
     useEffect(() => {
         const handleKeyPress = (e: KeyboardEvent) => {
-            // If user is typing in an input, ignore shortcuts
             if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") return;
-
             if (!videoRef.current) return;
 
-            switch (e.key) {
+            switch (e.key.toLowerCase()) {
                 case " ":
-                case "k":
-                    e.preventDefault();
-                    togglePlay();
-                    resetControlsTimeout();
-                    break;
-                case "f":
-                    e.preventDefault();
-                    toggleFullscreen();
-                    break;
-                case "m":
-                    e.preventDefault();
-                    toggleMute();
-                    break;
-                case "ArrowLeft":
-                    e.preventDefault();
-                    skipBackward();
-                    resetControlsTimeout();
-                    break;
-                case "ArrowRight":
-                    e.preventDefault();
-                    skipForward();
-                    resetControlsTimeout();
-                    break;
-                case "ArrowUp":
-                    e.preventDefault();
-                    handleVolumeChange([Math.min(1, volume + 0.1)]);
-                    resetControlsTimeout();
-                    break;
-                case "ArrowDown":
-                    e.preventDefault();
-                    handleVolumeChange([Math.max(0, volume - 0.1)]);
-                    resetControlsTimeout();
-                    break;
+                case "k": e.preventDefault(); togglePlay(); resetControlsTimeout(); break;
+                case "f": e.preventDefault(); toggleFullscreen(); break;
+                case "m": e.preventDefault(); toggleMute(); break;
+                case "arrowleft": e.preventDefault(); skipBackward(); resetControlsTimeout(); break;
+                case "arrowright": e.preventDefault(); skipForward(); resetControlsTimeout(); break;
+                case "arrowup": e.preventDefault(); handleVolumeChange([Math.min(1, volume + 0.1)]); resetControlsTimeout(); break;
+                case "arrowdown": e.preventDefault(); handleVolumeChange([Math.max(0, volume - 0.1)]); resetControlsTimeout(); break;
             }
         };
-
         window.addEventListener("keydown", handleKeyPress);
         return () => window.removeEventListener("keydown", handleKeyPress);
     }, [togglePlay, toggleFullscreen, toggleMute, volume, skipBackward, skipForward, resetControlsTimeout]);
 
-
-
-    // Video event listeners
+    // Video Event Listeners
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
@@ -297,13 +272,9 @@ export function CustomVideoPlayer({
         const handleWaiting = () => setIsLoading(true);
         const handleCanPlay = () => setIsLoading(false);
         const handleProgress = () => {
-            if (video.buffered.length > 0) {
-                setBuffered(video.buffered.end(video.buffered.length - 1));
-            }
+            if (video.buffered.length > 0) setBuffered(video.buffered.end(video.buffered.length - 1));
         };
-        const handleEnded = () => {
-            setIsPlaying(false);
-        };
+        const handleEnded = () => setIsPlaying(false);
 
         video.addEventListener("play", handlePlay);
         video.addEventListener("pause", handlePause);
@@ -328,29 +299,20 @@ export function CustomVideoPlayer({
         };
     }, [videoUrl]);
 
-    // ... rest of the component ...
-
-
-    // Fullscreen change listener
+    // Fullscreen change
     useEffect(() => {
-        const handleFullscreenChange = () => {
-            setIsFullscreen(!!document.fullscreenElement);
-        };
-
+        const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
         document.addEventListener("fullscreenchange", handleFullscreenChange);
         return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
     }, []);
 
-    // Reset video on URL change
+    // Video Load & Resume Logic
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
-
         wasFullscreenBeforeChange.current = isFullscreen;
-
         video.pause();
-        video.currentTime = startTime; // Resume from saved position
-
+        video.currentTime = startTime;
         setIsPlaying(false);
         setCurrentTime(startTime);
         setIsLoading(true);
@@ -358,12 +320,8 @@ export function CustomVideoPlayer({
         if (isFirstRender.current) {
             isFirstRender.current = false;
             video.load();
-
-            // Set start time after metadata loads
             const handleLoadedMetadata = () => {
-                if (startTime > 0) {
-                    video.currentTime = startTime;
-                }
+                if (startTime > 0) video.currentTime = startTime;
             };
             video.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true });
             return;
@@ -371,132 +329,64 @@ export function CustomVideoPlayer({
 
         setIsTransitioning(true);
         video.load();
-
         const timer = setTimeout(() => {
             setIsTransitioning(false);
-            // Set start time after load
-            if (startTime > 0 && video.duration) {
-                video.currentTime = Math.min(startTime, video.duration);
-            }
+            if (startTime > 0 && video.duration) video.currentTime = Math.min(startTime, video.duration);
             if (wasFullscreenBeforeChange.current && containerRef.current) {
-                containerRef.current.requestFullscreen().catch((err) => {
-                    console.log("Could not restore fullscreen:", err);
-                });
+                containerRef.current.requestFullscreen().catch((err: unknown) => console.log(err));
             }
-        }, 2000);
-
+        }, 1500);
         return () => clearTimeout(timer);
     }, [videoUrl, startTime]);
 
-    // Enable first subtitle by default
-    useEffect(() => {
-        if (!videoRef.current) return;
-        const video = videoRef.current;
-        const handleLoadedMetadata = () => {
-            const tracks = video.textTracks;
-            if (tracks.length > 0) {
-                tracks[0].mode = "showing";
-                for (let i = 1; i < tracks.length; i++) {
-                    tracks[i].mode = "hidden";
-                }
-            }
-        };
-        video.addEventListener("loadedmetadata", handleLoadedMetadata);
-        return () => video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-    }, [subtitles]);
-
-    // Watch progress tracking - save every 10 seconds
+    // Watch Progress Saver
     useEffect(() => {
         if (!mediaId || !videoRef.current) return;
-
-        console.log('[Watch Progress] Starting tracking for:', mediaId);
-
-        let hasWatchedFor10Seconds = false;
+        let hasWatchedFor10s = false;
         const video = videoRef.current;
-
         const saveProgress = async () => {
             if (!video || !mediaId) return;
-
             const progress = video.currentTime;
-            const videoDuration = video.duration;
-
-            console.log('[Watch Progress] Attempting to save:', {
-                mediaId,
-                mediaType,
-                progress,
-                duration: videoDuration,
-                hasWatched10s: hasWatchedFor10Seconds
-            });
-
-            // Only save if we have valid data and video has been watched for at least 10 seconds
-            if (progress > 0 && videoDuration > 0 && progress >= 10) {
+            if (progress > 0 && video.duration > 0 && progress >= 10) {
                 try {
-                    console.log('[Watch Progress] Sending API request...');
-                    const response = await fetch('/api/watch-progress', {
+                    await fetch('/api/watch-progress', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            mediaId,
-                            mediaType,
-                            progress,
-                            duration: videoDuration
-                        })
+                        body: JSON.stringify({ mediaId, mediaType, progress, duration: video.duration })
                     });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        console.log('[Watch Progress] Successfully saved:', data);
-                    } else {
-                        console.error('[Watch Progress] API error:', response.status, await response.text());
-                    }
-                } catch (error) {
-                    console.error('[Watch Progress] Error saving:', error);
-                }
-            } else {
-                console.log('[Watch Progress] Skipped - not enough progress yet');
+                } catch (e) { console.error(e); }
             }
         };
-
-        // Save progress every 10 seconds
         const interval = setInterval(() => {
-            if (video.currentTime >= 10 && !hasWatchedFor10Seconds) {
-                hasWatchedFor10Seconds = true;
-                console.log('[Watch Progress] Reached 10 seconds, saving...');
-                saveProgress();
-            } else if (hasWatchedFor10Seconds) {
-                console.log('[Watch Progress] Periodic save...');
-                saveProgress();
-            }
-        }, 10000); // Every 10 seconds
-
-        // Save progress when video ends or component unmounts
-        const handleBeforeUnload = () => saveProgress();
-        const handleEnded = () => saveProgress();
-
-        video.addEventListener('ended', handleEnded);
-        window.addEventListener('beforeunload', handleBeforeUnload);
-
+            if (video.currentTime >= 10 && !hasWatchedFor10s) { hasWatchedFor10s = true; saveProgress(); }
+            else if (hasWatchedFor10s) saveProgress();
+        }, 10000);
+        const handleUnload = () => saveProgress();
+        video.addEventListener('ended', handleUnload);
+        window.addEventListener('beforeunload', handleUnload);
         return () => {
             clearInterval(interval);
-            saveProgress(); // Save one last time before cleanup
-            video.removeEventListener('ended', handleEnded);
-            window.removeEventListener('beforeunload', handleBeforeUnload);
+            saveProgress(); // Last save
+            video.removeEventListener('ended', handleUnload);
+            window.removeEventListener('beforeunload', handleUnload);
         };
     }, [mediaId, mediaType]);
 
-
-    // Mouse move handler
-    const handleMouseMove = () => {
-        resetControlsTimeout();
+    // Volume Icon Logic
+    const getVolumeIcon = () => {
+        if (isMuted || volume === 0) return <VolumeX className="h-5 w-5 md:h-6 md:w-6" />;
+        if (volume < 0.5) return <Volume1 className="h-5 w-5 md:h-6 md:w-6" />;
+        return <Volume2 className="h-5 w-5 md:h-6 md:w-6" />;
     };
 
     return (
         <div
             ref={containerRef}
-            className="relative w-full h-full bg-black group overflow-hidden select-none"
-            onMouseMove={handleMouseMove}
+            className="relative w-full h-full bg-black group overflow-hidden select-none touch-manipulation font-sans"
+            onMouseMove={() => resetControlsTimeout()}
             onMouseLeave={() => isPlaying && setShowControls(false)}
-            onClick={handleOverlayClick}
+            onClick={handleMouseClick}
+            onTouchEnd={handleTouchEnd}
         >
             {/* Video Element */}
             <video
@@ -510,219 +400,163 @@ export function CustomVideoPlayer({
                 poster={poster}
                 src={videoUrl}
             >
-                {subtitles.map((subtitle, index) => (
-                    <track
-                        key={`subtitle-${index}`}
-                        kind={subtitle.kind || "subtitles"}
-                        src={subtitle.url}
-                        srcLang={subtitle.language}
-                        label={subtitle.label}
-                        default={subtitle.default}
-                    />
+                {subtitles.map((sub, i) => (
+                    <track key={i} kind={sub.kind || "subtitles"} src={sub.url} srcLang={sub.language} label={sub.label} default={sub.default} />
                 ))}
             </video>
 
-            {/* Double Tap Animations - Left */}
+            {/* Double Tap Animations */}
             <AnimatePresence>
                 {showBackwardAnim && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.5, x: -50 }}
-                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 1.5 }}
-                        className="absolute left-[10%] top-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-white/80 z-40 pointer-events-none"
+                        className="absolute left-[15%] top-1/2 -translate-y-1/2 flex flex-col items-center justify-center z-40 pointer-events-none text-white drop-shadow-lg"
                     >
-                        <div className="bg-black/40 p-4 rounded-full backdrop-blur-sm">
-                            <ChevronsLeft className="w-10 h-10" />
-                        </div>
-                        <span className="text-sm font-bold mt-2 text-shadow">10s</span>
+                        <ChevronsLeft className="w-12 h-12" />
+                        <span className="text-sm font-bold mt-1">-{skipAmount}s</span>
                     </motion.div>
                 )}
-            </AnimatePresence>
-
-            {/* Double Tap Animations - Right */}
-            <AnimatePresence>
                 {showForwardAnim && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.5, x: 50 }}
-                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 1.5 }}
-                        className="absolute right-[10%] top-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-white/80 z-40 pointer-events-none"
+                        className="absolute right-[15%] top-1/2 -translate-y-1/2 flex flex-col items-center justify-center z-40 pointer-events-none text-white drop-shadow-lg"
                     >
-                        <div className="bg-black/40 p-4 rounded-full backdrop-blur-sm">
-                            <ChevronsRight className="w-10 h-10" />
-                        </div>
-                        <span className="text-sm font-bold mt-2 text-shadow">10s</span>
+                        <ChevronsRight className="w-12 h-12" />
+                        <span className="text-sm font-bold mt-1">+{skipAmount}s</span>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Transition Overlay */}
-            {isTransitioning && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="absolute inset-0 bg-black flex flex-col items-center justify-center z-50 pointer-events-none"
-                >
-                    <Loader2 className="h-12 w-12 text-white animate-spin mb-4" />
-                    <p className="text-white text-lg font-semibold">Loading Video...</p>
-                </motion.div>
-            )}
-
-            {/* Loading Overlay */}
-            {isLoading && !isTransitioning && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40">
+            {/* Loaders */}
+            {(isLoading || isTransitioning) && (
+                <div className="absolute inset-0 flex items-center justify-center z-40 bg-black/10 pointer-events-none">
                     <Loader2 className="h-12 w-12 text-white animate-spin drop-shadow-lg" />
                 </div>
             )}
 
-            {/* Play/Pause Overlay (Center Button) */}
-            <div
-                className={cn(
-                    "absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-300 z-30",
-                    showControls && !isLoading ? "opacity-100" : "opacity-0"
+            {/* Large Center Play/Pause (Animated) */}
+            <AnimatePresence>
+                {!isPlaying && !isLoading && !isTransitioning && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.1 }}
+                        className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none"
+                    >
+                        <div className="bg-black/40 backdrop-blur-sm p-4 rounded-full border border-white/10 shadow-2xl">
+                            <Play className="h-10 w-10 text-white fill-white ml-1" />
+                        </div>
+                    </motion.div>
                 )}
-            >
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation(); // Prevent triggering double tap logic
-                        togglePlay();
-                    }}
-                    className="pointer-events-auto w-16 h-16 md:w-20 md:h-20 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-all hover:scale-110"
-                >
-                    {isPlaying ? (
-                        <Pause className="h-8 w-8 md:h-10 md:w-10 text-white fill-white" />
-                    ) : (
-                        <Play className="h-8 w-8 md:h-10 md:w-10 text-white fill-white ml-1" />
-                    )}
-                </button>
-            </div>
+            </AnimatePresence>
 
-            {/* Controls Bar */}
+            {/* Bottom Controls Bar */}
             <div
                 className={cn(
-                    "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent transition-all duration-300 px-4 pb-4 pt-20 z-40",
-                    showControls
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 translate-y-4 pointer-events-none"
+                    "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent transition-all duration-300 z-50 flex flex-col justify-end px-3 md:px-5 pb-3 md:pb-5 pt-24",
+                    showControls ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
                 )}
-                onClick={(e) => e.stopPropagation()} // Prevent closing controls when clicking on bar
+                onClick={(e) => e.stopPropagation()}
             >
-                {/* Progress Bar */}
-                <div className="relative group/progress mb-4 flex items-center h-4 cursor-pointer touch-none">
+                {/* 1. Progress Bar Row */}
+                <div className="w-full mb-3 flex items-center group/progress h-5 cursor-pointer touch-none relative">
+                    {/* Hit Area (Invisible but clickable) */}
+                    <div className="absolute inset-0 z-20" />
+
                     {/* Background Track */}
-                    <div className="absolute w-full h-1 bg-white/20 rounded-full" />
-
-                    {/* Buffer Track */}
-                    <div
-                        className="absolute h-1 bg-white/30 rounded-full transition-all duration-300"
-                        style={{ width: `${(buffered / duration) * 100}%` }}
-                    />
-
-                    {/* Slider */}
-                    <Slider
-                        value={[currentTime]}
-                        max={duration || 100}
-                        step={0.1}
-                        onValueChange={handleSeek}
-                        className="z-10 w-full"
-                    />
+                    <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden relative">
+                        {/* Buffer */}
+                        <div
+                            className="absolute top-0 left-0 h-full bg-white/30 transition-all duration-300"
+                            style={{ width: `${(buffered / duration) * 100}%` }}
+                        />
+                        {/* Slider Component */}
+                        <Slider
+                            value={[currentTime]}
+                            max={duration || 100}
+                            step={0.1}
+                            onValueChange={handleSeek}
+                            className={cn(
+                                "absolute inset-0 z-30",
+                                "[&_[role=slider]]:h-3 [&_[role=slider]]:w-3 [&_[role=slider]]:bg-white [&_[role=slider]]:border-0 [&_[role=slider]]:shadow-md",
+                                "[&_[role=slider]]:opacity-0 group-hover/progress:[&_[role=slider]]:opacity-100 [&_[role=slider]]:transition-opacity",
+                                "[&_.bg-primary]:bg-red-600" // Netflix red style progress
+                            )}
+                        />
+                    </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-2 md:gap-4">
-                    {/* Left Controls */}
+                {/* 2. Buttons Row */}
+                <div className="flex items-center justify-between">
+                    {/* Left Group: Play, Skip, Volume, Time */}
                     <div className="flex items-center gap-1 md:gap-3">
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={togglePlay}
-                            className="h-8 w-8 md:h-9 md:w-9 text-white hover:bg-white/20"
+                            className="h-10 w-10 text-white hover:bg-white/10 hover:text-white rounded-full"
                         >
-                            {isPlaying ? (
-                                <Pause className="h-4 w-4 md:h-5 md:w-5 fill-white" />
-                            ) : (
-                                <Play className="h-4 w-4 md:h-5 md:w-5 fill-white" />
-                            )}
+                            {isPlaying ? <Pause className="h-6 w-6 fill-white" /> : <Play className="h-6 w-6 fill-white" />}
                         </Button>
 
-                        {/* Skip Backward 10s - Hidden on Mobile */}
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={skipBackward}
-                            className="hidden md:inline-flex h-9 w-9 text-white hover:bg-white/20"
-                            title="Skip backward 10s"
-                        >
-                            <RotateCcw className="h-5 w-5" />
-                        </Button>
-
-                        {/* Skip Forward 10s - Hidden on Mobile */}
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={skipForward}
-                            className="hidden md:inline-flex h-9 w-9 text-white hover:bg-white/20"
-                            title="Skip forward 10s"
-                        >
-                            <RotateCw className="h-5 w-5" />
-                        </Button>
-
-                        {/* Volume Control */}
-                        <div className="flex items-center group/volume">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={toggleMute}
-                                className="h-8 w-8 md:h-9 md:w-9 text-white hover:bg-white/20"
-                            >
-                                {isMuted || volume === 0 ? (
-                                    <VolumeX className="h-4 w-4 md:h-5 md:w-5" />
-                                ) : (
-                                    <Volume2 className="h-4 w-4 md:h-5 md:w-5" />
-                                )}
+                        {/* Desktop Skip Buttons */}
+                        <div className="hidden md:flex items-center gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => skipBackward(10)} className="h-9 w-9 text-zinc-200 hover:bg-white/10 hover:text-white rounded-full">
+                                <RotateCcw className="h-5 w-5" />
                             </Button>
-                            {/* Volume Slider - Hidden on Mobile initially, or smaller */}
-                            <div className="w-0 overflow-hidden md:w-20 group-hover/volume:w-20 transition-all duration-300 flex items-center">
+                            <Button variant="ghost" size="icon" onClick={() => skipForward(10)} className="h-9 w-9 text-zinc-200 hover:bg-white/10 hover:text-white rounded-full">
+                                <RotateCw className="h-5 w-5" />
+                            </Button>
+                        </div>
+
+                        {/* Volume Controls */}
+                        <div className="flex items-center group/volume ml-1 md:ml-0">
+                            <Button variant="ghost" size="icon" onClick={toggleMute} className="h-9 w-9 text-white hover:bg-white/10 hover:text-white rounded-full">
+                                {getVolumeIcon()}
+                            </Button>
+                            {/* Volume Slider: Hidden on mobile, slide-out on desktop */}
+                            <div className="w-0 overflow-hidden sm:w-0 sm:group-hover/volume:w-24 transition-all duration-300 flex items-center">
                                 <Slider
                                     value={[isMuted ? 0 : volume]}
                                     max={1}
                                     step={0.01}
                                     onValueChange={handleVolumeChange}
-                                    className="w-20 cursor-pointer ml-2"
+                                    className={cn(
+                                        "w-20 ml-2 cursor-pointer",
+                                        "[&_[role=track]]:bg-white/20", // Track background
+                                        "[&_[role=range]]:bg-white",   // Filled part
+                                        "[&_[role=slider]]:bg-white [&_[role=slider]]:h-3 [&_[role=slider]]:w-3 [&_[role=slider]]:border-0 shadow-sm" // Thumb style
+                                    )}
                                 />
                             </div>
                         </div>
 
                         {/* Time Display */}
-                        <div className="text-white text-xs md:text-sm font-medium tabular-nums ml-2">
-                            {formatTime(currentTime)} / {formatTime(duration)}
+                        <div className="text-zinc-300 text-xs md:text-sm font-medium tabular-nums ml-2 select-none">
+                            <span className="text-white">{formatTime(currentTime)}</span>
+                            <span className="opacity-50 mx-1">/</span>
+                            <span>{formatTime(duration)}</span>
                         </div>
                     </div>
 
-                    {/* Center - Title (Fullscreen only) */}
-                    {isFullscreen && title && (
-                        <div className="hidden md:flex flex-1 justify-center px-4">
-                            <p className="text-white text-sm md:text-base font-semibold drop-shadow-lg truncate max-w-md">
-                                {title}
-                            </p>
-                        </div>
-                    )}
+                    {/* Right Group: Title, Fullscreen */}
+                    <div className="flex items-center gap-2 md:gap-4">
+                        {/* Title (Shows on large screens) */}
+                        <h4 className="hidden lg:block text-white text-sm font-semibold tracking-wide drop-shadow-md max-w-[200px] truncate">
+                            {title}
+                        </h4>
 
-                    {/* Right Controls */}
-                    <div className="flex items-center gap-1 md:gap-2">
-                        {/* Fullscreen Toggle */}
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={toggleFullscreen}
-                            className="h-8 w-8 md:h-9 md:w-9 text-white hover:bg-white/20"
+                            className="h-9 w-9 text-white hover:bg-white/10 hover:text-white rounded-full"
                         >
-                            {isFullscreen ? (
-                                <Minimize className="h-4 w-4 md:h-5 md:w-5" />
-                            ) : (
-                                <Maximize className="h-4 w-4 md:h-5 md:w-5" />
-                            )}
+                            {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
                         </Button>
                     </div>
                 </div>

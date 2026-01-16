@@ -1,8 +1,7 @@
 
 import { Suspense } from "react";
 import { FeaturedSection } from "@/components/home/FeaturedSection";
-import { MoviesSection } from "@/components/home/MoviesSection";
-import { TVShowsSection } from "@/components/home/TVShowsSection";
+import { AllContentSection } from "@/components/home/AllContentSection";
 import { HeroSliderSkeleton } from "@/components/HeroSliderSkeleton";
 import { SectionSkeleton } from "@/components/home/SectionSkeleton";
 
@@ -16,17 +15,10 @@ export default function HomePage() {
                 <FeaturedSection />
             </Suspense>
 
-            {/* Movies Grid with Suspense */}
-            <div id="movies">
-                <Suspense fallback={<SectionSkeleton title="Popular Movies" />}>
-                    <MoviesSection />
-                </Suspense>
-            </div>
-
-            {/* TV Shows Grid with Suspense */}
-            <div id="tv-shows">
-                <Suspense fallback={<SectionSkeleton title="Popular TV Shows" />}>
-                    <TVShowsSection />
+            {/* All Content (Movies + TV Shows Mixed) */}
+            <div id="content">
+                <Suspense fallback={<SectionSkeleton title="Recently Added" />}>
+                    <AllContentSection />
                 </Suspense>
             </div>
 

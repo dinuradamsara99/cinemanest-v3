@@ -225,7 +225,7 @@ export function RequestMovieDialog({ children }: { children?: React.ReactNode })
                         </SidebarMenuButton>
                     )}
                 </DialogTrigger>
-                <DialogContent className="w-[95vw] sm:max-w-[600px] max-h-[90vh] p-0 overflow-hidden border-zinc-800 bg-zinc-950 [&>button]:hidden">
+                <DialogContent className="w-[92vw] sm:max-w-[600px] max-h-[90vh] p-0 overflow-hidden border-zinc-800 bg-zinc-950 rounded-2xl [&>button]:hidden">
                     {/* Visually hidden title for accessibility */}
                     <DialogTitle className="sr-only">Request a Movie or Show</DialogTitle>
                     <motion.div
@@ -294,16 +294,16 @@ export function RequestMovieDialog({ children }: { children?: React.ReactNode })
                             </button>
 
                             {/* Header */}
-                            <div className="mb-6">
+                            <div className="mb-6 pr-10">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-primary/10 rounded-xl border border-primary/20">
+                                    <div className="p-2 bg-primary/10 rounded-xl border border-primary/20 shrink-0">
                                         <Clapperboard className="h-5 w-5 text-primary" />
                                     </div>
-                                    <div>
-                                        <h2 className="text-xl sm:text-2xl font-bold text-white">
+                                    <div className="min-w-0">
+                                        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white truncate">
                                             Request a Movie or Show
                                         </h2>
-                                        <p className="text-zinc-400 text-sm mt-0.5">
+                                        <p className="text-zinc-400 text-xs sm:text-sm mt-0.5 truncate">
                                             Can't find what you're looking for? Let us know!
                                         </p>
                                     </div>

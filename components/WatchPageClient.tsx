@@ -348,7 +348,7 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
 
                                 {/* Description */}
                                 {movie.description && (
-                                    <p className="text-zinc-300 text-lg leading-9 mt-2">
+                                    <p className="text-zinc-300 text-lg leading-9 mt-2 whitespace-pre-line">
                                         {movie.description}
                                     </p>
                                 )}
@@ -451,6 +451,8 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
                                                                     alt={member.name}
                                                                     fill
                                                                     sizes="(max-width: 640px) 140px, 160px"
+                                                                    placeholder="blur"
+                                                                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAHhAAAgIBBQEAAAAAAAAAAAAAAQIDBAAFERIhMUH/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/ALc2n0Jb2JZtaq2Yol4JJzyYqN/fzHGpUbSG1ar2IrUkqSKHimmZlZSPCCPMYwf/2Q=="
                                                                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                                                                 />
                                                             ) : (
@@ -473,6 +475,7 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
                                             </div>
                                         </div>
                                     )}
+
                                 </div>
                             </div>
 
@@ -594,6 +597,8 @@ export function WatchPageClient({ movie }: WatchPageClientProps) {
                                                                     alt={episode.title}
                                                                     fill
                                                                     sizes="144px"
+                                                                    placeholder="blur"
+                                                                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAHhAAAgIBBQEAAAAAAAAAAAAAAQIDBAAFERIhMUH/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/ALc2n0Jb2JZtaq2Yol4JJzyYqN/fzHGpUbSG1ar2IrUkqSKHimmZlZSPCCPMYwf/2Q=="
                                                                     className={cn(
                                                                         "object-cover rounded-[8px] transition-all duration-500",
                                                                         !isDimmed && "group-hover:scale-110",

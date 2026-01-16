@@ -412,8 +412,9 @@ export async function searchMovies(searchQuery: string) {
     _type,
     title,
     slug,
-    "posterImage": posterImage {
-      asset -> {
+    tmdbId,
+    posterImage {
+      asset-> {
         _id,
         url
       },

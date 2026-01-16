@@ -31,15 +31,6 @@ export function SiteFooter() {
                         >
                             <span>Terms of Service</span>
                         </Link>
-
-                        <span className="hidden sm:inline text-zinc-700">•</span>
-
-                        <Link
-                            href="/contact"
-                            className="group flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
-                        >
-                            <span>Contact Us</span>
-                        </Link>
                     </div>
                 </div>
 

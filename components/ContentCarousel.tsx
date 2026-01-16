@@ -22,7 +22,7 @@ interface ContentCarouselProps {
 export function ContentCarousel({
     title,
     children,
-    itemsPerView = { mobile: 2, tablet: 3, desktop: 5 },
+    itemsPerView = { mobile: 2, tablet: 3, desktop: 6 },
 }: ContentCarouselProps) {
     return (
         <section className="w-full py-8">

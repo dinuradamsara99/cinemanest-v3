@@ -110,6 +110,8 @@ function HeroSlide({ item }: { item: FeaturedItem }) {
                     fill
                     className="object-cover"
                     priority
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAHhAAAgIBBQEAAAAAAAAAAAAAAQIDBAAFERIhMUH/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/ALc2n0Jb2JZtaq2Yol4JJzyYqN/fzHGpUbSG1ar2IrUkqSKHimmZlZSPCCPMYwf/2Q=="
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1400px"
                 />
 

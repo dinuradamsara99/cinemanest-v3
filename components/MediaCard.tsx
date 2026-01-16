@@ -44,7 +44,7 @@ export function MediaCard({
     watchProgress,
     hideRating = false,
     watchedAt,
-    aspectRatio = "3/4",
+    aspectRatio = "2/3",
 }: MediaCardProps) {
     const [fetchedPoster, setFetchedPoster] = useState<string | null>(null);
 
@@ -82,6 +82,8 @@ export function MediaCard({
                     alt={title}
                     fill
                     loading="lazy"
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAHhAAAgIBBQEAAAAAAAAAAAAAAQIDBAAFERIhMUH/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEEQA/wBXi0+hLexLNrVWzPEvBJOeTFRv7+Y41KjaQ2rVexFaklSRQ8U0bMrKR4QR5jGD/9k="
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
                 />

@@ -10,12 +10,13 @@ import { urlFor } from "@/lib/sanity";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-// ... (Interfaces ටික පරණ විදිහමයි)
+// Search Result Interface
 interface SearchResult {
     _id: string;
     _type: "movie" | "tvshow";
     title: string;
     slug: { current: string };
+    tmdbId?: number;
     posterImage?: {
         asset?: {
             _id: string;
@@ -90,11 +91,64 @@ export function SearchBar({ className }: { className?: string }) {
     };
 
     const getPosterUrl = (result: SearchResult) => {
-        if (result.posterImage?.asset) {
-            return urlFor(result.posterImage.asset).width(100).height(150).url();
+        // 1. First check if there's a direct URL from Sanity asset
+        if (result.posterImage?.asset?.url) {
+            return result.posterImage.asset.url;
+        }
+        // 2. Try urlFor builder for Sanity images
+        if (result.posterImage?.asset?._id) {
+            try {
+                return urlFor(result.posterImage.asset).width(100).height(150).url();
+            } catch {
+                // Continue to TMDB fallback
+            }
+        }
+        // 3. Fallback to TMDB poster if tmdbId exists (using cached poster map)
+        if (result.tmdbId && tmdbPosters[result.tmdbId]) {
+            return tmdbPosters[result.tmdbId];
         }
         return null;
     };
+
+    // Fetch TMDB posters for results without Sanity images
+    const [tmdbPosters, setTmdbPosters] = useState<Record<number, string>>({});
+
+    useEffect(() => {
+        const fetchMissingPosters = async () => {
+            const resultsNeedingPosters = results.filter(r =>
+                !r.posterImage?.asset?.url &&
+                !r.posterImage?.asset?._id &&
+                r.tmdbId &&
+                !tmdbPosters[r.tmdbId]
+            );
+
+            if (resultsNeedingPosters.length === 0) return;
+
+            const newPosters: Record<number, string> = {};
+
+            await Promise.all(resultsNeedingPosters.map(async (result) => {
+                if (!result.tmdbId) return;
+                try {
+                    const type = result._type === 'tvshow' ? 'tv' : 'movie';
+                    const res = await fetch(`/api/tmdb-poster?id=${result.tmdbId}&type=${type}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.posterUrl) {
+                            newPosters[result.tmdbId] = data.posterUrl;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to fetch TMDB poster:', e);
+                }
+            }));
+
+            if (Object.keys(newPosters).length > 0) {
+                setTmdbPosters(prev => ({ ...prev, ...newPosters }));
+            }
+        };
+
+        fetchMissingPosters();
+    }, [results]);
 
     const closeMobileSearch = () => {
         setIsMobileExpanded(false);
